@@ -4,6 +4,8 @@ Propostas têm sido feitas para guias de onda dielétricos capazes de conduzir f
 
 ![Figura 1 — Guias de onda dielétricos para circuitos ópticos integrados.](img/fig_01.png)
 
+Figura 1 — Guias de onda dielétricos para circuitos ópticos integrados.
+
 Essas geometrias são atraentes não apenas por sua simplicidade, precisão de construção e estabilidade mecânica, mas também porque, escolhendo $\Delta$ suficientemente pequeno, a operação em modo único pode ser obtida com dimensões transversais do guia grandes em comparação com o comprimento de onda no espaço livre, relaxando assim as exigências de tolerância de fabricação.
 
 Embora, em um guia real, a seção transversal da haste guia não seja exatamente retangular e as fronteiras entre os dielétricos não sejam definidas abruptamente, como na Figura 1, vale a pena determinar as características dos modos nessa estrutura idealizada e os requisitos necessários para torná-la um guia de onda monomodo.
@@ -11,6 +13,8 @@ Embora, em um guia real, a seção transversal da haste guia não seja exatament
 Além disso, acopladores direcionais obtidos pela aproximação de dois desses guias, como na Figura 2, podem tornar-se componentes importantes de circuito.[1,2] Neste artigo, estudamos a transmissão por meio de tal acoplador; os modos em um guia único aparecem como um caso particular, quando a separação entre os dois guias é suficientemente grande para que o acoplamento seja desprezível. Por meio do uso de uma técnica de perturbação, também determinamos as propriedades do acoplador quando os dois guias são ligeiramente diferentes.
 
 ![Figura 2 — Acopladores direcionais.](img/fig_02.png)
+
+Figura 2 — Acopladores direcionais.
 
 As propriedades de guiamento do guia de seção transversal retangular imerso em um único dielétrico são comparadas com aquelas obtidas por cálculos computacionais de Goell.[4] De modo semelhante, as propriedades de acoplamento de dois guias de seção transversal quadrada imersos em um único dielétrico são comparadas com aquelas de dois guias de seção transversal circular obtidas por Jones e por Bracey e colaboradores.[5,6] Em ambas as comparações, a concordância é bastante boa.
 

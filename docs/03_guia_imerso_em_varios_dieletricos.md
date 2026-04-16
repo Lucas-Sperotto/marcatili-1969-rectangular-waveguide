@@ -2,9 +2,10 @@
 
 O guia imerso em vários dielétricos (Fig. 4a) é obtido a partir da Fig. 3 escolhendo-se
 
+## (1)
+
 $$
 c=\infty .
-\tag{1}
 $$
 
-Ele suporta um número discreto de modos guiados, que agrupamos em duas famílias, $E^y_{pq}$ e $E^x_{pq}$, além de um contínuo de modos não guiados.
+Ele suporta um número discreto de modos guiados, que agrupamos em duas famílias, $E^x_{pq}$ e $E^y_{pq}$, além de um contínuo de modos não guiados.
