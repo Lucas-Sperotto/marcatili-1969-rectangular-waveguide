@@ -148,6 +148,13 @@ Figure7Result SolveFigure7(const Figure7Config& config) {
     result.x_numerator = Square(kPi / config.a) / Square(x_denominator);
     result.y_numerator = Square(kPi / config.b) / Square(y_denominator);
     result.derived_c = Square((config.a / config.b) * (x_denominator / y_denominator));
+    if (std::isfinite(config.reference_c_value)) {
+        result.reference_c_absolute_error = std::abs(result.derived_c - config.reference_c_value);
+        if (std::abs(config.reference_c_value) > 1e-15) {
+            result.reference_c_relative_error =
+                result.reference_c_absolute_error / std::abs(config.reference_c_value);
+        }
+    }
     result.design_example.a_over_b = config.a / config.b;
 
     const bool pair_35_symmetric = std::abs(config.n3 - config.n5) <= 1e-12;

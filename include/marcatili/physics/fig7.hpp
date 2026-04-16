@@ -106,6 +106,8 @@ struct Figure7Result {
     double x_numerator = 0.0;
     double y_numerator = 0.0;
     double derived_c = 0.0;
+    double reference_c_absolute_error = std::numeric_limits<double>::quiet_NaN();
+    double reference_c_relative_error = std::numeric_limits<double>::quiet_NaN();
     Figure7DesignExampleSummary design_example;
     Figure7ArticleReferenceCheck article_reference_check;
     std::vector<Figure7LineSample> line_samples;

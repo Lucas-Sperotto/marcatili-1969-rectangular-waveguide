@@ -152,7 +152,11 @@ std::string BuildFigure7JsonReport(
     json << "    \"x_numerator\": " << JsonNumber(result.x_numerator) << ",\n";
     json << "    \"y_numerator\": " << JsonNumber(result.y_numerator) << ",\n";
     json << "    \"derived_c\": " << JsonNumber(result.derived_c) << ",\n";
-    json << "    \"reference_c_value\": " << JsonNumber(result.config.reference_c_value) << "\n";
+    json << "    \"reference_c_value\": " << JsonNumber(result.config.reference_c_value) << ",\n";
+    json << "    \"reference_c_absolute_error\": "
+         << JsonNumberOrNull(result.reference_c_absolute_error) << ",\n";
+    json << "    \"reference_c_relative_error\": "
+         << JsonNumberOrNull(result.reference_c_relative_error) << "\n";
     json << "  },\n";
     json << "  \"design_example\": {\n";
     json << "    \"a_over_b\": " << JsonNumber(result.design_example.a_over_b) << ",\n";
