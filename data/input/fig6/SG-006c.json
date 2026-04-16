@@ -1,13 +1,13 @@
 {
-  "case_id": "SG-006b-approx",
-  "article_target": "Figure 6b sweep for a guide fully embedded in a single dielectric, comparing the current repository closed-form and exact single-guide solvers",
-  "panel_id": "SG-006b",
+  "case_id": "SG-006c",
+  "article_target": "Figure 6c, finite panel sweep with current repository assumptions for the weak-contrast fully embedded single-dielectric guide",
+  "panel_id": "SG-006c",
   "solver_models": [
     "closed_form",
     "exact"
   ],
   "wavelength": 1.0e-6,
-  "a_over_b": 2.0,
+  "a_over_b": 4.0,
   "n1": 1.5,
   "n2": 1.4851485148514851,
   "n3": 1.4851485148514851,
@@ -29,3 +29,4 @@
     "E_x:3:1"
   ]
 }
+

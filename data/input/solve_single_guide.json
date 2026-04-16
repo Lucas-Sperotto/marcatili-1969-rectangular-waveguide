@@ -1,6 +1,26 @@
 {
-  "case_name": "bootstrap_single_guide",
-  "article_scope": "single rectangular dielectric guide",
-  "expected_output": "placeholder_json"
+  "case_id": "SG-POINT-001",
+  "article_target": "Closed-form single-guide point based on Eqs. (10), (12)-(16) and the fundamental mode used as the starting point for Fig. 6b / coupler sizing",
+  "solver_model": "closed_form",
+  "mode_family": "E_y",
+  "mode_indices": {
+    "p": 1,
+    "q": 1
+  },
+  "geometry": {
+    "wavelength": 1.0e-6,
+    "a": 3.54e-6,
+    "b": 1.77e-6
+  },
+  "materials": {
+    "n1": 1.5,
+    "n2": 1.4851485148514851,
+    "n3": 1.4851485148514851,
+    "n4": 1.4851485148514851,
+    "n5": 1.4851485148514851
+  },
+  "boundary_conditions": {
+    "guide_limit": "c_infinity",
+    "approximation_regime": "well_guided_closed_form"
+  }
 }
-

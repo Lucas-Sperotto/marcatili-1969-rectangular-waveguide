@@ -1,0 +1,31 @@
+{
+  "case_id": "SG-006j",
+  "article_target": "Figure 6j, finite panel sweep for the asymmetric single-guide case using the current repository transcription: n2 = n1/1.5 and n3 = n4 = n5 very close to n1 so that the E12 pair aligns better with the scanned panel",
+  "panel_id": "SG-006j",
+  "solver_models": [
+    "closed_form",
+    "exact"
+  ],
+  "wavelength": 1.0e-6,
+  "a_over_b": 4.0,
+  "n1": 1.5,
+  "n2": 1.0,
+  "n3": 1.4985014985014986,
+  "n4": 1.4985014985014986,
+  "n5": 1.4985014985014986,
+  "b_over_A4_min": 0.05,
+  "b_over_A4_max": 4.0,
+  "point_count": 240,
+  "modes": [
+    "E_y:1:1",
+    "E_x:1:1",
+    "E_y:2:1",
+    "E_x:2:1",
+    "E_y:1:2",
+    "E_x:1:2",
+    "E_y:2:2",
+    "E_x:2:2",
+    "E_y:3:1",
+    "E_x:3:1"
+  ]
+}

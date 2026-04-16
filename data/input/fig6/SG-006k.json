@@ -1,0 +1,27 @@
+{
+  "case_id": "SG-006k",
+  "article_target": "Figure 6k, slab-limit asymmetric guide using the one-dimensional y-directed characteristic equations from the current repository transcription: n2 = n1/1.5 and n4 slightly below n1",
+  "panel_id": "SG-006k",
+  "geometry_model": "slab",
+  "solver_models": [
+    "closed_form",
+    "exact"
+  ],
+  "wavelength": 1.0e-6,
+  "n1": 1.5,
+  "n2": 1.0,
+  "n3": 1.4851485148514851,
+  "n4": 1.4851485148514851,
+  "n5": 1.4851485148514851,
+  "b_over_A4_min": 0.05,
+  "b_over_A4_max": 4.0,
+  "point_count": 160,
+  "modes": [
+    "E_y:1:1",
+    "E_x:1:1",
+    "E_y:1:2",
+    "E_x:1:2",
+    "E_y:1:3",
+    "E_x:1:3"
+  ]
+}

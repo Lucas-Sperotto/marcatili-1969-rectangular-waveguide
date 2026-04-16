@@ -1,0 +1,32 @@
+{
+  "case_id": "SG-006g",
+  "article_target": "Figure 6g, finite panel sweep for the stronger-contrast fully embedded single-dielectric guide using the current repository transcription",
+  "panel_id": "SG-006g",
+  "solver_models": [
+    "closed_form",
+    "exact"
+  ],
+  "wavelength": 1.0e-6,
+  "a_over_b": 4.0,
+  "n1": 1.5,
+  "n2": 1.0,
+  "n3": 1.0,
+  "n4": 1.0,
+  "n5": 1.0,
+  "b_over_A4_min": 0.35,
+  "b_over_A4_max": 4.0,
+  "point_count": 80,
+  "modes": [
+    "E_y:1:1",
+    "E_x:1:1",
+    "E_y:2:1",
+    "E_x:2:1",
+    "E_y:1:2",
+    "E_x:1:2",
+    "E_y:2:2",
+    "E_x:2:2",
+    "E_y:3:1",
+    "E_x:3:1"
+  ]
+}
+
