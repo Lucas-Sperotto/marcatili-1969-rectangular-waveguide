@@ -1,8 +1,8 @@
 # V. Acoplador direcional construído com guias ligeiramente diferentes
 
-Considere o acoplador direcional da Fig. 12, no qual os dois guias possuem alturas ligeiramente diferentes: um mede \(b+h\) e o outro \(b-h\).
+Considere o acoplador direcional da Fig. 12, no qual os dois guias possuem alturas ligeiramente diferentes: um mede $b+h$ e o outro $b-h$.
 
-Façamos um esboço qualitativo do coeficiente de acoplamento como função de \(h\), conforme a Fig. 13. Por argumentos simples de simetria, o valor absoluto do coeficiente de acoplamento é estacionário (isto é, sua primeira derivada é nula) em torno de \(h=0\). Portanto, o coeficiente de acoplamento entre dois guias de alturas \(b_1\) e \(b_2\) é o mesmo que aquele entre dois guias idênticos de altura \(\tfrac{1}{2}(b_1+b_2)\), desde que \(|b_1-b_2|\) seja suficientemente pequeno.
+Façamos um esboço qualitativo do coeficiente de acoplamento como função de $h$, conforme a Fig. 13. Por argumentos simples de simetria, o valor absoluto do coeficiente de acoplamento é estacionário (isto é, sua primeira derivada é nula) em torno de $h=0$. Portanto, o coeficiente de acoplamento entre dois guias de alturas $b_1$ e $b_2$ é o mesmo que aquele entre dois guias idênticos de altura $\tfrac{1}{2}(b_1+b_2)$, desde que $|b_1-b_2|$ seja suficientemente pequeno.
 
 Esse raciocínio aplica-se a guias com larguras, alturas e índices de refração diferentes, desde que as diferenças sejam suficientemente pequenas. Infelizmente, como ocorre na maior parte das análises perturbativas, não sabemos exatamente o que significa “suficientemente pequeno” a menos que calculemos o termo de ordem superior seguinte.
 

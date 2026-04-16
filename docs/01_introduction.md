@@ -1,10 +1,10 @@
 # I. Introdução
 
-Propostas têm sido feitas para guias de onda dielétricos capazes de conduzir feixes em circuitos ópticos integrados de modo muito semelhante àquele em que guias de onda e cabos coaxiais são usados em circuitos de micro-ondas.[1–3] A Figura 1 mostra as geometrias básicas desses guias de onda. O guia é uma haste dielétrica de índice de refração \(n\), imersa em outro dielétrico de índice de refração ligeiramente menor, \(n(1-\Delta)\); ambos estão em contato com um terceiro dielétrico, que pode ser o ar (Fig. 1a) ou um dielétrico de índice de refração \(n(1-\Delta)\) (Fig. 1b).
+Propostas têm sido feitas para guias de onda dielétricos capazes de conduzir feixes em circuitos ópticos integrados de modo muito semelhante àquele em que guias de onda e cabos coaxiais são usados em circuitos de micro-ondas.[1–3] A Figura 1 mostra as geometrias básicas desses guias de onda. O guia é uma haste dielétrica de índice de refração $n$, imersa em outro dielétrico de índice de refração ligeiramente menor, $n(1-\Delta)$; ambos estão em contato com um terceiro dielétrico, que pode ser o ar (Fig. 1a) ou um dielétrico de índice de refração $n(1-\Delta)$ (Fig. 1b).
 
 ![Figura 1 — Guias de onda dielétricos para circuitos ópticos integrados.](img/fig_01.png)
 
-Essas geometrias são atraentes não apenas por sua simplicidade, precisão de construção e estabilidade mecânica, mas também porque, escolhendo \(\Delta\) suficientemente pequeno, a operação em modo único pode ser obtida com dimensões transversais do guia grandes em comparação com o comprimento de onda no espaço livre, relaxando assim as exigências de tolerância de fabricação.
+Essas geometrias são atraentes não apenas por sua simplicidade, precisão de construção e estabilidade mecânica, mas também porque, escolhendo $\Delta$ suficientemente pequeno, a operação em modo único pode ser obtida com dimensões transversais do guia grandes em comparação com o comprimento de onda no espaço livre, relaxando assim as exigências de tolerância de fabricação.
 
 Embora, em um guia real, a seção transversal da haste guia não seja exatamente retangular e as fronteiras entre os dielétricos não sejam definidas abruptamente, como na Figura 1, vale a pena determinar as características dos modos nessa estrutura idealizada e os requisitos necessários para torná-la um guia de onda monomodo.
 
@@ -20,7 +20,7 @@ As propriedades de guiamento do guia de seção transversal retangular imerso em
 
 - O termo **dielectric waveguide** foi traduzido como **guia de onda dielétrico**.
 - O termo **dielectric rod** foi mantido como **haste dielétrica**, por ser tecnicamente adequado ao contexto geométrico descrito por Marcatili.
-- O parâmetro \(\Delta\) aparece aqui como o contraste relativo entre índices de refração, sendo central para a possibilidade de operação monomodo.
+- O parâmetro $\Delta$ aparece aqui como o contraste relativo entre índices de refração, sendo central para a possibilidade de operação monomodo.
 - Nesta introdução, Marcatili já antecipa os dois grandes blocos do artigo:
   1. a análise do guia retangular dielétrico isolado;
   2. a análise do acoplador direcional formado por dois guias próximos.
