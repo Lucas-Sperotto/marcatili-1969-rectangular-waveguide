@@ -42,3 +42,9 @@ if [[ -f "$OUTPUT_DIR/reproduce_fig7.lines.csv" ]]; then
         --intersections-csv "$OUTPUT_DIR/reproduce_fig7.intersections.csv" \
         -o "$OUTPUT_DIR/reproduce_fig7.png"
 fi
+
+if [[ -f "$OUTPUT_DIR/reproduce_fig8.csv" ]]; then
+    "$ROOT_DIR/scripts/plot_fig8.py" \
+        "$OUTPUT_DIR/reproduce_fig8.csv" \
+        -o "$OUTPUT_DIR/reproduce_fig8.png"
+fi

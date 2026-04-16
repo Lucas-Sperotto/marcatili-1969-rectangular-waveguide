@@ -17,7 +17,8 @@ Nesta etapa, a base do projeto já inclui:
 1. um solver do guia único com versões aproximada e exata;
 2. a reprodução operacional da Fig. 6, incluindo casos retangulares e limites de lâmina;
 3. uma primeira reprodução do nomograma da Fig. 7;
-4. placeholders organizados para as demais figuras e para o acoplador.
+4. uma primeira reproducao operacional da Fig. 8 para o caso com interface metalizada;
+5. placeholders organizados para o acoplador e para as figuras ainda nao tratadas.
 
 ## Estrutura
 
@@ -37,7 +38,7 @@ Nesta etapa, a base do projeto já inclui:
 - `solve_coupler`: placeholder.
 - `reproduce_fig6`: executa um sweep em $b/A_4$ e gera curvas numéricas em `CSV` e resumo em `JSON` para um painel de Fig. 6, com suporte a solver aproximado, exato e ao limite de lâmina.
 - `reproduce_fig7`: reproduz o nomograma da Fig. 7 como conjunto de retas modais, retas de $C$ e interseções de referência em `JSON` e `CSV`.
-- `reproduce_fig8`: placeholder.
+- `reproduce_fig8`: executa um sweep em $a/A$ para o caso metalizado da Fig. 8, atualmente com foco na familia $E_y$ e com as hipoteses de contorno explicitadas no relatorio `JSON`.
 - `reproduce_fig10`: placeholder.
 - `reproduce_fig11`: placeholder.
 - `reproduce_table1`: procura o primeiro cutoff de modo superior em cada linha da Tabela I e gera comparações em `JSON` e `CSV` para as dimensões monomodo publicadas, tratando a entrada tabulada como a dimensão `a`.
@@ -50,7 +51,10 @@ Todos aceitam um arquivo de entrada:
 ./scripts/plot_fig6.py data/output/reproduce_fig6.csv -o data/output/reproduce_fig6.png
 ./build/bin/reproduce_fig7 data/input/reproduce_fig7.json data/output/reproduce_fig7.json
 ./scripts/plot_fig7.py data/output/reproduce_fig7.lines.csv --intersections-csv data/output/reproduce_fig7.intersections.csv -o data/output/reproduce_fig7.png
+./build/bin/reproduce_fig8 data/input/reproduce_fig8.json data/output/reproduce_fig8.json
+./scripts/plot_fig8.py data/output/reproduce_fig8.csv -o data/output/reproduce_fig8.png
 ./scripts/run/build_fig7_article_comparison.sh
+./scripts/run/build_fig8_article_comparison.sh
 ```
 
 ## Build e execução
@@ -60,6 +64,7 @@ Todos aceitam um arquivo de entrada:
 ./scripts/run/reproduce_all.sh
 ./scripts/run/reproduce_fig6_panels.sh
 ./scripts/run/reproduce_fig7_nomogram.sh
+./scripts/run/reproduce_fig8_case.sh
 ./scripts/run/clean.sh
 ```
 
@@ -85,5 +90,5 @@ RUN_TESTS=1 ./scripts/run/build.sh
 1. consolidar a documentação técnica e o dicionário de símbolos em `docs/`;
 2. refinar a transcrição e a validação cruzada da Fig. 6;
 3. transformar a primeira base da Fig. 7 em comparação quantitativa com o artigo;
-4. reproduzir Fig. 8 e Tabela I;
+4. consolidar a comparacao artigo x reproducao da Fig. 8 e refinar a leitura dos rotulos modais;
 5. implementar o acoplador direcional e reproduzir Fig. 10 e Fig. 11.
