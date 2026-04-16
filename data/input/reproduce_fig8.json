@@ -1,7 +1,7 @@
 {
   "case_id": "SG-008-METAL-001",
-  "article_target": "Figure 8: metalized upper interface, current first-pass reproduction.",
-  "ocr_note": "The scan states n1/1.05 < n4 < n1 and a = 2b. The current case uses the explicit lower-contrast endpoint n4 = n1/1.05 as a reproducible baseline. TODO: confirm whether the published panel assumes a single n4 or a material interval.",
+  "article_target": "Figure 8: metalized upper interface, refined with E_y11, E_x11 and E_x21 as the current three-branch interpretation.",
+  "ocr_note": "The scan states n1/1.05 < n4 < n1 and a = 2b. The current case uses the explicit lower-contrast endpoint n4 = n1/1.05 as a reproducible baseline. TODO OCR: the intermediate label is hard to read in the current scan; this case tracks the physically consistent branch set E_y11, E_x11 and E_x21, while the lower label clearly reads E_x21.",
   "wavelength": 1e-6,
   "a_over_b": 2.0,
   "n1": 1.5,
@@ -15,7 +15,7 @@
   ],
   "modes": [
     "E_y:1:1",
-    "E_y:2:1",
-    "E_y:3:1"
+    "E_x:1:1",
+    "E_x:2:1"
   ]
 }

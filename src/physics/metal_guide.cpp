@@ -59,10 +59,6 @@ double PenetrationDepth(double A_value, double transverse_wave_number) {
 }
 
 void ValidateConfig(const SingleGuideConfig& config) {
-    if (config.family != SingleGuideFamily::kEy) {
-        throw std::runtime_error("The current Fig. 8 metal-boundary model only supports E_y modes.");
-    }
-
     if (config.wavelength <= 0.0) {
         throw std::runtime_error("wavelength must be positive.");
     }
@@ -116,21 +112,37 @@ void FinalizeResult(SingleGuideResult& result) {
 
 }  // namespace
 
-SingleGuideResult SolveMetalGuideEyClosedForm(const SingleGuideConfig& config) {
+SingleGuideResult SolveMetalGuideClosedForm(const SingleGuideConfig& config) {
     ValidateConfig(config);
 
     SingleGuideResult result = BuildBaseResult(config);
 
-    const double x_denominator = 1.0 + (result.A3 + result.A5) / (kPi * config.a);
-    const double y_denominator =
-        1.0 + (Square(config.n4) * result.A4) / (kPi * Square(config.n1) * config.b);
+    if (config.family == SingleGuideFamily::kEy) {
+        const double x_denominator = 1.0 + (result.A3 + result.A5) / (kPi * config.a);
+        const double y_denominator =
+            1.0 + (Square(config.n4) * result.A4) / (kPi * Square(config.n1) * config.b);
 
-    result.kx = (config.p * kPi / config.a) / x_denominator;
-    // The metalized upper boundary is modeled as a PEC phase shift of pi/2 in the y equation.
-    result.ky = ((static_cast<double>(config.q) - 0.5) * kPi / config.b) / y_denominator;
-    result.equations_used =
-        "Fig. 8 metal-boundary approximation derived from (6), (7), (12), (13) "
-        "with n3=n5=n4 and the top interface replaced by a PEC phase term pi/2";
+        result.kx = (config.p * kPi / config.a) / x_denominator;
+        // For E_y, the metalized upper boundary is modeled as a fixed pi/2 phase term.
+        result.ky = ((static_cast<double>(config.q) - 0.5) * kPi / config.b) / y_denominator;
+        result.equations_used =
+            "Fig. 8 metal-boundary approximation for E_y derived from (6), (7), (12), (13) "
+            "with n3=n5=n4 and the top interface replaced by a PEC phase term pi/2";
+    } else {
+        const double x_denominator =
+            1.0 +
+            (Square(config.n4) * (result.A3 + result.A5)) /
+                (kPi * Square(config.n1) * config.a);
+        // For E_x, the tangential electric field vanishes on the metal wall, so the
+        // top-interface arctangent term is removed while the dielectric bottom term remains.
+        const double y_denominator = 1.0 + result.A4 / (kPi * config.b);
+
+        result.kx = (config.p * kPi / config.a) / x_denominator;
+        result.ky = (static_cast<double>(config.q) * kPi / config.b) / y_denominator;
+        result.equations_used =
+            "Fig. 8 metal-boundary approximation for E_x inferred from (20), (21), (22), (23) "
+            "with n3=n5=n4, a PEC top boundary and only the lower dielectric term kept in y";
+    }
 
     result.approximation_checks.kx_a3_over_pi_squared = Square(result.kx * result.A3 / kPi);
     result.approximation_checks.kx_a5_over_pi_squared = Square(result.kx * result.A5 / kPi);
@@ -163,23 +175,41 @@ SingleGuideResult SolveMetalGuideEyClosedForm(const SingleGuideConfig& config) {
     return result;
 }
 
-SingleGuideResult SolveMetalGuideEyExact(const SingleGuideConfig& config) {
+SingleGuideResult SolveMetalGuideExact(const SingleGuideConfig& config) {
     ValidateConfig(config);
 
     SingleGuideResult result = BuildBaseResult(config);
 
-    const auto fx = [&](double kx_value) {
-        const double xi = PenetrationDepth(result.A4, kx_value);
-        return kx_value * config.a + 2.0 * std::atan(kx_value * xi) -
-               static_cast<double>(config.p) * kPi;
-    };
+    std::function<double(double)> fx;
+    std::function<double(double)> fy;
 
-    const auto fy = [&](double ky_value) {
-        const double eta4 = PenetrationDepth(result.A4, ky_value);
-        return ky_value * config.b +
-               std::atan((Square(config.n4) / Square(config.n1)) * ky_value * eta4) -
-               (static_cast<double>(config.q) - 0.5) * kPi;
-    };
+    if (config.family == SingleGuideFamily::kEy) {
+        fx = [&](double kx_value) {
+            const double xi = PenetrationDepth(result.A4, kx_value);
+            return kx_value * config.a + 2.0 * std::atan(kx_value * xi) -
+                   static_cast<double>(config.p) * kPi;
+        };
+
+        fy = [&](double ky_value) {
+            const double eta4 = PenetrationDepth(result.A4, ky_value);
+            return ky_value * config.b +
+                   std::atan((Square(config.n4) / Square(config.n1)) * ky_value * eta4) -
+                   (static_cast<double>(config.q) - 0.5) * kPi;
+        };
+    } else {
+        fx = [&](double kx_value) {
+            const double xi = PenetrationDepth(result.A4, kx_value);
+            return kx_value * config.a +
+                   2.0 * std::atan((Square(config.n4) / Square(config.n1)) * kx_value * xi) -
+                   static_cast<double>(config.p) * kPi;
+        };
+
+        fy = [&](double ky_value) {
+            const double eta4 = PenetrationDepth(result.A4, ky_value);
+            return ky_value * config.b + std::atan(ky_value * eta4) -
+                   static_cast<double>(config.q) * kPi;
+        };
+    }
 
     const double x_upper = SafeUpperBound(kPi / result.A3, kPi / result.A5);
     const double y_upper = kPi / result.A4 * (1.0 - 1e-10);
@@ -203,9 +233,15 @@ SingleGuideResult SolveMetalGuideEyExact(const SingleGuideConfig& config) {
 
     result.kx = RootSolveByBisection(fx, lower, x_upper);
     result.ky = RootSolveByBisection(fy, lower, y_upper);
-    result.equations_used =
-        "Fig. 8 metal-boundary exact model derived from (6), (7) and Appendix A.1, "
-        "using n3=n5=n4 and a PEC phase condition on the top interface";
+    if (config.family == SingleGuideFamily::kEy) {
+        result.equations_used =
+            "Fig. 8 metal-boundary exact model for E_y derived from (6), (7) and Appendix A.1, "
+            "using n3=n5=n4 and a PEC phase condition on the top interface";
+    } else {
+        result.equations_used =
+            "Fig. 8 metal-boundary exact model for E_x inferred from (20), (21), (18), (19), "
+            "using n3=n5=n4, a PEC top boundary and a single lower dielectric phase term in y";
+    }
 
     result.approximation_checks.kx_a3_over_pi_squared = Square(result.kx * result.A3 / kPi);
     result.approximation_checks.kx_a5_over_pi_squared = Square(result.kx * result.A5 / kPi);
@@ -238,12 +274,12 @@ SingleGuideResult SolveMetalGuideEyExact(const SingleGuideConfig& config) {
     return result;
 }
 
-SingleGuideResult SolveMetalGuideEy(const SingleGuideConfig& config) {
+SingleGuideResult SolveMetalGuide(const SingleGuideConfig& config) {
     if (config.solver_model == SingleGuideSolverModel::kExact) {
-        return SolveMetalGuideEyExact(config);
+        return SolveMetalGuideExact(config);
     }
 
-    return SolveMetalGuideEyClosedForm(config);
+    return SolveMetalGuideClosedForm(config);
 }
 
 }  // namespace marcatili

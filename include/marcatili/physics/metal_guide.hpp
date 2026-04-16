@@ -4,8 +4,8 @@
 
 namespace marcatili {
 
-SingleGuideResult SolveMetalGuideEyClosedForm(const SingleGuideConfig& config);
-SingleGuideResult SolveMetalGuideEyExact(const SingleGuideConfig& config);
-SingleGuideResult SolveMetalGuideEy(const SingleGuideConfig& config);
+SingleGuideResult SolveMetalGuideClosedForm(const SingleGuideConfig& config);
+SingleGuideResult SolveMetalGuideExact(const SingleGuideConfig& config);
+SingleGuideResult SolveMetalGuide(const SingleGuideConfig& config);
 
 }  // namespace marcatili

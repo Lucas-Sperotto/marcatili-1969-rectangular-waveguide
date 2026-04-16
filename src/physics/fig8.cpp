@@ -43,11 +43,6 @@ void ValidateConfig(const Figure8Config& config) {
         throw std::runtime_error("At least one mode must be listed in the modes array.");
     }
 
-    for (const auto& mode : config.modes) {
-        if (mode.family != SingleGuideFamily::kEy) {
-            throw std::runtime_error("The current Fig. 8 implementation only supports E_y modes.");
-        }
-    }
 }
 
 std::string DefaultCurveId(const Figure8ModeSpec& mode) {
@@ -121,7 +116,7 @@ Figure8Result SolveFigure8(const Figure8Config& config) {
                 point_config.n4 = config.n4;
                 point_config.n5 = config.n4;
 
-                const auto point = SolveMetalGuideEy(point_config);
+                const auto point = SolveMetalGuide(point_config);
 
                 if (point.domain_valid) {
                     ++curve_summary.valid_points;

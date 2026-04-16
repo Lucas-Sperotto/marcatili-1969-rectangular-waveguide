@@ -126,8 +126,9 @@ std::string BuildFigure8JsonReport(
     json << "  \"ocr_note\": " << JsonStringOrNull(result.config.ocr_note) << ",\n";
     json << "  \"model_note\": "
          << JsonStringOrNull(
-                "Top interface treated as a PEC wall; y-characteristic equation "
-                "modeled as the Fig. 4/Appendix A limit with a fixed pi/2 phase shift."
+                "Top interface treated as a PEC wall. For E_y, the upper y-boundary is modeled "
+                "with a fixed pi/2 phase term; for E_x, the tangential electric field is forced "
+                "to vanish on the metal wall and only the lower dielectric phase term is kept."
             ) << ",\n";
     json << "  \"sweep\": {\n";
     json << "    \"wavelength\": " << JsonNumber(result.config.wavelength) << ",\n";
