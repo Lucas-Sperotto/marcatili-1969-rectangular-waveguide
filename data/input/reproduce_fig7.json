@@ -1,6 +1,9 @@
 {
   "case_id": "SG-007-NOMOGRAM-001",
   "article_target": "Figure 7 nomogram plus the design example with a/b = 5 and the C = 25 guide line highlighted",
+  "article_reference_mode": "E_y:2:1",
+  "article_reference_y_readoff": 0.88,
+  "article_reference_note": "TODO OCR: the scan labels the plotted p=2, q=1 line as E_y21, while the transcribed sentence mentions E_x21. This case tracks the plotted nomogram line.",
   "wavelength": 1.0e-6,
   "a": 25.0e-6,
   "b": 5.0e-6,

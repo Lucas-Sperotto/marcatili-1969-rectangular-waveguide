@@ -50,6 +50,7 @@ Todos aceitam um arquivo de entrada:
 ./scripts/plot_fig6.py data/output/reproduce_fig6.csv -o data/output/reproduce_fig6.png
 ./build/bin/reproduce_fig7 data/input/reproduce_fig7.json data/output/reproduce_fig7.json
 ./scripts/plot_fig7.py data/output/reproduce_fig7.lines.csv --intersections-csv data/output/reproduce_fig7.intersections.csv -o data/output/reproduce_fig7.png
+./scripts/run/build_fig7_article_comparison.sh
 ```
 
 ## Build e execução

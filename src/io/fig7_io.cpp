@@ -83,6 +83,12 @@ marcatili::Figure7Config ParseFigure7Config(
     config.intersections_csv_output_path =
         FindStringValue(json_text, "csv_intersections_file")
             .value_or(DefaultIntersectionsCsvPath(cli_output_json));
+    if (const auto article_reference_mode = FindStringValue(json_text, "article_reference_mode")) {
+        config.article_reference_mode_line_id =
+            marcatili::ParseFigure7ModeSpec(*article_reference_mode).line_id;
+    }
+    config.article_reference_note =
+        FindStringValue(json_text, "article_reference_note").value_or("");
     config.wavelength = RequireDoubleValue(json_text, "wavelength");
     config.a = RequireDoubleValue(json_text, "a");
     config.b = RequireDoubleValue(json_text, "b");
@@ -93,6 +99,8 @@ marcatili::Figure7Config ParseFigure7Config(
     config.n5 = RequireDoubleValue(json_text, "n5");
     config.line_point_count = FindIntValue(json_text, "line_point_count").value_or(200);
     config.reference_c_value = FindDoubleValue(json_text, "reference_c_value").value_or(NaN());
+    config.article_reference_y_readoff =
+        FindDoubleValue(json_text, "article_reference_y_readoff").value_or(NaN());
 
     for (const auto& mode_text : RequireStringArrayValues(json_text, "modes")) {
         config.modes.push_back(marcatili::ParseFigure7ModeSpec(mode_text));
@@ -146,6 +154,41 @@ std::string BuildFigure7JsonReport(
     json << "    \"derived_c\": " << JsonNumber(result.derived_c) << ",\n";
     json << "    \"reference_c_value\": " << JsonNumber(result.config.reference_c_value) << "\n";
     json << "  },\n";
+    json << "  \"design_example\": {\n";
+    json << "    \"a_over_b\": " << JsonNumber(result.design_example.a_over_b) << ",\n";
+    json << "    \"symmetric_material_pairs\": "
+         << (result.design_example.symmetric_material_pairs ? "true" : "false") << ",\n";
+    json << "    \"delta_from_n35\": "
+         << JsonNumberOrNull(result.design_example.delta_from_n35) << ",\n";
+    json << "    \"delta_prime_from_n24\": "
+         << JsonNumberOrNull(result.design_example.delta_prime_from_n24) << ",\n";
+    json << "    \"sqrt_delta_prime_over_delta\": "
+         << JsonNumberOrNull(result.design_example.sqrt_delta_prime_over_delta) << "\n";
+    json << "  },\n";
+    json << "  \"article_reference_check\": ";
+
+    if (result.article_reference_check.available) {
+        json << "{\n";
+        json << "    \"mode_line_id\": \"" << EscapeJson(result.article_reference_check.mode_line_id)
+             << "\",\n";
+        json << "    \"reference_c_value\": "
+             << JsonNumberOrNull(result.article_reference_check.c_value) << ",\n";
+        json << "    \"exact_x\": " << JsonNumberOrNull(result.article_reference_check.exact_x)
+             << ",\n";
+        json << "    \"exact_y\": " << JsonNumberOrNull(result.article_reference_check.exact_y)
+             << ",\n";
+        json << "    \"article_y_readoff\": "
+             << JsonNumberOrNull(result.article_reference_check.article_y_readoff) << ",\n";
+        json << "    \"article_y_absolute_error\": "
+             << JsonNumberOrNull(result.article_reference_check.article_y_absolute_error) << ",\n";
+        json << "    \"article_y_relative_error\": "
+             << JsonNumberOrNull(result.article_reference_check.article_y_relative_error) << ",\n";
+        json << "    \"note\": " << JsonStringOrNull(result.article_reference_check.note) << "\n";
+        json << "  },\n";
+    } else {
+        json << "null,\n";
+    }
+
     json << "  \"reference_intersections\": [\n";
 
     bool first = true;

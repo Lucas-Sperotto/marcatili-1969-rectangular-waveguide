@@ -29,6 +29,11 @@ def parse_args() -> argparse.Namespace:
         help="Output image path. Defaults to the line CSV path with .png extension.",
     )
     parser.add_argument("--title", help="Optional title override.")
+    parser.add_argument(
+        "--no-title",
+        action="store_true",
+        help="Suppress the default case title. Useful for article-style comparisons.",
+    )
     return parser.parse_args()
 
 
@@ -68,6 +73,7 @@ def build_plot(
     intersections: list[dict[str, str]],
     output_path: Path,
     title: str | None,
+    show_default_title: bool,
 ) -> None:
     plt.style.use("seaborn-v0_8-whitegrid")
     figure, axis = plt.subplots(figsize=(7.6, 7.2))
@@ -111,7 +117,10 @@ def build_plot(
     axis.set_yticks([index / 5 for index in range(6)])
     axis.set_xlabel(r"$X=\left(\frac{\pi}{a}\right)^2\left(1+\frac{A_3+A_5}{\pi a}\right)^{-2}(k_1^2-k_z^2)^{-1}$")
     axis.set_ylabel(r"$Y=\left(\frac{\pi}{b}\right)^2\left(1+\frac{n_2^2A_2+n_4^2A_4}{\pi n_1^2 b}\right)^{-2}(k_1^2-k_z^2)^{-1}$")
-    axis.set_title(title or case_id)
+    if title is not None:
+        axis.set_title(title)
+    elif show_default_title:
+        axis.set_title(case_id)
     axis.grid(True, which="major", color="#d0d0d0", linewidth=0.8)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -126,7 +135,14 @@ def main() -> int:
 
     case_id, grouped_lines = load_line_groups(args.lines_csv)
     intersections = load_reference_intersections(args.intersections_csv)
-    build_plot(case_id, grouped_lines, intersections, output_path, args.title)
+    build_plot(
+        case_id,
+        grouped_lines,
+        intersections,
+        output_path,
+        args.title,
+        not args.no_title,
+    )
     print(f"Wrote plot to {output_path}")
     return 0
 

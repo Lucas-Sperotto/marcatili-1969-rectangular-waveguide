@@ -148,6 +148,20 @@ Figure7Result SolveFigure7(const Figure7Config& config) {
     result.x_numerator = Square(kPi / config.a) / Square(x_denominator);
     result.y_numerator = Square(kPi / config.b) / Square(y_denominator);
     result.derived_c = Square((config.a / config.b) * (x_denominator / y_denominator));
+    result.design_example.a_over_b = config.a / config.b;
+
+    const bool pair_35_symmetric = std::abs(config.n3 - config.n5) <= 1e-12;
+    const bool pair_24_symmetric = std::abs(config.n2 - config.n4) <= 1e-12;
+    result.design_example.symmetric_material_pairs = pair_35_symmetric && pair_24_symmetric;
+    result.design_example.delta_from_n35 = 1.0 - 0.5 * (config.n3 + config.n5) / config.n1;
+    result.design_example.delta_prime_from_n24 = 1.0 - 0.5 * (config.n2 + config.n4) / config.n1;
+
+    if (result.design_example.delta_from_n35 > 0.0 &&
+        result.design_example.delta_prime_from_n24 > 0.0) {
+        result.design_example.sqrt_delta_prime_over_delta = std::sqrt(
+            result.design_example.delta_prime_from_n24 / result.design_example.delta_from_n35
+        );
+    }
 
     for (const auto& mode : config.modes) {
         const double x_max = 1.0 / Square(static_cast<double>(mode.p));
@@ -226,6 +240,37 @@ Figure7Result SolveFigure7(const Figure7Config& config) {
             }
 
             result.intersections.push_back(intersection);
+        }
+    }
+
+    if (!config.article_reference_mode_line_id.empty()) {
+        for (const auto& intersection : result.intersections) {
+            if (!intersection.is_reference_c ||
+                intersection.mode_line_id != config.article_reference_mode_line_id) {
+                continue;
+            }
+
+            result.article_reference_check.available = true;
+            result.article_reference_check.mode_line_id = intersection.mode_line_id;
+            result.article_reference_check.note = config.article_reference_note;
+            result.article_reference_check.c_value = intersection.c_value;
+            result.article_reference_check.exact_x = intersection.x;
+            result.article_reference_check.exact_y = intersection.y;
+            result.article_reference_check.article_y_readoff =
+                config.article_reference_y_readoff;
+
+            if (std::isfinite(config.article_reference_y_readoff)) {
+                result.article_reference_check.article_y_absolute_error =
+                    std::abs(intersection.y - config.article_reference_y_readoff);
+
+                if (std::abs(config.article_reference_y_readoff) > 1e-15) {
+                    result.article_reference_check.article_y_relative_error =
+                        result.article_reference_check.article_y_absolute_error /
+                        std::abs(config.article_reference_y_readoff);
+                }
+            }
+
+            break;
         }
     }
 
