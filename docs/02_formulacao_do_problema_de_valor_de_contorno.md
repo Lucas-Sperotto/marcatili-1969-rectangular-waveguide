@@ -16,7 +16,7 @@ As principais componentes de campo dos modos da primeira família são $E_x$ e $
 
 ---
 
-## Observações editoriais
+## Observações
 
 - O termo **boundary value problem** foi traduzido como **problema de valor de contorno**.
 - O termo **matching** foi traduzido como **casamento** dos campos, que é a forma usual em textos técnicos quando se impõem condições de contorno entre regiões.
@@ -24,17 +24,10 @@ As principais componentes de campo dos modos da primeira família são $E_x$ e $
 - O artigo deixa claro que a solução apresentada não é a solução rigorosa completa do problema, mas uma **aproximação analítica fortemente simplificada**.
 - A notação das famílias modais foi mantida como $E^x_{pq}$ e $E^y_{pq}$, pois ela será importante nas seções seguintes.
 
-## Comentário técnico complementar
+## Comentário complementar
 
 Esta seção é central para entender toda a estratégia de Marcatili. Em vez de resolver exatamente o problema completo em todas as regiões da seção transversal, ele explora o fato físico de que, para modos bem confinados, a maior parte da energia permanece na região central do guia. Assim, as regiões periféricas menos importantes podem ser tratadas de forma aproximada, o que reduz drasticamente a complexidade do problema.
 
 A ideia essencial é transformar um problema bidimensional rigoroso, com casamento completo de campos em todos os contornos, em um problema analítico tratável, no qual o casamento é imposto apenas nas interfaces mais relevantes da região central. Essa é a base que permitirá obter relações de dispersão aproximadas em forma fechada nas próximas seções.
 
 Outro ponto importante é a interpretação modal. Embora os modos sejam rigorosamente híbridos, eles possuem uma polarização predominante, o que permite classificá-los em duas famílias. Essa classificação será fundamental para interpretar as curvas de dispersão, os modos fundamentais e o comportamento do acoplador direcional.
-
-## Texto original correspondente
-
-- início da Seção II: **Formulation of the Boundary Value Problem**;
-- apresentação da Figura 3;
-- justificativa física da aproximação;
-- definição das duas famílias de modos fundamentais do problema.

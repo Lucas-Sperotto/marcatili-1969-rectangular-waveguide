@@ -38,21 +38,14 @@ Os guias dielétricos e os acopladores direcionais descritos mostram grande pote
 4. são estruturas relativamente simples e se prestam à fabricação com alta precisão por técnicas de circuitos integrados;
 5. podem incluir dispositivos ativos de dimensões comparavelmente pequenas.
 
-## Fig. 13 — Comportamento qualitativo do coeficiente de acoplamento em função de $h$
-
-Legenda:  
-**Fig. 13 —** Comportamento qualitativo do coeficiente de acoplamento em função de $h$.
-
 ---
 
-## Observações editoriais
+## Observações
 
 - Nesta conclusão, Marcatili retoma os pontos centrais do artigo: modos híbridos, curvas de dispersão, condição monomodo, quase degenerescência dos modos fundamentais e aplicação em acopladores direcionais.
 - O termo **single mode** foi traduzido como **monomodo**.
-- Mantive a distinção entre a vantagem estrutural do guia e a limitação associada à quase degenerescência dos modos fundamentais.
-- O trecho final é claramente programático: ele posiciona essas estruturas como candidatas naturais para óptica integrada.
 
-## Comentário técnico complementar
+## Comentário complementar
 
 Esta conclusão consolida muito bem o valor do artigo. O principal mérito de Marcatili está em mostrar que uma estrutura relativamente simples, uma haste dielétrica retangular cercada por meios de menor índice, pode ser analisada de forma aproximada, mas ainda assim útil para projeto. A teoria não pretende substituir uma solução rigorosa em todos os regimes, mas oferece fórmulas, curvas e critérios de dimensionamento bastante práticos.
 
@@ -66,9 +59,3 @@ Do ponto de vista do repositório, esta seção praticamente define o checklist 
 - validar os exemplos numéricos de separação e comprimento de acoplador.
 
 Também fica claro que a contribuição do artigo não é apenas teórica, mas também tecnológica: ele fornece argumentos concretos para o uso desses guias em circuitos ópticos integrados compactos e fabricáveis.
-
-## Texto original correspondente
-
-- Seção **VI. Summary and Conclusions**;
-- retomada dos principais resultados teóricos e práticos do artigo;
-- lista final de vantagens dos guias dielétricos e acopladores direcionais para óptica integrada.

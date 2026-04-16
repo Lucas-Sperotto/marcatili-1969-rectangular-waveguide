@@ -8,23 +8,16 @@ Como discutido na Seção II, ao desprezar a potência que se propaga através d
 
 Cada família de modos será estudada separadamente.
 
-![Fig. 14 — Seção transversal do acoplador com o plano $x=0$ sendo um curto-circuito elétrico ou magnético.](img/fig_14.png)
+![Fig. 14 — Seção transversal do acoplador com o plano (x = 0) sendo um curto-circuito elétrico ou magnético.](img/fig_14.png)
 
-## A.1 Modos $E^{x}_{pq}$: polarização ao longo de $y$
+Figura 14  — Seção transversal do acoplador com o plano (x = 0) sendo um curto-circuito elétrico ou magnético.
+
+## A.1 Modos $E^{y}_{pq}$: polarização ao longo de $y$
 
 As componentes de campo na $v$-ésima das cinco regiões da Fig. 14 são:[13]
 
 $$
-H_x
-=
-e^{-ik_z z+i\omega t}
-\begin{cases}
-M_1 \cos(k_x x+\alpha)\cos(k_y y+\beta), & \nu=1,\$$4pt]
-M_2 \cos(k_x x+\alpha)\exp(-ik_{y2}y), & \nu=2,\$$4pt]
-M_3 \cos(k_y y+\beta)\exp(-ik_{x3}x), & \nu=3,\$$4pt]
-M_4 \cos(k_x x+\alpha)\exp(ik_{y4}y), & \nu=4,\$$4pt]
-M_5 \cos(k_y y+\beta)\sin(k_{x5}x+\gamma), & \nu=5,
-\end{cases}
+H_x = e^{-ik_z z+i\omega t} \begin{cases} M_1 \cos(k_x x+\alpha)\cos(k_y y+\beta), & \nu=1,\$$4pt M_2 \cos(k_x x+\alpha)\exp(-ik_{y2}y), & \nu=2,\$$4pt M_3 \cos(k_y y+\beta)\exp(-ik_{x3}x), & \nu=3,\$$4pt M_4 \cos(k_x x+\alpha)\exp(ik_{y4}y), & \nu=4,\$$4pt M_5 \cos(k_y y+\beta)\sin(k_{x5}x+\gamma), & \nu=5, \end{cases}
 $$
 
 $$
@@ -124,6 +117,10 @@ $$
 Onde há duas escolhas, as superiores devem ser tomadas em conjunto, e as inferiores também em conjunto.
 
 T. Li observou que cada uma dessas equações, considerada separadamente, é a equação característica de um problema de valor de contorno mais simples do que o da Fig. 14.[8,9] Assim, para uma lâmina dielétrica infinita nas direções $x$ e $z$, com índices de refração como os indicados na Fig. 15a, a equação característica para modos sem componente $H_y$ coincide com a equação (44). De modo semelhante, para duas lâminas infinitas nas direções $y$ e $z$, limitadas em $x=0$ por um curto-circuito elétrico ou magnético, como na Fig. 15b, a equação característica para modos com $E_z=0$ é a equação (45).
+
+![Fig. 15 — Lâminas dielétricas.](img/fig_15.png)
+
+Figura 15  — Lâminas dielétricas.
 
 Uma técnica semelhante foi usada por Schlosser e Unger para determinar as propriedades de transmissão de um guia dielétrico retangular imerso em outro dielétrico.[7] Se as duas hastes guias estão tão distantes uma da outra que o acoplamento entre elas é apenas uma perturbação, então
 
