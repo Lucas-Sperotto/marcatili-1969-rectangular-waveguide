@@ -1,6 +1,21 @@
 {
-  "case_name": "bootstrap_fig8",
-  "article_scope": "Figure 8",
-  "expected_output": "placeholder_json"
+  "case_id": "SG-008-METAL-001",
+  "article_target": "Figure 8: metalized upper interface, current first-pass reproduction.",
+  "ocr_note": "The scan states n1/1.05 < n4 < n1 and a = 2b. The current case uses the explicit lower-contrast endpoint n4 = n1/1.05 as a reproducible baseline. TODO: confirm whether the published panel assumes a single n4 or a material interval.",
+  "wavelength": 1e-6,
+  "a_over_b": 2.0,
+  "n1": 1.5,
+  "n4": 1.4285714285714286,
+  "a_over_A_min": 0.05,
+  "a_over_A_max": 4.0,
+  "point_count": 121,
+  "solver_models": [
+    "exact",
+    "closed_form"
+  ],
+  "modes": [
+    "E_y:1:1",
+    "E_y:2:1",
+    "E_y:3:1"
+  ]
 }
-
