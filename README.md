@@ -40,7 +40,7 @@ Nesta etapa, a base do projeto já inclui:
 - `reproduce_fig8`: placeholder.
 - `reproduce_fig10`: placeholder.
 - `reproduce_fig11`: placeholder.
-- `reproduce_table1`: placeholder.
+- `reproduce_table1`: procura o primeiro cutoff de modo superior em cada linha da Tabela I e gera comparações em `JSON` e `CSV` para as dimensões monomodo publicadas, tratando a entrada tabulada como a dimensão `a`.
 
 Todos aceitam um arquivo de entrada:
 

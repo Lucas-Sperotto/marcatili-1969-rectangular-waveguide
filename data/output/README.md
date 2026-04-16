@@ -9,6 +9,7 @@ Os arquivos gerados pelos executaveis devem ser gravados aqui.
 - `reproduce_fig7` ja produz um `JSON`, um `CSV` para as retas do nomograma e um `CSV` para as interseccoes de referencia.
 - `scripts/plot_fig7.py` gera o `PNG` correspondente ao caso-base da Fig. 7.
 - `scripts/compare_fig7_article.py` gera uma comparacao lado a lado entre o scan da Fig. 7 e a reproducao atual.
+- `reproduce_table1` gera um `JSON`, um `CSV`-resumo por linha da tabela e um `CSV` com os cutoffs pesquisados por modo; nesta etapa, a comparacao principal usa a interpretacao da entrada tabulada como a dimensao `a`.
 - O subdiretorio `fig6/` concentra paineis individuais e comparacoes com o artigo.
 - Os demais executaveis ainda produzem relatorios placeholder em `JSON`.
 - Resultados numericos futuros devem continuar sendo salvos em `CSV` ou `JSON`.
