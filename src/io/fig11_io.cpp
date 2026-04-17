@@ -140,13 +140,27 @@ void AppendJsonField(
 }
 
 std::vector<marcatili::Figure11CurveSpec> ParseCurveSpecs(const std::string& json_text) {
+    const auto curve_objects = FindObjectArrayValues(json_text, "curves");
+    if (!curve_objects.empty()) {
+        std::vector<marcatili::Figure11CurveSpec> curves;
+        curves.reserve(curve_objects.size());
+
+        for (const auto& curve_object : curve_objects) {
+            marcatili::Figure11CurveSpec curve;
+            curve.a_over_A5 = RequireDoubleValue(curve_object, "a_over_A5");
+            curve.curve_id = FindStringValue(curve_object, "curve_id").value_or("");
+            curve.label = FindStringValue(curve_object, "label").value_or("");
+            curves.push_back(curve);
+        }
+
+        return curves;
+    }
+
     const auto curve_texts =
         FindStringArrayWithFallback(json_text, "curves", "a_over_A5_values");
 
     if (curve_texts.empty()) {
-        throw std::runtime_error(
-            "Missing required string-array key: curves (or a_over_A5_values)"
-        );
+        throw std::runtime_error("Missing required key: curves (objects or strings).");
     }
 
     std::vector<marcatili::Figure11CurveSpec> curves;
@@ -162,13 +176,29 @@ std::vector<marcatili::Figure11CurveSpec> ParseCurveSpecs(const std::string& jso
 std::vector<marcatili::Figure11IndexRatioSpec> ParseIndexRatioSpecs(
     const std::string& json_text
 ) {
+    const auto ratio_objects = FindObjectArrayValues(json_text, "index_ratios");
+    if (!ratio_objects.empty()) {
+        std::vector<marcatili::Figure11IndexRatioSpec> ratios;
+        ratios.reserve(ratio_objects.size());
+
+        for (const auto& ratio_object : ratio_objects) {
+            marcatili::Figure11IndexRatioSpec ratio;
+            ratio.n1_over_n5 = FindDoubleValue(ratio_object, "n1_over_n5").value_or(0.0);
+            ratio.index_ratio_squared =
+                FindDoubleValue(ratio_object, "index_ratio_squared").value_or(0.0);
+            ratio.ratio_id = FindStringValue(ratio_object, "ratio_id").value_or("");
+            ratio.label = FindStringValue(ratio_object, "label").value_or("");
+            ratios.push_back(ratio);
+        }
+
+        return ratios;
+    }
+
     const auto ratio_texts =
         FindStringArrayWithFallback(json_text, "index_ratios", "n1_over_n5_values");
 
     if (ratio_texts.empty()) {
-        throw std::runtime_error(
-            "Missing required string-array key: index_ratios (or n1_over_n5_values)"
-        );
+        throw std::runtime_error("Missing required key: index_ratios (objects or strings).");
     }
 
     std::vector<marcatili::Figure11IndexRatioSpec> ratios;

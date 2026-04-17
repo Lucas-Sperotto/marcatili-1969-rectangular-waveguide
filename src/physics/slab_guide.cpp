@@ -28,19 +28,36 @@ bool IsFiniteNumber(double value) {
     return std::isfinite(value);
 }
 
+std::string ClassifyStatus(const std::string& status) {
+    if (status == "ok") {
+        return "solution";
+    }
+
+    if (status == "below_cutoff") {
+        return "physical_limit";
+    }
+
+    return "domain_limit";
+}
+
 void ResetDependentOutputs(SingleGuideResult& result) {
     result.ky = NaN();
     result.kz = NaN();
     result.eta2 = NaN();
     result.eta4 = NaN();
     result.kz_normalized_against_n4 = NaN();
-    result.domain_valid = false;
     result.guided = false;
 }
 
-void InvalidateResult(SingleGuideResult& result, const char* status) {
+void SetUnavailableResult(
+    SingleGuideResult& result,
+    const char* status,
+    bool domain_valid
+) {
     result.status = status;
+    result.status_class = ClassifyStatus(result.status);
     ResetDependentOutputs(result);
+    result.domain_valid = domain_valid;
 }
 
 void ValidateConfig(const SingleGuideConfig& config) {
@@ -83,6 +100,7 @@ SingleGuideResult BuildBaseResult(const SingleGuideConfig& config) {
     SingleGuideResult result;
     result.config = config;
     result.status = "ok";
+    result.status_class = ClassifyStatus(result.status);
 
     result.k0 = 2.0 * kPi / config.wavelength;
     result.k1 = result.k0 * config.n1;
@@ -105,6 +123,8 @@ SingleGuideResult BuildBaseResult(const SingleGuideConfig& config) {
     result.approximation_checks.kx_a5_over_pi_squared = 0.0;
 
     result.b_over_A4 = config.b / result.A4;
+    result.critical_external_index = std::max(config.n2, config.n4);
+    result.critical_external_wave_number = result.k0 * result.critical_external_index;
 
     return result;
 }
@@ -119,7 +139,7 @@ void FinalizeResult(SingleGuideResult& result) {
 
     result.guided =
         IsFiniteNumber(result.kz) &&
-        Square(result.kz) > Square(result.k4) &&
+        Square(result.kz) > Square(result.critical_external_wave_number) &&
         Square(result.kz) <= Square(result.k1) &&
         IsFiniteNumber(result.kz_normalized_against_n4) &&
         result.kz_normalized_against_n4 >= 0.0 &&
@@ -127,9 +147,11 @@ void FinalizeResult(SingleGuideResult& result) {
 
     result.domain_valid = true;
 
-    if (!result.guided && result.status == "ok") {
+    if (!result.guided) {
         result.status = "below_cutoff";
     }
+
+    result.status_class = ClassifyStatus(result.status);
 }
 
 bool BracketsRoot(
@@ -191,7 +213,7 @@ SingleGuideResult SolveSlabGuideClosedForm(const SingleGuideConfig& config) {
         IsFiniteNumber(eta4_argument) && eta4_argument > 0.0;
 
     if (!domain_valid) {
-        InvalidateResult(result, "outside_closed_form_domain");
+        SetUnavailableResult(result, "outside_closed_form_domain", false);
         return result;
     }
 
@@ -243,19 +265,19 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
     const double f_upper = characteristic_function(upper_bound);
 
     if (!IsFiniteNumber(f_lower) || !IsFiniteNumber(f_upper) || !(f_lower < 0.0)) {
-        InvalidateResult(result, "outside_exact_domain");
+        SetUnavailableResult(result, "outside_exact_domain", false);
         return result;
     }
 
     // Quando a função continua não-positiva até o limite superior permitido,
     // o modo permanece abaixo do cutoff dentro do intervalo físico admissível.
     if (f_upper <= 0.0) {
-        InvalidateResult(result, "below_cutoff");
+        SetUnavailableResult(result, "below_cutoff", true);
         return result;
     }
 
     if (!BracketsRoot(characteristic_function, lower_bound, upper_bound)) {
-        InvalidateResult(result, "outside_exact_domain");
+        SetUnavailableResult(result, "outside_exact_domain", false);
         return result;
     }
 
@@ -278,13 +300,17 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
     const double eta4_argument =
         Square(kPi / result.A4) - Square(result.ky);
 
-    const bool domain_valid =
-        IsFiniteNumber(kz_squared) && kz_squared >= 0.0 &&
+    const bool decay_domain_valid =
         IsFiniteNumber(eta2_argument) && eta2_argument > 0.0 &&
         IsFiniteNumber(eta4_argument) && eta4_argument > 0.0;
 
-    if (!domain_valid) {
-        InvalidateResult(result, "outside_exact_domain");
+    if (!(IsFiniteNumber(kz_squared)) || !decay_domain_valid) {
+        SetUnavailableResult(result, "outside_exact_domain", false);
+        return result;
+    }
+
+    if (kz_squared < 0.0) {
+        SetUnavailableResult(result, "below_cutoff", true);
         return result;
     }
 

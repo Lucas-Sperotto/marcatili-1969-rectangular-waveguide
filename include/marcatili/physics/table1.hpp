@@ -77,6 +77,10 @@ struct Table1ModeCutoff {
     std::string mode_id;
 
     bool cutoff_found = false;
+    bool guided_at_search_min = false;
+    bool guided_at_search_max = false;
+    bool guided_in_search_window = false;
+    std::string cutoff_status;
 
     double cutoff_b_normalized = 0.0;
     double cutoff_a_normalized = 0.0;
@@ -99,6 +103,7 @@ struct Table1RowSummary {
     double n5 = 0.0;
 
     bool limiting_cutoff_found = false;
+    std::string limiting_cutoff_status;
     std::string limiting_mode_id;
     SingleGuideFamily limiting_family = SingleGuideFamily::kEy;
     int limiting_p = 0;

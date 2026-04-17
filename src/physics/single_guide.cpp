@@ -30,6 +30,18 @@ bool IsFiniteNumber(double value) {
     return std::isfinite(value);
 }
 
+std::string ClassifyStatus(const std::string& status) {
+    if (status == "ok") {
+        return "solution";
+    }
+
+    if (status == "below_cutoff") {
+        return "physical_limit";
+    }
+
+    return "domain_limit";
+}
+
 std::string NormalizeToken(const std::string& text) {
     std::string normalized;
     normalized.reserve(text.size());
@@ -50,13 +62,18 @@ void ResetDependentOutputs(SingleGuideResult& result) {
     result.eta2 = NaN();
     result.eta4 = NaN();
     result.kz_normalized_against_n4 = NaN();
-    result.domain_valid = false;
     result.guided = false;
 }
 
-void InvalidateResult(SingleGuideResult& result, const char* status) {
+void SetUnavailableResult(
+    SingleGuideResult& result,
+    const char* status,
+    bool domain_valid
+) {
     result.status = status;
+    result.status_class = ClassifyStatus(result.status);
     ResetDependentOutputs(result);
+    result.domain_valid = domain_valid;
 }
 
 void ValidateConfig(const SingleGuideConfig& config) {
@@ -103,6 +120,7 @@ SingleGuideResult BuildBaseResult(const SingleGuideConfig& config) {
     SingleGuideResult result;
     result.config = config;
     result.status = "ok";
+    result.status_class = ClassifyStatus(result.status);
 
     result.k0 = 2.0 * kPi / config.wavelength;
     result.k1 = result.k0 * config.n1;
@@ -117,6 +135,9 @@ SingleGuideResult BuildBaseResult(const SingleGuideConfig& config) {
     result.A5 = ComputeA(config.wavelength, config.n1, config.n5);
 
     result.b_over_A4 = config.b / result.A4;
+    result.critical_external_index =
+        std::max(std::max(config.n2, config.n3), std::max(config.n4, config.n5));
+    result.critical_external_wave_number = result.k0 * result.critical_external_index;
 
     return result;
 }
@@ -133,7 +154,7 @@ void FinalizeResult(SingleGuideResult& result) {
     // como referência de reporte. Isso é uma convenção de apresentação.
     result.guided =
         IsFiniteNumber(result.kz) &&
-        Square(result.kz) > Square(result.k4) &&
+        Square(result.kz) > Square(result.critical_external_wave_number) &&
         Square(result.kz) <= Square(result.k1) &&
         IsFiniteNumber(result.kz_normalized_against_n4) &&
         result.kz_normalized_against_n4 >= 0.0 &&
@@ -141,9 +162,11 @@ void FinalizeResult(SingleGuideResult& result) {
 
     result.domain_valid = true;
 
-    if (!result.guided && result.status == "ok") {
+    if (!result.guided) {
         result.status = "below_cutoff";
     }
+
+    result.status_class = ClassifyStatus(result.status);
 }
 
 bool BracketsRoot(
@@ -171,6 +194,42 @@ double SolveExactRoot(
     }
 
     return math::SolveRootByBisection(function, kRootLowerBound, upper_bound);
+}
+
+enum class RootSearchStatus {
+    kFound,
+    kBelowCutoff,
+    kOutsideDomain
+};
+
+struct RootSearchResult {
+    RootSearchStatus status = RootSearchStatus::kOutsideDomain;
+    double root = NaN();
+};
+
+RootSearchResult SolveExactRootWithStatus(
+    const std::function<double(double)>& function,
+    double upper_bound
+) {
+    const double f_lower = function(kRootLowerBound);
+    const double f_upper = function(upper_bound);
+
+    if (!IsFiniteNumber(f_lower) || !IsFiniteNumber(f_upper) || !(f_lower < 0.0)) {
+        return {RootSearchStatus::kOutsideDomain, NaN()};
+    }
+
+    if (f_upper <= 0.0) {
+        return {RootSearchStatus::kBelowCutoff, NaN()};
+    }
+
+    if (!BracketsRoot(function, kRootLowerBound, upper_bound)) {
+        return {RootSearchStatus::kOutsideDomain, NaN()};
+    }
+
+    return {
+        RootSearchStatus::kFound,
+        SolveExactRoot(function, upper_bound)
+    };
 }
 
 }  // namespace
@@ -291,7 +350,7 @@ SingleGuideResult SolveSingleGuideClosedForm(const SingleGuideConfig& config) {
         IsFiniteNumber(eta4_argument) && eta4_argument > 0.0;
 
     if (!domain_valid) {
-        InvalidateResult(result, "outside_closed_form_domain");
+        SetUnavailableResult(result, "outside_closed_form_domain", false);
         return result;
     }
 
@@ -310,74 +369,89 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
 
     SingleGuideResult result = BuildBaseResult(config);
 
-    try {
-        if (config.family == SingleGuideFamily::kEy) {
-            const auto fx = [&](double kx_value) {
-                const double xi3 = PenetrationDepth(result.A3, kx_value);
-                const double xi5 = PenetrationDepth(result.A5, kx_value);
+    RootSearchResult root_x;
+    RootSearchResult root_y;
 
-                return kx_value * config.a +
-                       std::atan(kx_value * xi3) +
-                       std::atan(kx_value * xi5) -
-                       static_cast<double>(config.p) * kPi;
-            };
+    if (config.family == SingleGuideFamily::kEy) {
+        const auto fx = [&](double kx_value) {
+            const double xi3 = PenetrationDepth(result.A3, kx_value);
+            const double xi5 = PenetrationDepth(result.A5, kx_value);
 
-            const auto fy = [&](double ky_value) {
-                const double eta2 = PenetrationDepth(result.A2, ky_value);
-                const double eta4 = PenetrationDepth(result.A4, ky_value);
+            return kx_value * config.a +
+                   std::atan(kx_value * xi3) +
+                   std::atan(kx_value * xi5) -
+                   static_cast<double>(config.p) * kPi;
+        };
 
-                return ky_value * config.b +
-                       std::atan((Square(config.n2) / Square(config.n1)) * ky_value * eta2) +
-                       std::atan((Square(config.n4) / Square(config.n1)) * ky_value * eta4) -
-                       static_cast<double>(config.q) * kPi;
-            };
+        const auto fy = [&](double ky_value) {
+            const double eta2 = PenetrationDepth(result.A2, ky_value);
+            const double eta4 = PenetrationDepth(result.A4, ky_value);
 
-            result.kx = SolveExactRoot(
-                fx,
-                SafeUpperBound(kPi / result.A3, kPi / result.A5)
-            );
-            result.ky = SolveExactRoot(
-                fy,
-                SafeUpperBound(kPi / result.A2, kPi / result.A4)
-            );
-            result.equations_used = "(6), (7), (8), (9), (10)";
-        } else {
-            const auto fx = [&](double kx_value) {
-                const double xi3 = PenetrationDepth(result.A3, kx_value);
-                const double xi5 = PenetrationDepth(result.A5, kx_value);
+            return ky_value * config.b +
+                   std::atan((Square(config.n2) / Square(config.n1)) * ky_value * eta2) +
+                   std::atan((Square(config.n4) / Square(config.n1)) * ky_value * eta4) -
+                   static_cast<double>(config.q) * kPi;
+        };
 
-                return kx_value * config.a +
-                       std::atan((Square(config.n3) / Square(config.n1)) * kx_value * xi3) +
-                       std::atan((Square(config.n5) / Square(config.n1)) * kx_value * xi5) -
-                       static_cast<double>(config.p) * kPi;
-            };
+        root_x = SolveExactRootWithStatus(
+            fx,
+            SafeUpperBound(kPi / result.A3, kPi / result.A5)
+        );
+        root_y = SolveExactRootWithStatus(
+            fy,
+            SafeUpperBound(kPi / result.A2, kPi / result.A4)
+        );
+        result.equations_used = "(6), (7), (8), (9), (10)";
+    } else {
+        const auto fx = [&](double kx_value) {
+            const double xi3 = PenetrationDepth(result.A3, kx_value);
+            const double xi5 = PenetrationDepth(result.A5, kx_value);
 
-            const auto fy = [&](double ky_value) {
-                const double eta2 = PenetrationDepth(result.A2, ky_value);
-                const double eta4 = PenetrationDepth(result.A4, ky_value);
+            return kx_value * config.a +
+                   std::atan((Square(config.n3) / Square(config.n1)) * kx_value * xi3) +
+                   std::atan((Square(config.n5) / Square(config.n1)) * kx_value * xi5) -
+                   static_cast<double>(config.p) * kPi;
+        };
 
-                return ky_value * config.b +
-                       std::atan(ky_value * eta2) +
-                       std::atan(ky_value * eta4) -
-                       static_cast<double>(config.q) * kPi;
-            };
+        const auto fy = [&](double ky_value) {
+            const double eta2 = PenetrationDepth(result.A2, ky_value);
+            const double eta4 = PenetrationDepth(result.A4, ky_value);
 
-            result.kx = SolveExactRoot(
-                fx,
-                SafeUpperBound(kPi / result.A3, kPi / result.A5)
-            );
-            result.ky = SolveExactRoot(
-                fy,
-                SafeUpperBound(kPi / result.A2, kPi / result.A4)
-            );
-            result.equations_used = "(20), (21), (18), (19), (10)";
-        }
-    } catch (const std::runtime_error&) {
+            return ky_value * config.b +
+                   std::atan(ky_value * eta2) +
+                   std::atan(ky_value * eta4) -
+                   static_cast<double>(config.q) * kPi;
+        };
+
+        root_x = SolveExactRootWithStatus(
+            fx,
+            SafeUpperBound(kPi / result.A3, kPi / result.A5)
+        );
+        root_y = SolveExactRootWithStatus(
+            fy,
+            SafeUpperBound(kPi / result.A2, kPi / result.A4)
+        );
+        result.equations_used = "(20), (21), (18), (19), (10)";
+    }
+
+    if (root_x.status == RootSearchStatus::kOutsideDomain ||
+        root_y.status == RootSearchStatus::kOutsideDomain) {
         result.kx = NaN();
         result.ky = NaN();
-        InvalidateResult(result, "outside_exact_domain");
+        SetUnavailableResult(result, "outside_exact_domain", false);
         return result;
     }
+
+    if (root_x.status == RootSearchStatus::kBelowCutoff ||
+        root_y.status == RootSearchStatus::kBelowCutoff) {
+        result.kx = NaN();
+        result.ky = NaN();
+        SetUnavailableResult(result, "below_cutoff", true);
+        return result;
+    }
+
+    result.kx = root_x.root;
+    result.ky = root_y.root;
 
     result.approximation_checks.kx_a3_over_pi_squared =
         Square(result.kx * result.A3 / kPi);
@@ -402,15 +476,19 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
     const double eta4_argument =
         Square(kPi / result.A4) - Square(result.ky);
 
-    const bool domain_valid =
-        IsFiniteNumber(kz_squared) && kz_squared >= 0.0 &&
+    const bool decay_domain_valid =
         IsFiniteNumber(xi3_argument) && xi3_argument > 0.0 &&
         IsFiniteNumber(xi5_argument) && xi5_argument > 0.0 &&
         IsFiniteNumber(eta2_argument) && eta2_argument > 0.0 &&
         IsFiniteNumber(eta4_argument) && eta4_argument > 0.0;
 
-    if (!domain_valid) {
-        InvalidateResult(result, "outside_exact_domain");
+    if (!(IsFiniteNumber(kz_squared)) || !decay_domain_valid) {
+        SetUnavailableResult(result, "outside_exact_domain", false);
+        return result;
+    }
+
+    if (kz_squared < 0.0) {
+        SetUnavailableResult(result, "below_cutoff", true);
         return result;
     }
 

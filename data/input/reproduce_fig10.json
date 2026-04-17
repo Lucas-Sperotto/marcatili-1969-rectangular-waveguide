@@ -9,13 +9,13 @@
     "exact",
     "closed_form"
   ],
-  "a_over_A5_values": [
-    "0.5",
-    "0.75",
-    "1.0",
-    "1.5",
-    "2.0",
-    "3.0",
-    "4.0"
+  "curves": [
+    {"a_over_A5": 0.5, "curve_id": "a_over_A5=0.5", "label": "0.5"},
+    {"a_over_A5": 0.75, "curve_id": "a_over_A5=0.75", "label": "0.75"},
+    {"a_over_A5": 1.0, "curve_id": "a_over_A5=1", "label": "1"},
+    {"a_over_A5": 1.5, "curve_id": "a_over_A5=1.5", "label": "1.5"},
+    {"a_over_A5": 2.0, "curve_id": "a_over_A5=2", "label": "2"},
+    {"a_over_A5": 3.0, "curve_id": "a_over_A5=3", "label": "3"},
+    {"a_over_A5": 4.0, "curve_id": "a_over_A5=4", "label": "4"}
   ]
 }

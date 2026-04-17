@@ -50,6 +50,12 @@ struct CouplerPointConfig {
     // Relação auxiliar do caso simétrico: r = (n_5 / n_1)^2.
     // Necessária para Eq. (20) e para a aproximação correspondente.
     double index_ratio_squared = 0.0;
+
+    // Entradas dimensionais opcionais. Quando presentes, permitem recuperar
+    // A5, a, c, |K| e L a partir da forma normalizada de Eq. (34).
+    double wavelength = 0.0;
+    double n1 = 0.0;
+    double n5 = 0.0;
 };
 
 /**
@@ -58,7 +64,10 @@ struct CouplerPointConfig {
 struct CouplerPointResult {
     CouplerPointConfig config;
     bool domain_valid = false;
+    bool transverse_root_found = false;
+    bool dimensional_outputs_available = false;
     std::string status;
+    std::string status_class;
     std::string equations_used;
 
     double a_over_A5 = 0.0;
@@ -66,6 +75,17 @@ struct CouplerPointResult {
     double kx_A5_over_pi = 0.0;
     double sqrt_one_minus_kx_A5_over_pi_squared = 0.0;
     double normalized_coupling = 0.0;
+
+    double A5 = 0.0;
+    double a = 0.0;
+    double c = 0.0;
+    double k0 = 0.0;
+    double k1 = 0.0;
+    double k5 = 0.0;
+    double kx = 0.0;
+    double kz = 0.0;
+    double coupling_magnitude = 0.0;
+    double full_transfer_length = 0.0;
 };
 
 /**

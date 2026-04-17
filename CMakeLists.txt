@@ -116,6 +116,17 @@ if(BUILD_TESTING)
     # Garante que o diretório de saída dos testes exista
     file(MAKE_DIRECTORY "${MARCATILI_TEST_OUTPUT_DIR}")
 
+    add_executable(
+        marcatili_regression_checks
+        tests/regression_checks.cpp
+    )
+    target_link_libraries(marcatili_regression_checks PRIVATE marcatili_core)
+    target_compile_definitions(
+        marcatili_regression_checks
+        PRIVATE
+            MARCATILI_PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
+    )
+
     marcatili_add_smoke_test(
         solve_single_guide_smoke
         solve_single_guide
@@ -184,5 +195,10 @@ if(BUILD_TESTING)
         reproduce_table1
         "${PROJECT_SOURCE_DIR}/data/input/reproduce_table1.json"
         "${MARCATILI_TEST_OUTPUT_DIR}/reproduce_table1.json"
+    )
+
+    add_test(
+        NAME regression_checks
+        COMMAND marcatili_regression_checks
     )
 endif()

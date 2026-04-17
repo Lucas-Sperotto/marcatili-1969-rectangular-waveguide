@@ -416,6 +416,13 @@ std::string BuildTable1JsonReport(
         );
         AppendJsonField(
             json,
+            "limiting_cutoff_status",
+            JsonStringOrNull(row.limiting_cutoff_status),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
             "limiting_mode_id",
             JsonStringOrNull(row.limiting_mode_id),
             true,
@@ -488,7 +495,7 @@ std::string BuildTable1SummaryCsvReport(const marcatili::Table1Result& result) {
 
     csv << "case_id,table_entry_interpretation,row_id,article_panel_id,solver_model,a_over_b,n1,n2,n3,n4,n5,"
            "article_dimension_normalized,computed_dimension_normalized,computed_b_normalized,computed_a_normalized,computed_b_over_A4,"
-           "absolute_error,relative_error,limiting_cutoff_found,limiting_mode_id,"
+           "absolute_error,relative_error,limiting_cutoff_found,limiting_cutoff_status,limiting_mode_id,"
            "limiting_mode_family,limiting_p,limiting_q,ex11_guided_just_below_cutoff,"
            "ey11_guided_just_below_cutoff\n";
 
@@ -512,6 +519,7 @@ std::string BuildTable1SummaryCsvReport(const marcatili::Table1Result& result) {
             << CsvNumber(row.absolute_error) << ","
             << CsvNumber(row.relative_error) << ","
             << (row.limiting_cutoff_found ? "1" : "0") << ","
+            << EscapeCsv(row.limiting_cutoff_status) << ","
             << EscapeCsv(row.limiting_mode_id) << ","
             << EscapeCsv(ToString(row.limiting_family)) << ","
             << row.limiting_p << ","
@@ -527,7 +535,8 @@ std::string BuildTable1DetailsCsvReport(const marcatili::Table1Result& result) {
     std::ostringstream csv;
 
     csv << "case_id,table_entry_interpretation,row_id,article_panel_id,solver_model,mode_id,mode_family,p,q,"
-           "cutoff_found,cutoff_b_normalized,cutoff_a_normalized,cutoff_b_over_A4\n";
+           "cutoff_found,guided_at_search_min,guided_at_search_max,guided_in_search_window,cutoff_status,"
+           "cutoff_b_normalized,cutoff_a_normalized,cutoff_b_over_A4\n";
 
     for (const auto& cutoff : result.mode_cutoffs) {
         csv << EscapeCsv(result.config.case_id) << ","
@@ -540,6 +549,10 @@ std::string BuildTable1DetailsCsvReport(const marcatili::Table1Result& result) {
             << cutoff.p << ","
             << cutoff.q << ","
             << (cutoff.cutoff_found ? "1" : "0") << ","
+            << (cutoff.guided_at_search_min ? "1" : "0") << ","
+            << (cutoff.guided_at_search_max ? "1" : "0") << ","
+            << (cutoff.guided_in_search_window ? "1" : "0") << ","
+            << EscapeCsv(cutoff.cutoff_status) << ","
             << CsvNumber(cutoff.cutoff_b_normalized) << ","
             << CsvNumber(cutoff.cutoff_a_normalized) << ","
             << CsvNumber(cutoff.cutoff_b_over_A4) << "\n";

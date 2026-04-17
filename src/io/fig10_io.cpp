@@ -140,11 +140,25 @@ void AppendJsonField(
 }
 
 std::vector<marcatili::Figure10CurveSpec> ParseCurveSpecs(const std::string& json_text) {
+    const auto curve_objects = FindObjectArrayValues(json_text, "curves");
+    if (!curve_objects.empty()) {
+        std::vector<marcatili::Figure10CurveSpec> curves;
+        curves.reserve(curve_objects.size());
+
+        for (const auto& curve_object : curve_objects) {
+            marcatili::Figure10CurveSpec curve;
+            curve.a_over_A5 = RequireDoubleValue(curve_object, "a_over_A5");
+            curve.curve_id = FindStringValue(curve_object, "curve_id").value_or("");
+            curve.label = FindStringValue(curve_object, "label").value_or("");
+            curves.push_back(curve);
+        }
+
+        return curves;
+    }
+
     const auto curve_texts = FindStringArrayWithFallback(json_text, "curves", "a_over_A5_values");
     if (curve_texts.empty()) {
-        throw std::runtime_error(
-            "Missing required string-array key: curves (or a_over_A5_values)"
-        );
+        throw std::runtime_error("Missing required key: curves (objects or strings).");
     }
 
     std::vector<marcatili::Figure10CurveSpec> curves;

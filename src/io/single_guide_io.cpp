@@ -147,6 +147,7 @@ std::string BuildSingleGuideJsonReport(
 
     AppendJsonField(json, "app", "\"solve_single_guide\"");
     AppendJsonField(json, "status", "\"" + EscapeJson(result.status) + "\"");
+    AppendJsonField(json, "status_class", "\"" + EscapeJson(result.status_class) + "\"");
     AppendJsonField(
         json,
         "model",
@@ -218,6 +219,20 @@ std::string BuildSingleGuideJsonReport(
         json,
         "kz_normalized_against_n4",
         JsonNumberOrNull(result.kz_normalized_against_n4),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "critical_external_index",
+        JsonNumberOrNull(result.critical_external_index),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "critical_external_wave_number",
+        JsonNumberOrNull(result.critical_external_wave_number),
         false,
         4
     );
@@ -262,9 +277,9 @@ std::string BuildSingleGuideCsvReport(const marcatili::SingleGuideResult& result
     std::ostringstream csv;
 
     csv << "case_id,solver_model,mode_family,p,q,wavelength,a,b,n1,n2,n3,n4,n5,"
-           "guided,domain_valid,k0,k1,k2,k3,k4,k5,"
+           "status,status_class,guided,domain_valid,k0,k1,k2,k3,k4,k5,"
            "A2,A3,A4,A5,kx,ky,kz,xi3,xi5,eta2,eta4,"
-           "b_over_A4,kz_normalized_against_n4,"
+           "b_over_A4,kz_normalized_against_n4,critical_external_index,critical_external_wave_number,"
            "kx_A3_over_pi_squared,kx_A5_over_pi_squared,"
            "ky_A2_over_pi_squared,ky_A4_over_pi_squared\n";
 
@@ -281,6 +296,8 @@ std::string BuildSingleGuideCsvReport(const marcatili::SingleGuideResult& result
         << CsvNumber(result.config.n3) << ","
         << CsvNumber(result.config.n4) << ","
         << CsvNumber(result.config.n5) << ","
+        << EscapeCsv(result.status) << ","
+        << EscapeCsv(result.status_class) << ","
         << (result.guided ? "1" : "0") << ","
         << (result.domain_valid ? "1" : "0") << ","
         << CsvNumber(result.k0) << ","
@@ -302,6 +319,8 @@ std::string BuildSingleGuideCsvReport(const marcatili::SingleGuideResult& result
         << CsvNumber(result.eta4) << ","
         << CsvNumber(result.b_over_A4) << ","
         << CsvNumber(result.kz_normalized_against_n4) << ","
+        << CsvNumber(result.critical_external_index) << ","
+        << CsvNumber(result.critical_external_wave_number) << ","
         << CsvNumber(result.approximation_checks.kx_a3_over_pi_squared) << ","
         << CsvNumber(result.approximation_checks.kx_a5_over_pi_squared) << ","
         << CsvNumber(result.approximation_checks.ky_a2_over_pi_squared) << ","

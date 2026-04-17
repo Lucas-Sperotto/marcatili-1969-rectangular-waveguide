@@ -20,6 +20,10 @@ bool IsFiniteNumber(double value) {
     return std::isfinite(value);
 }
 
+bool IsPhysicalBelowCutoff(const SingleGuideResult& result) {
+    return result.status == "below_cutoff";
+}
+
 void ValidateRowSpec(const Table1Config& config, const Table1RowSpec& row) {
     if (row.row_id.empty()) {
         throw std::invalid_argument(
@@ -207,14 +211,30 @@ Table1ModeCutoff FindModeCutoff(
 
     const double lower = config.search.b_normalized_min;
     const double upper = config.search.b_normalized_max;
+    SingleGuideResult lower_result;
+    SingleGuideResult upper_result;
+    cutoff.guided_at_search_min =
+        EvaluateGuidance(config, row, solver_model, family, p, q, lower, &lower_result);
+    cutoff.guided_at_search_max =
+        EvaluateGuidance(config, row, solver_model, family, p, q, upper, &upper_result);
 
     // A busca assume monotonicidade qualitativa: ao afinar o guia,
     // modos superiores deixam de ser guiados.
-    if (EvaluateGuidance(config, row, solver_model, family, p, q, lower, nullptr)) {
-        cutoff.cutoff_found = true;
-        cutoff.cutoff_b_normalized = lower;
-    } else if (!EvaluateGuidance(config, row, solver_model, family, p, q, upper, nullptr)) {
+    if (cutoff.guided_at_search_min) {
         cutoff.cutoff_found = false;
+        cutoff.guided_in_search_window = true;
+        cutoff.cutoff_status = "below_search_min";
+        cutoff.cutoff_b_normalized = NaN();
+        cutoff.cutoff_a_normalized = NaN();
+        cutoff.cutoff_b_over_A4 = NaN();
+        return cutoff;
+    } else if (!cutoff.guided_at_search_max) {
+        cutoff.cutoff_found = false;
+        cutoff.guided_in_search_window = false;
+        cutoff.cutoff_status =
+            IsPhysicalBelowCutoff(upper_result)
+                ? "above_search_max"
+                : "not_guided_in_search_window";
         cutoff.cutoff_b_normalized = NaN();
         cutoff.cutoff_a_normalized = NaN();
         cutoff.cutoff_b_over_A4 = NaN();
@@ -238,6 +258,8 @@ Table1ModeCutoff FindModeCutoff(
         }
 
         cutoff.cutoff_found = true;
+        cutoff.guided_in_search_window = true;
+        cutoff.cutoff_status = "found";
         cutoff.cutoff_b_normalized = right;
     }
 
@@ -265,6 +287,7 @@ Table1RowSummary BuildInitialRowSummary(
     summary.n5 = row.n5;
 
     summary.article_dimension_normalized = row.article_dimension_normalized;
+    summary.limiting_cutoff_status = "not_guided_in_search_window";
     summary.computed_dimension_normalized = NaN();
     summary.computed_b_normalized = NaN();
     summary.computed_a_normalized = NaN();
@@ -282,11 +305,16 @@ void FinalizeSummaryFromBestMode(
     const Table1ModeCutoff& best_mode,
     Table1RowSummary& summary
 ) {
-    summary.limiting_cutoff_found = true;
+    summary.limiting_cutoff_found = best_mode.cutoff_found;
+    summary.limiting_cutoff_status = best_mode.cutoff_status;
     summary.limiting_mode_id = best_mode.mode_id;
     summary.limiting_family = best_mode.family;
     summary.limiting_p = best_mode.p;
     summary.limiting_q = best_mode.q;
+
+    if (!best_mode.cutoff_found) {
+        return;
+    }
 
     summary.computed_b_normalized = best_mode.cutoff_b_normalized;
     summary.computed_a_normalized = best_mode.cutoff_a_normalized;
@@ -350,6 +378,10 @@ Table1Result SolveTable1(const Table1Config& config) {
 
             double best_cutoff = std::numeric_limits<double>::infinity();
             Table1ModeCutoff best_mode;
+            bool best_mode_selected = false;
+            bool any_below_search_min = false;
+            bool any_above_search_max = false;
+            bool any_not_guided = false;
 
             for (int p = 1; p <= config.search.max_p; ++p) {
                 for (int q = 1; q <= config.search.max_q; ++q) {
@@ -363,16 +395,36 @@ Table1Result SolveTable1(const Table1Config& config) {
 
                         result.mode_cutoffs.push_back(cutoff);
 
+                        if (cutoff.cutoff_status == "below_search_min" &&
+                            !any_below_search_min) {
+                            best_mode = cutoff;
+                            best_mode_selected = true;
+                            any_below_search_min = true;
+                        }
+
+                        if (cutoff.cutoff_status == "above_search_max") {
+                            any_above_search_max = true;
+                        }
+
+                        if (cutoff.cutoff_status == "not_guided_in_search_window") {
+                            any_not_guided = true;
+                        }
+
+                        if (any_below_search_min) {
+                            continue;
+                        }
+
                         if (cutoff.cutoff_found &&
                             cutoff.cutoff_b_normalized < best_cutoff) {
                             best_cutoff = cutoff.cutoff_b_normalized;
                             best_mode = cutoff;
+                            best_mode_selected = true;
                         }
                     }
                 }
             }
 
-            if (std::isfinite(best_cutoff)) {
+            if (best_mode_selected) {
                 FinalizeSummaryFromBestMode(
                     config,
                     row,
@@ -380,6 +432,8 @@ Table1Result SolveTable1(const Table1Config& config) {
                     best_mode,
                     summary
                 );
+            } else if (any_above_search_max && !any_not_guided) {
+                summary.limiting_cutoff_status = "above_search_max";
             }
 
             result.row_summaries.push_back(summary);

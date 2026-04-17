@@ -10,7 +10,12 @@
     "a_over_A5": 1.6,
     "c_over_a": 2.5
   },
+  "geometry": {
+    "wavelength": 1.0e-6
+  },
   "materials": {
+    "n1": 1.8,
+    "n5": 1.5,
     "n1_over_n5": 1.5
   }
 }

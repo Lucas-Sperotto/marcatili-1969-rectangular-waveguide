@@ -167,6 +167,18 @@ marcatili::CouplerPointConfig ParseCouplerPointConfig(
         config.index_ratio_squared = 0.0;
     }
 
+    config.wavelength =
+        FindDoubleWithFallback(json_text, "geometry.wavelength", "wavelength").value_or(0.0);
+    config.n1 = FindDoubleWithFallback(json_text, "materials.n1", "n1").value_or(0.0);
+    config.n5 = FindDoubleWithFallback(json_text, "materials.n5", "n5").value_or(0.0);
+
+    if (!(config.index_ratio_squared > 0.0) &&
+        config.n1 > 0.0 &&
+        config.n5 > 0.0 &&
+        config.n1 > config.n5) {
+        config.index_ratio_squared = (config.n5 * config.n5) / (config.n1 * config.n1);
+    }
+
     return config;
 }
 
@@ -180,6 +192,7 @@ std::string BuildCouplerPointJsonReport(
 
     AppendJsonField(json, "app", "\"solve_coupler\"");
     AppendJsonField(json, "status", "\"" + EscapeJson(result.status) + "\"");
+    AppendJsonField(json, "status_class", "\"" + EscapeJson(result.status_class) + "\"");
     AppendJsonField(
         json,
         "model",
@@ -197,6 +210,16 @@ std::string BuildCouplerPointJsonReport(
     AppendJsonField(json, "case_id", "\"" + EscapeJson(result.config.case_id) + "\"");
     AppendJsonField(json, "article_target", JsonStringOrNull(result.config.article_target));
     AppendJsonField(json, "domain_valid", result.domain_valid ? "true" : "false");
+    AppendJsonField(
+        json,
+        "transverse_root_found",
+        result.transverse_root_found ? "true" : "false"
+    );
+    AppendJsonField(
+        json,
+        "dimensional_outputs_available",
+        result.dimensional_outputs_available ? "true" : "false"
+    );
 
     json << "  \"normalized_inputs\": {\n";
     AppendJsonField(json, "p", std::to_string(result.config.p), true, 4);
@@ -231,13 +254,44 @@ std::string BuildCouplerPointJsonReport(
     );
     json << "  },\n";
 
+    json << "  \"dimensional_inputs\": {\n";
+    AppendJsonField(json, "wavelength", JsonNumberOrNull(result.config.wavelength), true, 4);
+    AppendJsonField(json, "n1", JsonNumberOrNull(result.config.n1), true, 4);
+    AppendJsonField(json, "n5", JsonNumberOrNull(result.config.n5), false, 4);
+    json << "  },\n";
+
+    json << "  \"dimensional_outputs\": {\n";
+    AppendJsonField(json, "A5", JsonNumberOrNull(result.A5), true, 4);
+    AppendJsonField(json, "a", JsonNumberOrNull(result.a), true, 4);
+    AppendJsonField(json, "c", JsonNumberOrNull(result.c), true, 4);
+    AppendJsonField(json, "k0", JsonNumberOrNull(result.k0), true, 4);
+    AppendJsonField(json, "k1", JsonNumberOrNull(result.k1), true, 4);
+    AppendJsonField(json, "k5", JsonNumberOrNull(result.k5), true, 4);
+    AppendJsonField(json, "kx", JsonNumberOrNull(result.kx), true, 4);
+    AppendJsonField(json, "kz", JsonNumberOrNull(result.kz), true, 4);
+    AppendJsonField(
+        json,
+        "coupling_magnitude",
+        JsonNumberOrNull(result.coupling_magnitude),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "full_transfer_length",
+        JsonNumberOrNull(result.full_transfer_length),
+        false,
+        4
+    );
+    json << "  },\n";
+
     AppendJsonField(
         json,
         "note",
         JsonStringOrNull(
-            "This executable currently solves the normalized coupling model from Eq. (34). "
-            "Computing dimensional |K| and L requires additional dimensional inputs tied to "
-            "kz normalization."
+            "This executable always reports the normalized Eq. (34) model. "
+            "When wavelength, n1 and n5 are also provided, it additionally reconstructs "
+            "A5, a, c, |K| and L using the same reduced transverse model."
         ),
         false
     );
@@ -250,8 +304,10 @@ std::string BuildCouplerPointCsvReport(const marcatili::CouplerPointResult& resu
     std::ostringstream csv;
 
     csv << "case_id,solver_model,transverse_equation,p,a_over_A5,c_over_a,c_over_A5,"
-           "index_ratio_squared,kx_A5_over_pi,sqrt_one_minus_kx_A5_over_pi_squared,"
-           "normalized_coupling,domain_valid,status,equations_used\n";
+           "index_ratio_squared,wavelength,n1,n5,transverse_root_found,dimensional_outputs_available,"
+           "kx_A5_over_pi,sqrt_one_minus_kx_A5_over_pi_squared,normalized_coupling,"
+           "A5,a,c,k0,k1,k5,kx,kz,coupling_magnitude,full_transfer_length,"
+           "domain_valid,status,status_class,equations_used\n";
 
     csv << EscapeCsv(result.config.case_id) << ","
         << EscapeCsv(ToString(result.config.solver_model)) << ","
@@ -261,11 +317,27 @@ std::string BuildCouplerPointCsvReport(const marcatili::CouplerPointResult& resu
         << CsvNumber(result.config.c_over_a) << ","
         << CsvNumber(result.c_over_A5) << ","
         << CsvNumber(result.config.index_ratio_squared) << ","
+        << CsvNumber(result.config.wavelength) << ","
+        << CsvNumber(result.config.n1) << ","
+        << CsvNumber(result.config.n5) << ","
+        << (result.transverse_root_found ? "1" : "0") << ","
+        << (result.dimensional_outputs_available ? "1" : "0") << ","
         << CsvNumber(result.kx_A5_over_pi) << ","
         << CsvNumber(result.sqrt_one_minus_kx_A5_over_pi_squared) << ","
         << CsvNumber(result.normalized_coupling) << ","
+        << CsvNumber(result.A5) << ","
+        << CsvNumber(result.a) << ","
+        << CsvNumber(result.c) << ","
+        << CsvNumber(result.k0) << ","
+        << CsvNumber(result.k1) << ","
+        << CsvNumber(result.k5) << ","
+        << CsvNumber(result.kx) << ","
+        << CsvNumber(result.kz) << ","
+        << CsvNumber(result.coupling_magnitude) << ","
+        << CsvNumber(result.full_transfer_length) << ","
         << (result.domain_valid ? "1" : "0") << ","
         << EscapeCsv(result.status) << ","
+        << EscapeCsv(result.status_class) << ","
         << EscapeCsv(result.equations_used) << "\n";
 
     return csv.str();

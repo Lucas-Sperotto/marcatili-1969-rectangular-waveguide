@@ -73,6 +73,7 @@ struct SingleGuideResult {
     bool guided = false;
 
     std::string status;
+    std::string status_class;
     std::string equations_used;
 
     double k0 = 0.0;
@@ -98,6 +99,8 @@ struct SingleGuideResult {
 
     double b_over_A4 = 0.0;
     double kz_normalized_against_n4 = 0.0;
+    double critical_external_index = 0.0;
+    double critical_external_wave_number = 0.0;
 
     SingleGuideApproximationChecks approximation_checks;
 };
