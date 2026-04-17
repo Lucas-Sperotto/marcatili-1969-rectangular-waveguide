@@ -191,23 +191,24 @@ Essa opção de arquitetura facilita:
 - revisão científica;
 - rastreabilidade artigo $\to$ código.
 
-## Como os scripts `run/*.sh` se encaixam
+## Como o `run.sh` se encaixa
 
-Os scripts em `scripts/run/` automatizam a rotina do projeto.
+O script `scripts/run.sh` automatiza a rotina do projeto.
 
 Os principais papéis são:
 
-- `build.sh`: configurar e compilar;
-- `clean.sh`: limpar artefatos;
-- `reproduce_all.sh`: rodar todos os casos principais;
-- `clean_build_reproduce_all.sh`: pipeline único de limpeza, build e reprodução;
-- `build_fig*_article_comparison.sh`: montar comparações artigo $\times$ reprodução.
+- `build`: configurar e compilar;
+- `clean`: limpar artefatos;
+- `fig6`, `fig7`, `fig8`, `fig10`, `fig11`: gerar figuras individuais;
+- `reproduce`: rodar todos os casos principais;
+- `check`: verificar os artefatos obrigatorios;
+- `full`: pipeline único de limpeza, build, reprodução e verificação.
 
 Ou seja, o shell coordena a execução, mas não substitui o núcleo científico.
 
 ## Como os scripts Python se encaixam
 
-Os scripts `plot_fig*.py` e `compare_fig*.py` ficam fora do C++ por uma razão importante:
+Os scripts `plot_fig*.py` ficam fora do C++ por uma razão importante:
 
 - o C++ produz dados;
 - o Python produz visualização.

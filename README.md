@@ -2,7 +2,7 @@
 
 Repositório em **C++17** para reproduzir, de forma didática e reprodutível, o artigo **“Dielectric Rectangular Waveguide and Directional Coupler for Integrated Optics”** (Marcatili, 1969).
 
-O foco do projeto é ligar, de maneira clara, três camadas:
+O foco do projeto é conectar, de maneira clara, três camadas:
 
 - **artigo original**;
 - **documentação técnica e pedagógica**;
@@ -28,7 +28,7 @@ Uma sequência recomendada para entender o projeto é:
 2. abrir os arquivos de entrada em `data/input/`;
 3. ler os executáveis em `src/apps/`;
 4. descer para `src/io/`, `src/math/` e `src/physics/`;
-5. por fim, ver os scripts de plot em `scripts/`.
+5. por fim, examinar os scripts de plot em `scripts/`.
 
 Documentos recomendados para a trilha técnica:
 
@@ -41,7 +41,7 @@ Documentos recomendados para a trilha técnica:
 
 ## Tradução do artigo
 
-A tradução e organização comentada do artigo estão distribuídas nos arquivos abaixo:
+A tradução e a organização comentada do artigo estão distribuídas nos arquivos abaixo:
 
 - [Resumo inicial](docs/00_resumo.md)
 - [1. Introduction](docs/01_introduction.md)
@@ -73,8 +73,7 @@ Referências de apoio:
 - `include/`: cabeçalhos do núcleo C++;
 - `src/`: implementação compartilhada;
 - `src/apps/`: executáveis;
-- `scripts/`: scripts Python e automações;
-- `scripts/run/`: build, limpeza e reprodução;
+- `scripts/`: scripts Python de plot e um `run.sh` único para build, limpeza, reprodução e verificação;
 - `tests/`: testes e verificações.
 
 ## Estado atual dos executáveis
@@ -88,56 +87,40 @@ Referências de apoio:
 - `reproduce_fig11`: reproduz a curva de acoplamento da Fig. 11;
 - `reproduce_table1`: compara as dimensões monomodo da Tabela I com os cálculos do repositório.
 
-## Execução rápida
-
-Todos os executáveis recebem um arquivo de entrada.
-
-```bash
-./build/bin/solve_single_guide data/input/solve_single_guide.json
-./build/bin/solve_coupler data/input/solve_coupler.json data/output/solve_coupler.json
-
-./build/bin/reproduce_fig6 data/input/reproduce_fig6.json data/output/reproduce_fig6.json
-./scripts/plot_fig6.py data/output/reproduce_fig6.csv -o data/output/reproduce_fig6.png
-
-./build/bin/reproduce_fig7 data/input/reproduce_fig7.json data/output/reproduce_fig7.json
-./scripts/plot_fig7.py data/output/reproduce_fig7.lines.csv --intersections-csv data/output/reproduce_fig7.intersections.csv -o data/output/reproduce_fig7.png
-
-./build/bin/reproduce_fig8 data/input/reproduce_fig8.json data/output/reproduce_fig8.json
-./scripts/plot_fig8.py data/output/reproduce_fig8.csv -o data/output/reproduce_fig8.png
-
-./build/bin/reproduce_fig10 data/input/reproduce_fig10.json data/output/reproduce_fig10.json
-./scripts/plot_fig10.py data/output/reproduce_fig10.csv -o data/output/reproduce_fig10.png
-
-./build/bin/reproduce_fig11 data/input/reproduce_fig11.json data/output/reproduce_fig11.json
-./scripts/plot_fig11.py data/output/reproduce_fig11.csv -o data/output/reproduce_fig11.png
-````
-
 ## Build e automação
 
 ```bash
-./scripts/run/build.sh
-./scripts/run/clean_build_reproduce_all.sh
-./scripts/run/reproduce_all.sh
-./scripts/run/reproduce_fig6_panels.sh
-./scripts/run/reproduce_fig7_nomogram.sh
-./scripts/run/reproduce_fig8_case.sh
-./scripts/run/reproduce_fig10_case.sh
-./scripts/run/reproduce_fig11_case.sh
-./scripts/run/check_reproduction.sh
-./scripts/run/clean.sh
-```
+./scripts/run.sh build
+./scripts/run.sh fig6
+./scripts/run.sh fig7
+./scripts/run.sh fig8
+./scripts/run.sh fig10
+./scripts/run.sh fig11
+./scripts/run.sh reproduce
+./scripts/run.sh check
+./scripts/run.sh full
+./scripts/run.sh clean
+````
 
 Para remover também saídas rastreadas pelo Git:
 
 ```bash
-CLEAN_TRACKED_OUTPUT=1 ./scripts/run/clean.sh
+CLEAN_TRACKED_OUTPUT=1 ./scripts/run.sh clean
 ```
 
 Para executar os smoke tests registrados no `CTest`:
 
 ```bash
-RUN_TESTS=1 ./scripts/run/build.sh
+RUN_TESTS=1 ./scripts/run.sh build
 ```
+
+## Imagens geradas
+
+O fluxo atual gera apenas as imagens finais do projeto:
+
+* Fig. 6 em painéis individuais em `data/output/fig6/`, com rótulos `(a)`, `(b)`, ...;
+* Figs. 7, 8, 10 e 11 diretamente em `data/output/*.png`;
+* sem montagens de comparação `article_compare` e sem variantes `article_style`.
 
 ## `closed_form` e `exact`
 
@@ -167,10 +150,10 @@ Veja também: [docs/11_closed_form_vs_exact.md](docs/11_closed_form_vs_exact.md)
 
 Uma leitura prática do projeto pode seguir esta correspondência:
 
-* **Seções 2 e 3 do artigo** → `solve_single_guide`, `reproduce_fig6`, `reproduce_fig7`, `reproduce_fig8`
-* **Seção 4 do artigo** → `solve_coupler`, `reproduce_fig10`, `reproduce_fig11`
-* **Tabela I** → `reproduce_table1`
-* **Apêndice A** → base matemática do acoplador e das equações transcendentais
+* **Seções 2 e 3 do artigo** → `solve_single_guide`, `reproduce_fig6`, `reproduce_fig7`, `reproduce_fig8`;
+* **Seção 4 do artigo** → `solve_coupler`, `reproduce_fig10`, `reproduce_fig11`;
+* **Tabela I** → `reproduce_table1`;
+* **Apêndice A** → base matemática do acoplador e das equações transcendentais.
 
 ## Estado de reprodução
 

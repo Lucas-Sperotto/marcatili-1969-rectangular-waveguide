@@ -140,8 +140,8 @@ if(BUILD_TESTING)
     marcatili_add_smoke_test(
         reproduce_fig6_smoke
         reproduce_fig6
-        "${PROJECT_SOURCE_DIR}/data/input/reproduce_fig6.json"
-        "${MARCATILI_TEST_OUTPUT_DIR}/reproduce_fig6.json"
+        "${PROJECT_SOURCE_DIR}/data/input/fig6/SG-006h.json"
+        "${MARCATILI_TEST_OUTPUT_DIR}/reproduce_fig6_rectangular.json"
     )
 
     marcatili_add_smoke_test(

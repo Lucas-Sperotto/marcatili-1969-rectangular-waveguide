@@ -1,7 +1,7 @@
 {
   "app": "reproduce_fig6",
   "status": "ok",
-  "model": "closed_form_approximation",
+  "app_model": "figure6_sweep",
   "input_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/input/fig6/SG-006a.json",
   "output_json_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/fig6/SG-006a.json",
   "output_csv_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/fig6/SG-006a.csv",

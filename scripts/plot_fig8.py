@@ -6,7 +6,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -14,6 +16,29 @@ from matplotlib.lines import Line2D
 
 X_TICKS = [0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.6, 4.0]
 Y_TICKS = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+
+REQUIRED_COLUMNS = {
+    "case_id",
+    "curve_id",
+    "solver_model",
+    "mode_family",
+    "p",
+    "q",
+    "a_over_A",
+    "kz_normalized_against_n4",
+}
+
+
+@dataclass(frozen=True)
+class CurvePoint:
+    case_id: str
+    curve_id: str
+    solver_model: str
+    mode_family: str
+    p: int
+    q: int
+    a_over_A: float
+    kz_normalized_against_n4: float
 
 
 def parse_args() -> argparse.Namespace:
@@ -36,49 +61,78 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def mode_label(row: dict[str, str]) -> str:
-    superscript = "y" if row["mode_family"] == "E_y" else "x"
-    return rf"$E^{{{superscript}}}_{{{row['p']}{row['q']}}}$"
+def validate_columns(fieldnames: list[str] | None) -> None:
+    if not fieldnames:
+        raise ValueError("CSV file is empty or missing a header row.")
+
+    missing = REQUIRED_COLUMNS.difference(fieldnames)
+    if missing:
+        missing_text = ", ".join(sorted(missing))
+        raise ValueError(f"CSV is missing required columns: {missing_text}")
 
 
-def curve_sort_key(rows: list[dict[str, str]]) -> tuple[int, int, int]:
-    family_order = 0 if rows[0]["mode_family"] == "E_y" else 1
-    return (int(rows[0]["p"]), int(rows[0]["q"]), family_order)
+def mode_label(point: CurvePoint) -> str:
+    superscript = "y" if point.mode_family == "E_y" else "x"
+    return rf"$E^{{{superscript}}}_{{{point.p}{point.q}}}$"
 
 
-def load_curves(csv_path: Path) -> tuple[str, dict[tuple[str, str], list[dict[str, str]]]]:
-    grouped: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+def curve_sort_key(rows: list[CurvePoint]) -> tuple[int, int, int]:
+    family_order = 0 if rows[0].mode_family == "E_y" else 1
+    return (rows[0].p, rows[0].q, family_order)
+
+
+def parse_curve_point(row: dict[str, str]) -> CurvePoint | None:
+    y_value = float(row["kz_normalized_against_n4"])
+    if math.isnan(y_value) or y_value < 0.0 or y_value > 1.0:
+        return None
+
+    return CurvePoint(
+        case_id=row["case_id"],
+        curve_id=row["curve_id"],
+        solver_model=row["solver_model"],
+        mode_family=row["mode_family"],
+        p=int(row["p"]),
+        q=int(row["q"]),
+        a_over_A=float(row["a_over_A"]),
+        kz_normalized_against_n4=y_value,
+    )
+
+
+def load_curves(csv_path: Path) -> tuple[str, dict[tuple[str, str], list[CurvePoint]]]:
+    if not csv_path.is_file():
+        raise FileNotFoundError(f"Input CSV not found: {csv_path}")
+
+    grouped: dict[tuple[str, str], list[CurvePoint]] = defaultdict(list)
     case_id = ""
 
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
+        validate_columns(reader.fieldnames)
+
         for row in reader:
-            case_id = row["case_id"]
-
-            kz_normalized = row["kz_normalized_against_n4"]
-            if kz_normalized == "nan":
+            point = parse_curve_point(row)
+            if point is None:
                 continue
 
-            y_value = float(kz_normalized)
-            if y_value < 0.0 or y_value > 1.0:
-                continue
-
-            grouped[(row["curve_id"], row["solver_model"])].append(row)
+            case_id = point.case_id
+            grouped[(point.curve_id, point.solver_model)].append(point)
 
     for rows in grouped.values():
-        rows.sort(key=lambda item: float(item["a_over_A"]))
+        rows.sort(key=lambda point: point.a_over_A)
 
     return case_id, grouped
 
 
-def label_anchor(rows: list[dict[str, str]]) -> dict[str, str]:
+def label_anchor(rows: list[CurvePoint]) -> CurvePoint:
+    if not rows:
+        raise ValueError("Cannot select label anchor from an empty curve.")
     anchor_index = min(len(rows) - 1, max(0, len(rows) * 4 // 5))
     return rows[anchor_index]
 
 
 def build_plot(
     case_id: str,
-    grouped_curves: dict[tuple[str, str], list[dict[str, str]]],
+    grouped_curves: dict[tuple[str, str], list[CurvePoint]],
     output_path: Path,
     title: str | None,
     show_default_title: bool,
@@ -87,44 +141,40 @@ def build_plot(
     figure, axis = plt.subplots(figsize=(9.0, 6.0))
 
     sorted_groups = sorted(grouped_curves.values(), key=curve_sort_key)
-    base_curve_ids = sorted({rows[0]["curve_id"] for rows in sorted_groups})
-    color_map = {
-        curve_id: "black"
-        for curve_id in base_curve_ids
-    }
+    base_curve_ids = sorted({rows[0].curve_id for rows in sorted_groups})
 
-    label_rows_by_curve: dict[str, dict[str, str]] = {}
+    color_map = {curve_id: "black" for curve_id in base_curve_ids}
+    label_rows_by_curve: dict[str, CurvePoint] = {}
 
     for rows in sorted_groups:
         if not rows:
             continue
 
-        curve_id = rows[0]["curve_id"]
-        solver_model = rows[0]["solver_model"]
-        x_values = [float(row["a_over_A"]) for row in rows]
-        y_values = [float(row["kz_normalized_against_n4"]) for row in rows]
+        first = rows[0]
+        x_values = [point.a_over_A for point in rows]
+        y_values = [point.kz_normalized_against_n4 for point in rows]
 
         axis.plot(
             x_values,
             y_values,
-            color=color_map[curve_id],
-            linestyle="-" if solver_model == "exact" else "--",
-            linewidth=2.0 if rows[0]["p"] == "1" else 1.7,
+            color=color_map[first.curve_id],
+            linestyle="-" if first.solver_model == "exact" else "--",
+            linewidth=2.0 if first.p == 1 else 1.7,
         )
 
-        if solver_model == "exact":
-            label_rows_by_curve[curve_id] = label_anchor(rows)
-        elif curve_id not in label_rows_by_curve:
-            label_rows_by_curve[curve_id] = label_anchor(rows)
+        if first.solver_model == "exact":
+            label_rows_by_curve[first.curve_id] = label_anchor(rows)
+        elif first.curve_id not in label_rows_by_curve:
+            label_rows_by_curve[first.curve_id] = label_anchor(rows)
 
     for curve_id in base_curve_ids:
-        if curve_id not in label_rows_by_curve:
+        point = label_rows_by_curve.get(curve_id)
+        if point is None:
             continue
 
-        row = label_rows_by_curve[curve_id]
-        x_value = min(3.82, float(row["a_over_A"]) + 0.08)
-        y_value = float(row["kz_normalized_against_n4"]) + 0.02
-        axis.text(x_value, y_value, mode_label(row), fontsize=11)
+        x_value = min(3.82, point.a_over_A + 0.08)
+        y_value = point.kz_normalized_against_n4 + 0.02
+        axis.text(x_value, y_value, mode_label(point), fontsize=11)
 
     axis.set_xlim(0.0, 4.0)
     axis.set_ylim(0.0, 1.0)
@@ -132,10 +182,12 @@ def build_plot(
     axis.set_yticks(Y_TICKS)
     axis.set_xlabel(r"$a/A = \frac{2a}{\lambda}\left(n_1^2-n_4^2\right)^{1/2}$")
     axis.set_ylabel(r"$(k_z^2-k_4^2)/(k_1^2-k_4^2)$")
+
     if title is not None:
         axis.set_title(title)
     elif show_default_title:
         axis.set_title(case_id)
+
     axis.grid(True, which="major", color="#d0d0d0", linewidth=0.8)
 
     solver_handles = [
@@ -158,7 +210,14 @@ def main() -> int:
     if not grouped_curves:
         raise SystemExit("No plottable rows were found in the CSV.")
 
-    build_plot(case_id, grouped_curves, output_path, args.title, not args.no_title)
+    build_plot(
+        case_id=case_id,
+        grouped_curves=grouped_curves,
+        output_path=output_path,
+        title=args.title,
+        show_default_title=not args.no_title,
+    )
+
     print(f"Wrote plot to {output_path}")
     return 0
 

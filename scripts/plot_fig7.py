@@ -7,9 +7,44 @@ from __future__ import annotations
 import argparse
 import csv
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+
+REQUIRED_LINE_COLUMNS = {
+    "case_id",
+    "line_kind",
+    "line_id",
+    "sample_index",
+    "x",
+    "y",
+}
+
+REQUIRED_INTERSECTION_COLUMNS = {
+    "x",
+    "y",
+    "is_reference_c",
+}
+
+
+@dataclass(frozen=True)
+class LineSample:
+    case_id: str
+    line_kind: str
+    line_id: str
+    sample_index: int
+    x: float
+    y: float
+    mode_family: str | None = None
+    p: int | None = None
+    q: int | None = None
+
+
+@dataclass(frozen=True)
+class IntersectionPoint:
+    x: float
+    y: float
 
 
 def parse_args() -> argparse.Namespace:
@@ -37,40 +72,95 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def mode_label(row: dict[str, str]) -> str:
-    superscript = "y" if row["mode_family"] == "E_y" else "x"
-    return rf"$E^{{{superscript}}}_{{{row['p']}{row['q']}}}$"
+def validate_columns(fieldnames: list[str] | None, required: set[str], csv_name: str) -> None:
+    if not fieldnames:
+        raise ValueError(f"{csv_name} is empty or missing a header row.")
+
+    missing = required.difference(fieldnames)
+    if missing:
+        missing_text = ", ".join(sorted(missing))
+        raise ValueError(f"{csv_name} is missing required columns: {missing_text}")
 
 
-def load_line_groups(lines_csv: Path) -> tuple[str, dict[tuple[str, str], list[dict[str, str]]]]:
-    grouped: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+def parse_mode_label(sample: LineSample) -> str:
+    if sample.mode_family is None or sample.p is None or sample.q is None:
+        raise ValueError("Mode line is missing mode metadata needed for labeling.")
+
+    superscript = "y" if sample.mode_family == "E_y" else "x"
+    return rf"$E^{{{superscript}}}_{{{sample.p}{sample.q}}}$"
+
+
+def parse_line_sample(row: dict[str, str]) -> LineSample:
+    return LineSample(
+        case_id=row["case_id"],
+        line_kind=row["line_kind"],
+        line_id=row["line_id"],
+        sample_index=int(row["sample_index"]),
+        x=float(row["x"]),
+        y=float(row["y"]),
+        mode_family=row.get("mode_family") or None,
+        p=int(row["p"]) if row.get("p") else None,
+        q=int(row["q"]) if row.get("q") else None,
+    )
+
+
+def pick_label_sample(rows: list[LineSample], fraction: float) -> LineSample:
+    if not rows:
+        raise ValueError("Cannot pick label position from an empty line group.")
+
+    index = min(len(rows) - 1, max(1, int(len(rows) * fraction)))
+    return rows[index]
+
+
+def load_line_groups(lines_csv: Path) -> tuple[str, dict[tuple[str, str], list[LineSample]]]:
+    if not lines_csv.is_file():
+        raise FileNotFoundError(f"Line CSV not found: {lines_csv}")
+
+    grouped: dict[tuple[str, str], list[LineSample]] = defaultdict(list)
     case_id = ""
 
     with lines_csv.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
+        validate_columns(reader.fieldnames, REQUIRED_LINE_COLUMNS, str(lines_csv))
+
         for row in reader:
-            case_id = row["case_id"]
-            grouped[(row["line_kind"], row["line_id"])].append(row)
+            sample = parse_line_sample(row)
+            case_id = sample.case_id
+            grouped[(sample.line_kind, sample.line_id)].append(sample)
 
     for rows in grouped.values():
-        rows.sort(key=lambda row: int(row["sample_index"]))
+        rows.sort(key=lambda sample: sample.sample_index)
 
     return case_id, grouped
 
 
-def load_reference_intersections(intersections_csv: Path | None) -> list[dict[str, str]]:
-    if intersections_csv is None or not intersections_csv.exists():
+def load_reference_intersections(intersections_csv: Path | None) -> list[IntersectionPoint]:
+    if intersections_csv is None:
+        return []
+    if not intersections_csv.is_file():
         return []
 
     with intersections_csv.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
-        return [row for row in reader if row["is_reference_c"] == "1"]
+        validate_columns(reader.fieldnames, REQUIRED_INTERSECTION_COLUMNS, str(intersections_csv))
+
+        points: list[IntersectionPoint] = []
+        for row in reader:
+            if row["is_reference_c"] != "1":
+                continue
+            points.append(
+                IntersectionPoint(
+                    x=float(row["x"]),
+                    y=float(row["y"]),
+                )
+            )
+        return points
 
 
 def build_plot(
     case_id: str,
-    grouped_lines: dict[tuple[str, str], list[dict[str, str]]],
-    intersections: list[dict[str, str]],
+    grouped_lines: dict[tuple[str, str], list[LineSample]],
+    intersections: list[IntersectionPoint],
     output_path: Path,
     title: str | None,
     show_default_title: bool,
@@ -79,32 +169,32 @@ def build_plot(
     figure, axis = plt.subplots(figsize=(7.6, 7.2))
 
     for (line_kind, line_id), rows in grouped_lines.items():
-        x_values = [float(row["x"]) for row in rows]
-        y_values = [float(row["y"]) for row in rows]
+        x_values = [sample.x for sample in rows]
+        y_values = [sample.y for sample in rows]
 
         if line_kind == "mode":
             axis.plot(x_values, y_values, color="black", linewidth=1.7)
-            label_row = rows[min(len(rows) - 1, max(1, len(rows) * 2 // 3))]
+            label_sample = pick_label_sample(rows, 2 / 3)
             axis.text(
-                float(label_row["x"]) + 0.01,
-                float(label_row["y"]) + 0.01,
-                mode_label(label_row),
+                label_sample.x + 0.01,
+                label_sample.y + 0.01,
+                parse_mode_label(label_sample),
                 fontsize=10,
             )
         else:
             axis.plot(x_values, y_values, color="black", linewidth=1.4, linestyle="--")
-            label_row = rows[min(len(rows) - 1, max(1, len(rows) * 4 // 5))]
+            label_sample = pick_label_sample(rows, 4 / 5)
             axis.text(
-                float(label_row["x"]) + 0.01,
-                float(label_row["y"]) + 0.01,
+                label_sample.x + 0.01,
+                label_sample.y + 0.01,
                 line_id.replace("C=", ""),
                 fontsize=10,
             )
 
     if intersections:
         axis.scatter(
-            [float(row["x"]) for row in intersections],
-            [float(row["y"]) for row in intersections],
+            [point.x for point in intersections],
+            [point.y for point in intersections],
             color="#b22222",
             s=18,
             zorder=4,
@@ -117,10 +207,12 @@ def build_plot(
     axis.set_yticks([index / 5 for index in range(6)])
     axis.set_xlabel(r"$X=\left(\frac{\pi}{a}\right)^2\left(1+\frac{A_3+A_5}{\pi a}\right)^{-2}(k_1^2-k_z^2)^{-1}$")
     axis.set_ylabel(r"$Y=\left(\frac{\pi}{b}\right)^2\left(1+\frac{n_2^2A_2+n_4^2A_4}{\pi n_1^2 b}\right)^{-2}(k_1^2-k_z^2)^{-1}$")
+
     if title is not None:
         axis.set_title(title)
     elif show_default_title:
         axis.set_title(case_id)
+
     axis.grid(True, which="major", color="#d0d0d0", linewidth=0.8)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -134,15 +226,20 @@ def main() -> int:
     output_path = args.output if args.output else args.lines_csv.with_suffix(".png")
 
     case_id, grouped_lines = load_line_groups(args.lines_csv)
+    if not grouped_lines:
+        raise SystemExit("No line samples were found in the lines CSV.")
+
     intersections = load_reference_intersections(args.intersections_csv)
+
     build_plot(
-        case_id,
-        grouped_lines,
-        intersections,
-        output_path,
-        args.title,
-        not args.no_title,
+        case_id=case_id,
+        grouped_lines=grouped_lines,
+        intersections=intersections,
+        output_path=output_path,
+        title=args.title,
+        show_default_title=not args.no_title,
     )
+
     print(f"Wrote plot to {output_path}")
     return 0
 

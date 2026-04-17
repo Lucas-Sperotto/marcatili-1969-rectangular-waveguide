@@ -6,11 +6,34 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+
+REQUIRED_COLUMNS = {
+    "case_id",
+    "curve_id",
+    "solver_model",
+    "a_over_A5",
+    "c_over_a",
+    "normalized_coupling",
+    "curve_label",
+}
+
+
+@dataclass(frozen=True)
+class CurvePoint:
+    case_id: str
+    curve_id: str
+    solver_model: str
+    a_over_A5: float
+    c_over_a: float
+    normalized_coupling: float
+    curve_label: str
 
 
 def parse_args() -> argparse.Namespace:
@@ -33,36 +56,66 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_curves(csv_path: Path) -> tuple[str, dict[tuple[str, str], list[dict[str, str]]]]:
-    grouped: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+def validate_columns(fieldnames: list[str] | None) -> None:
+    if not fieldnames:
+        raise ValueError("CSV file is empty or missing a header row.")
+
+    missing = REQUIRED_COLUMNS.difference(fieldnames)
+    if missing:
+        missing_text = ", ".join(sorted(missing))
+        raise ValueError(f"CSV is missing required columns: {missing_text}")
+
+
+def parse_curve_point(row: dict[str, str]) -> CurvePoint | None:
+    y_value = float(row["normalized_coupling"])
+    if math.isnan(y_value) or y_value <= 0.0:
+        return None
+
+    return CurvePoint(
+        case_id=row["case_id"],
+        curve_id=row["curve_id"],
+        solver_model=row["solver_model"],
+        a_over_A5=float(row["a_over_A5"]),
+        c_over_a=float(row["c_over_a"]),
+        normalized_coupling=y_value,
+        curve_label=row["curve_label"],
+    )
+
+
+def load_curves(csv_path: Path) -> tuple[str, dict[tuple[str, str], list[CurvePoint]]]:
+    if not csv_path.is_file():
+        raise FileNotFoundError(f"Input CSV not found: {csv_path}")
+
+    grouped: dict[tuple[str, str], list[CurvePoint]] = defaultdict(list)
     case_id = ""
 
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
+        validate_columns(reader.fieldnames)
+
         for row in reader:
-            case_id = row["case_id"]
-            y_text = row["normalized_coupling"]
-            if y_text == "nan":
+            point = parse_curve_point(row)
+            if point is None:
                 continue
 
-            y_value = float(y_text)
-            if y_value <= 0.0:
-                continue
-
-            grouped[(row["curve_id"], row["solver_model"])].append(row)
+            case_id = point.case_id
+            grouped[(point.curve_id, point.solver_model)].append(point)
 
     for rows in grouped.values():
-        rows.sort(key=lambda row: float(row["c_over_a"]))
+        rows.sort(key=lambda point: point.c_over_a)
 
     return case_id, grouped
 
 
-def curve_sort_key(rows: list[dict[str, str]]) -> float:
-    return float(rows[0]["a_over_A5"])
+def curve_sort_key(rows: list[CurvePoint]) -> float:
+    return rows[0].a_over_A5
 
 
-def label_anchor(rows: list[dict[str, str]]) -> dict[str, str]:
-    parameter = float(rows[0]["a_over_A5"])
+def label_anchor(rows: list[CurvePoint]) -> CurvePoint:
+    if not rows:
+        raise ValueError("Cannot select label anchor from an empty curve.")
+
+    parameter = rows[0].a_over_A5
     if parameter <= 0.75:
         anchor_index = min(len(rows) - 1, max(0, len(rows) * 4 // 5))
     elif parameter <= 1.5:
@@ -75,7 +128,7 @@ def label_anchor(rows: list[dict[str, str]]) -> dict[str, str]:
 
 def build_plot(
     case_id: str,
-    grouped_curves: dict[tuple[str, str], list[dict[str, str]]],
+    grouped_curves: dict[tuple[str, str], list[CurvePoint]],
     output_path: Path,
     title: str | None,
     show_default_title: bool,
@@ -84,32 +137,36 @@ def build_plot(
     figure, axis = plt.subplots(figsize=(8.6, 7.8))
 
     sorted_groups = sorted(grouped_curves.values(), key=curve_sort_key)
-    label_rows_by_curve: dict[str, dict[str, str]] = {}
+    label_rows_by_curve: dict[str, CurvePoint] = {}
 
     for rows in sorted_groups:
         if not rows:
             continue
 
-        curve_id = rows[0]["curve_id"]
-        solver_model = rows[0]["solver_model"]
-        x_values = [float(row["c_over_a"]) for row in rows]
-        y_values = [float(row["normalized_coupling"]) for row in rows]
+        first = rows[0]
+        x_values = [point.c_over_a for point in rows]
+        y_values = [point.normalized_coupling for point in rows]
 
         axis.semilogy(
             x_values,
             y_values,
             color="black",
-            linestyle="-" if solver_model == "exact" else "--",
+            linestyle="-" if first.solver_model == "exact" else "--",
             linewidth=1.8,
         )
 
-        if solver_model == "exact":
-            label_rows_by_curve[curve_id] = label_anchor(rows)
+        if first.solver_model == "exact":
+            label_rows_by_curve[first.curve_id] = label_anchor(rows)
+        elif first.curve_id not in label_rows_by_curve:
+            label_rows_by_curve[first.curve_id] = label_anchor(rows)
 
-    for row in label_rows_by_curve.values():
-        x_value = float(row["c_over_a"]) + 0.03
-        y_value = float(row["normalized_coupling"]) * 1.05
-        axis.text(x_value, y_value, row["curve_label"], fontsize=10)
+    for point in label_rows_by_curve.values():
+        axis.text(
+            point.c_over_a + 0.03,
+            point.normalized_coupling * 1.05,
+            point.curve_label,
+            fontsize=10,
+        )
 
     axis.set_xlim(0.0, 3.0)
     axis.set_ylim(1.0e-4, 10.0)
@@ -118,6 +175,7 @@ def build_plot(
     axis.set_ylabel(
         r"$|K|a/\left(\left[1-\left(n_5/n_1\right)^2\right]^{1/2}k_z\right)$"
     )
+
     if title is not None:
         axis.set_title(title)
     elif show_default_title:
@@ -154,7 +212,14 @@ def main() -> int:
     if not grouped_curves:
         raise SystemExit("No plottable rows were found in the CSV.")
 
-    build_plot(case_id, grouped_curves, output_path, args.title, not args.no_title)
+    build_plot(
+        case_id=case_id,
+        grouped_curves=grouped_curves,
+        output_path=output_path,
+        title=args.title,
+        show_default_title=not args.no_title,
+    )
+
     print(f"Wrote plot to {output_path}")
     return 0
 

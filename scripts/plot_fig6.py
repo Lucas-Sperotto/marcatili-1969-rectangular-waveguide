@@ -12,20 +12,49 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import colorsys
+import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 X_TICKS = [0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.6, 4.0]
 DEFAULT_Y_MAX = 1.2
 PANEL_Y_MAX_OVERRIDES = {
-    # Based on the current divergence report against the article scan.
     "SG-006c": 1.0,
     "SG-006e": 1.0,
 }
+
+REQUIRED_COLUMNS = {
+    "panel_id",
+    "curve_id",
+    "mode_family",
+    "p",
+    "q",
+    "b_over_A4",
+    "kz_normalized_against_n4",
+}
+
+DEFAULT_SOLVER_MODEL = "closed_form"
+DEFAULT_VARIANT_ID = "default"
+DEFAULT_GEOMETRY_MODEL = "rectangular"
+
+
+@dataclass(frozen=True)
+class CurvePoint:
+    panel_id: str
+    curve_id: str
+    solver_model: str
+    variant_id: str
+    mode_family: str
+    geometry_model: str
+    p: int
+    q: int
+    b_over_A4: float
+    kz_normalized_against_n4: float
 
 
 def parse_args() -> argparse.Namespace:
@@ -63,60 +92,126 @@ def y_ticks_for_limit(y_max: float) -> list[float]:
     return [round(step * index, 1) for index in range(tick_count + 1)]
 
 
-def mode_label(row: dict[str, str]) -> str:
-    family = row["mode_family"]
-    superscript = "y" if family == "E_y" else "x"
-    if row.get("geometry_model", "rectangular") == "slab":
-        indices = f"0{row['q']}"
-    else:
-        indices = f"{row['p']}{row['q']}"
+def mode_label(point: CurvePoint) -> str:
+    superscript = "y" if point.mode_family == "E_y" else "x"
+    indices = f"0{point.q}" if point.geometry_model == "slab" else f"{point.p}{point.q}"
     return rf"$E^{{{superscript}}}_{{{indices}}}$"
 
 
-def curve_sort_key(row: dict[str, str]) -> tuple[int, int, int, int]:
-    family_order = 0 if row["mode_family"] == "E_y" else 1
-    solver_order = 0 if row.get("solver_model", "closed_form") == "exact" else 1
-    return (int(row["p"]), int(row["q"]), family_order, solver_order)
+def curve_sort_key(point: CurvePoint) -> tuple[int, int, int, int]:
+    family_order = 0 if point.mode_family == "E_y" else 1
+    solver_order = 0 if point.solver_model == "exact" else 1
+    return (point.p, point.q, family_order, solver_order)
 
 
-def load_curves(csv_path: Path) -> tuple[str, dict[tuple[str, str, str], list[dict[str, str]]]]:
-    grouped_rows: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
+def parse_required_float(row: dict[str, str], field_name: str) -> float:
+    try:
+        value = float(row[field_name])
+    except KeyError as exc:
+        raise ValueError(f"Missing required column: {field_name}") from exc
+    except ValueError as exc:
+        raise ValueError(f"Invalid float value in column '{field_name}': {row.get(field_name)!r}") from exc
+    return value
+
+
+def parse_required_int(row: dict[str, str], field_name: str) -> int:
+    try:
+        value = int(row[field_name])
+    except KeyError as exc:
+        raise ValueError(f"Missing required column: {field_name}") from exc
+    except ValueError as exc:
+        raise ValueError(f"Invalid integer value in column '{field_name}': {row.get(field_name)!r}") from exc
+    return value
+
+
+def validate_columns(fieldnames: list[str] | None) -> None:
+    if not fieldnames:
+        raise ValueError("CSV file is empty or missing a header row.")
+
+    missing = REQUIRED_COLUMNS.difference(fieldnames)
+    if missing:
+        missing_text = ", ".join(sorted(missing))
+        raise ValueError(f"CSV is missing required columns: {missing_text}")
+
+
+def parse_curve_point(row: dict[str, str]) -> CurvePoint | None:
+    y_value = parse_required_float(row, "kz_normalized_against_n4")
+    if math.isnan(y_value) or y_value < 0.0:
+        return None
+
+    return CurvePoint(
+        panel_id=row["panel_id"],
+        curve_id=row["curve_id"],
+        solver_model=row.get("solver_model", DEFAULT_SOLVER_MODEL),
+        variant_id=row.get("variant_id", DEFAULT_VARIANT_ID),
+        mode_family=row["mode_family"],
+        geometry_model=row.get("geometry_model", DEFAULT_GEOMETRY_MODEL),
+        p=parse_required_int(row, "p"),
+        q=parse_required_int(row, "q"),
+        b_over_A4=parse_required_float(row, "b_over_A4"),
+        kz_normalized_against_n4=y_value,
+    )
+
+
+def load_curves(csv_path: Path) -> tuple[str, dict[tuple[str, str, str], list[CurvePoint]]]:
+    grouped_rows: dict[tuple[str, str, str], list[CurvePoint]] = defaultdict(list)
     panel_id = ""
+
+    if not csv_path.is_file():
+        raise FileNotFoundError(f"Input CSV not found: {csv_path}")
 
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
+        validate_columns(reader.fieldnames)
+
         for row in reader:
-            panel_id = row["panel_id"]
-
-            kz_normalized = row["kz_normalized_against_n4"]
-            if kz_normalized == "nan":
+            point = parse_curve_point(row)
+            if point is None:
                 continue
 
-            y_value = float(kz_normalized)
-            if y_value < 0.0:
-                continue
-
-            solver_model = row.get("solver_model", "closed_form")
-            variant_id = row.get("variant_id", "default")
-            grouped_rows[(row["curve_id"], solver_model, variant_id)].append(row)
+            panel_id = point.panel_id
+            key = (point.curve_id, point.solver_model, point.variant_id)
+            grouped_rows[key].append(point)
 
     for rows in grouped_rows.values():
-        rows.sort(key=lambda item: float(item["b_over_A4"]))
+        rows.sort(key=lambda point: point.b_over_A4)
 
     return panel_id, grouped_rows
 
 
-def adjust_color(color: tuple[float, float, float, float], lightness_delta: float) -> tuple[float, float, float, float]:
+def adjust_color(
+    color: tuple[float, float, float, float],
+    lightness_delta: float,
+) -> tuple[float, float, float, float]:
     red, green, blue, alpha = color
     hue, lightness, saturation = colorsys.rgb_to_hls(red, green, blue)
-    shifted = max(0.0, min(1.0, lightness + lightness_delta))
-    shifted_red, shifted_green, shifted_blue = colorsys.hls_to_rgb(hue, shifted, saturation)
+    shifted_lightness = max(0.0, min(1.0, lightness + lightness_delta))
+    shifted_red, shifted_green, shifted_blue = colorsys.hls_to_rgb(
+        hue,
+        shifted_lightness,
+        saturation,
+    )
     return (shifted_red, shifted_green, shifted_blue, alpha)
+
+
+def build_variant_lightness(variant_ids: list[str]) -> dict[str, float]:
+    if not variant_ids:
+        return {}
+
+    if len(variant_ids) == 1:
+        return {variant_ids[0]: 0.0}
+
+    center = (len(variant_ids) - 1) / 2.0
+    step = 0.18
+    return {
+        variant_id: (index - center) * step
+        for index, variant_id in enumerate(variant_ids)
+    }
 
 
 def build_plot(
     panel_id: str,
-    grouped_rows: dict[tuple[str, str, str], list[dict[str, str]]],
+    grouped_rows: dict[tuple[str, str, str], list[CurvePoint]],
     output_path: Path,
     title: str,
     y_max_override: float | None,
@@ -129,18 +224,17 @@ def build_plot(
         key=lambda rows: curve_sort_key(rows[0]),
     )
 
-    base_curve_ids = sorted({rows[0]["curve_id"] for rows in sorted_curves})
+    base_curve_ids = sorted({rows[0].curve_id for rows in sorted_curves})
+    tab10 = plt.colormaps["tab10"]
     color_map = {
-        curve_id: plt.cm.tab10(index % 10)
+        curve_id: tab10(index % 10)
         for index, curve_id in enumerate(base_curve_ids)
     }
-    variant_ids = sorted({rows[0].get("variant_id", "default") for rows in sorted_curves})
-    variant_lightness = {
-        variant_id: (-0.18 + 0.18 * index)
-        for index, variant_id in enumerate(variant_ids)
-    }
 
-    solver_models_present = sorted({rows[0].get("solver_model", "closed_form") for rows in sorted_curves})
+    variant_ids = sorted({rows[0].variant_id for rows in sorted_curves})
+    variant_lightness = build_variant_lightness(variant_ids)
+
+    solver_models_present = sorted({rows[0].solver_model for rows in sorted_curves})
     mode_legend_handles: list[Line2D] = []
     variant_legend_handles: list[Line2D] = []
     seen_curve_ids: set[str] = set()
@@ -150,17 +244,16 @@ def build_plot(
         if not rows:
             continue
 
-        curve_id = rows[0]["curve_id"]
-        solver_model = rows[0].get("solver_model", "closed_form")
-        variant_id = rows[0].get("variant_id", "default")
-        linestyle = "-" if solver_model == "exact" else "--"
-        linewidth = 2.0 if rows[0]["p"] == "1" and rows[0]["q"] == "1" else 1.4
+        first = rows[0]
+        linestyle = "-" if first.solver_model == "exact" else "--"
+        linewidth = 2.0 if first.p == 1 and first.q == 1 else 1.4
         line_color = adjust_color(
-            color_map[curve_id],
-            variant_lightness.get(variant_id, 0.0),
+            color_map[first.curve_id],
+            variant_lightness.get(first.variant_id, 0.0),
         )
-        x_values = [float(row["b_over_A4"]) for row in rows]
-        y_values = [float(row["kz_normalized_against_n4"]) for row in rows]
+
+        x_values = [point.b_over_A4 for point in rows]
+        y_values = [point.kz_normalized_against_n4 for point in rows]
 
         axis.plot(
             x_values,
@@ -170,29 +263,32 @@ def build_plot(
             linewidth=linewidth,
         )
 
-        if curve_id not in seen_curve_ids:
-            seen_curve_ids.add(curve_id)
+        if first.curve_id not in seen_curve_ids:
+            seen_curve_ids.add(first.curve_id)
             mode_legend_handles.append(
                 Line2D(
                     [0],
                     [0],
-                    color=color_map[curve_id],
+                    color=color_map[first.curve_id],
                     linestyle="-",
                     linewidth=2.0,
-                    label=mode_label(rows[0]),
+                    label=mode_label(first),
                 )
             )
 
-        if variant_id not in seen_variant_ids and variant_id != "default":
-            seen_variant_ids.add(variant_id)
+        if first.variant_id not in seen_variant_ids and first.variant_id != DEFAULT_VARIANT_ID:
+            seen_variant_ids.add(first.variant_id)
             variant_legend_handles.append(
                 Line2D(
                     [0],
                     [0],
-                    color=adjust_color((0.2, 0.2, 0.2, 1.0), variant_lightness.get(variant_id, 0.0)),
+                    color=adjust_color(
+                        (0.2, 0.2, 0.2, 1.0),
+                        variant_lightness.get(first.variant_id, 0.0),
+                    ),
                     linestyle="-",
                     linewidth=2.0,
-                    label=variant_id,
+                    label=first.variant_id,
                 )
             )
 
@@ -256,12 +352,13 @@ def main() -> int:
         raise SystemExit("No plottable rows were found in the CSV.")
 
     build_plot(
-        panel_id,
-        grouped_rows,
-        output_path,
-        args.panel_title or panel_id,
-        args.y_max,
+        panel_id=panel_id,
+        grouped_rows=grouped_rows,
+        output_path=output_path,
+        title=args.panel_title or panel_id,
+        y_max_override=args.y_max,
     )
+
     print(f"Wrote plot to {output_path}")
     return 0
 

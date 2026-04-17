@@ -1,32 +1,31 @@
 # Scripts
 
-Os scripts Python deste diretorio devem cuidar apenas de tarefas externas ao nucleo C++.
+Os scripts deste diretório executam apenas tarefas externas ao núcleo em C++.
 
-- Geracao de graficos a partir de arquivos `CSV` e `JSON`.
-- Conversao e comparacao de dados de referencia.
-- Ferramentas auxiliares de reproducao.
+- geração de gráficos a partir de arquivos `CSV` e, quando necessário, de saídas derivadas de `JSON`;
+- ferramentas auxiliares para build, reprodução e verificação dos artefatos do projeto.
 
 ## Scripts atuais
 
-- `plot_fig6.py`: plota um painel de Fig. 6 a partir do `CSV` gerado por `reproduce_fig6`, com limite superior do eixo `y` parametrizado por painel (e opcao `--y-max`).
-- `compare_fig6_article.py`: monta uma comparacao lado a lado entre o scan do artigo e o `PNG` gerado para os paineis atualmente reproduzidos.
-- `plot_fig7.py`: plota o nomograma da Fig. 7 a partir dos `CSV` de linhas e interseccoes gerados por `reproduce_fig7`.
-- `compare_fig7_article.py`: monta uma comparacao lado a lado entre o scan da Fig. 7 e a reproducao atual do nomograma.
-- `plot_fig8.py`: plota a reproducao atual da Fig. 8 a partir do `CSV` gerado por `reproduce_fig8`.
-- `compare_fig8_article.py`: monta uma comparacao lado a lado entre o scan da Fig. 8 e a reproducao atual.
-- `plot_fig10.py`: plota a reproducao atual da Fig. 10 a partir do `CSV` gerado por `reproduce_fig10`.
-- `compare_fig10_article.py`: monta uma comparacao lado a lado entre o scan da Fig. 10 e a reproducao atual.
-- `plot_fig11.py`: plota a reproducao atual da Fig. 11 a partir do `CSV` gerado por `reproduce_fig11`, com codificacao explicita de solver por cor e razao `n_1/n_5` por estilo de linha.
-- `compare_fig11_article.py`: monta uma comparacao lado a lado entre o scan da Fig. 11 e a reproducao atual.
-- `run/reproduce_fig6_panels.sh`: gera JSON, CSV e PNG para os paineis finitos de Fig. 6 atualmente configurados.
-- `run/build_fig6_article_comparisons.sh`: atualiza os paineis numericos disponiveis e gera comparacoes `artigo x reproducao`, incluindo os limites de lamina `6d` e `6k`.
-- `run/reproduce_fig7_nomogram.sh`: gera os artefatos numericos e o `PNG` do caso-base atualmente configurado para a Fig. 7.
-- `run/build_fig7_article_comparison.sh`: atualiza o caso-base da Fig. 7, gera uma versao sem titulo e monta a comparacao `artigo x reproducao`.
-- `run/reproduce_fig8_case.sh`: gera os artefatos numericos e o `PNG` do caso-base atualmente configurado para a Fig. 8.
-- `run/build_fig8_article_comparison.sh`: atualiza o caso-base da Fig. 8, gera uma versao sem titulo e monta a comparacao `artigo x reproducao`.
-- `run/reproduce_fig10_case.sh`: gera os artefatos numericos e o `PNG` do caso-base atualmente configurado para a Fig. 10.
-- `run/build_fig10_article_comparison.sh`: atualiza o caso-base da Fig. 10, gera uma versao sem titulo e monta a comparacao `artigo x reproducao`.
-- `run/reproduce_fig11_case.sh`: gera os artefatos numericos e o `PNG` do caso-base atualmente configurado para a Fig. 11.
-- `run/build_fig11_article_comparison.sh`: atualiza o caso-base da Fig. 11, gera uma versao sem titulo e monta a comparacao `artigo x reproducao`.
-- `run/clean_build_reproduce_all.sh`: executa em sequencia limpeza, build e reproducao completa.
-- `run/check_reproduction.sh`: verifica se todos os artefatos obrigatorios de reproducao foram gerados.
+- `run.sh`: ponto único de entrada para limpeza, build, testes, reprodução e verificação dos artefatos obrigatórios;
+- `plot_fig6.py`: plota um painel da Fig. 6 a partir do `CSV` gerado por `reproduce_fig6`, com limite superior do eixo `y` parametrizado por painel e opção de sobrescrita via `--y-max`;
+- `plot_fig7.py`: plota o nomograma da Fig. 7 a partir dos arquivos `CSV` de linhas e interseções gerados por `reproduce_fig7`;
+- `plot_fig8.py`: plota a reprodução atual da Fig. 8 a partir do `CSV` gerado por `reproduce_fig8`;
+- `plot_fig10.py`: plota a reprodução atual da Fig. 10 a partir do `CSV` gerado por `reproduce_fig10`;
+- `plot_fig11.py`: plota a reprodução atual da Fig. 11 a partir do `CSV` gerado por `reproduce_fig11`, com codificação explícita do solver por cor e da razão `n_1/n_5` por estilo de linha.
+
+## Fluxo atual
+
+- `./scripts/run.sh build`: configura, compila e, opcionalmente, executa os testes via `CTest`;
+- `./scripts/run.sh fig6`: gera os painéis da Fig. 6 em `data/output/fig6/`, com identificação por letras `(a)`, `(b)`, ...;
+- `./scripts/run.sh fig7`: gera a figura principal correspondente à Fig. 7 no estilo do artigo;
+- `./scripts/run.sh fig8`: gera a figura principal correspondente à Fig. 8 no estilo do artigo;
+- `./scripts/run.sh fig10`: gera a figura principal correspondente à Fig. 10 no estilo do artigo;
+- `./scripts/run.sh fig11`: gera a figura principal correspondente à Fig. 11 no estilo do artigo;
+- `./scripts/run.sh reproduce`: executa toda a reprodução numérica e gera as imagens finais do fluxo principal;
+- `./scripts/run.sh check`: verifica a presença e a integridade dos artefatos obrigatórios do fluxo atual;
+- `./scripts/run.sh full`: executa limpeza, build, reprodução e verificação.
+
+## Observação de projeto
+
+A responsabilidade destes scripts é restrita à orquestração externa do pipeline. Toda a lógica numérica, formulação física e geração dos dados-base permanece concentrada no núcleo em C++.
