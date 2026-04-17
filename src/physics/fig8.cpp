@@ -5,14 +5,13 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "marcatili/math/waveguide_math.hpp"
 #include "marcatili/physics/metal_guide.hpp"
 
 namespace marcatili {
 namespace {
 
-double ComputeA(double wavelength, double n1, double nv) {
-    return wavelength / (2.0 * std::sqrt(n1 * n1 - nv * nv));
-}
+using math::ComputeA;
 
 void ValidateConfig(const Figure8Config& config) {
     if (config.wavelength <= 0.0) {

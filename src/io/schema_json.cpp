@@ -1,55 +1,454 @@
 #include "marcatili/io/schema_json.hpp"
 
-#include <regex>
+#include <cctype>
 #include <stdexcept>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace marcatili::io {
 namespace {
 
-std::string EscapeRegex(const std::string& text) {
-    std::string escaped;
-    escaped.reserve(text.size() * 2);
-
-    for (const char ch : text) {
-        switch (ch) {
-            case '\\':
-            case '^':
-            case '$':
-            case '.':
-            case '|':
-            case '?':
-            case '*':
-            case '+':
-            case '(':
-            case ')':
-            case '[':
-            case ']':
-            case '{':
-            case '}':
-                escaped.push_back('\\');
-                escaped.push_back(ch);
-                break;
-            default:
-                escaped.push_back(ch);
-                break;
-        }
-    }
-
-    return escaped;
+bool IsWhitespace(char character) {
+    return std::isspace(static_cast<unsigned char>(character)) != 0;
 }
 
-std::optional<std::string> FindMatch(
-    const std::string& json_text,
-    const std::string& pattern
-) {
-    const std::regex regex_pattern(pattern, std::regex::ECMAScript);
-    std::smatch match;
+std::size_t SkipWhitespace(std::string_view text, std::size_t position) {
+    std::size_t current = position;
+    while (current < text.size() && IsWhitespace(text[current])) {
+        ++current;
+    }
 
-    if (!std::regex_search(json_text, match, regex_pattern)) {
+    return current;
+}
+
+std::string_view TrimWhitespace(std::string_view text) {
+    const std::size_t begin = SkipWhitespace(text, 0);
+
+    if (begin >= text.size()) {
+        return {};
+    }
+
+    std::size_t end = text.size();
+    while (end > begin && IsWhitespace(text[end - 1])) {
+        --end;
+    }
+
+    return text.substr(begin, end - begin);
+}
+
+std::optional<std::size_t> FindMatchingDelimiter(
+    std::string_view text,
+    std::size_t open_position,
+    char open_delimiter,
+    char close_delimiter
+) {
+    if (open_position >= text.size() || text[open_position] != open_delimiter) {
         return std::nullopt;
     }
 
-    return match[1].str();
+    int depth = 0;
+    bool in_string = false;
+    bool escaping = false;
+
+    for (std::size_t position = open_position; position < text.size(); ++position) {
+        const char character = text[position];
+
+        if (in_string) {
+            if (escaping) {
+                escaping = false;
+            } else if (character == '\\') {
+                escaping = true;
+            } else if (character == '"') {
+                in_string = false;
+            }
+
+            continue;
+        }
+
+        if (character == '"') {
+            in_string = true;
+            continue;
+        }
+
+        if (character == open_delimiter) {
+            ++depth;
+            continue;
+        }
+
+        if (character == close_delimiter) {
+            --depth;
+            if (depth == 0) {
+                return position;
+            }
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<std::pair<std::size_t, std::string>> ParseJsonStringToken(
+    std::string_view text,
+    std::size_t quote_position
+) {
+    if (quote_position >= text.size() || text[quote_position] != '"') {
+        return std::nullopt;
+    }
+
+    std::string decoded;
+    bool escaping = false;
+
+    for (std::size_t position = quote_position + 1; position < text.size(); ++position) {
+        const char character = text[position];
+
+        if (escaping) {
+            switch (character) {
+                case '"':
+                case '\\':
+                case '/':
+                    decoded.push_back(character);
+                    break;
+                case 'b':
+                    decoded.push_back('\b');
+                    break;
+                case 'f':
+                    decoded.push_back('\f');
+                    break;
+                case 'n':
+                    decoded.push_back('\n');
+                    break;
+                case 'r':
+                    decoded.push_back('\r');
+                    break;
+                case 't':
+                    decoded.push_back('\t');
+                    break;
+                case 'u':
+                    // The repository inputs are ASCII in practice. Keep unicode escapes
+                    // lossless enough for diagnostics while remaining dependency-free.
+                    decoded.push_back('?');
+                    if (position + 4 < text.size()) {
+                        position += 4;
+                    }
+                    break;
+                default:
+                    decoded.push_back(character);
+                    break;
+            }
+
+            escaping = false;
+            continue;
+        }
+
+        if (character == '\\') {
+            escaping = true;
+            continue;
+        }
+
+        if (character == '"') {
+            return std::make_pair(position + 1, decoded);
+        }
+
+        decoded.push_back(character);
+    }
+
+    return std::nullopt;
+}
+
+std::optional<std::size_t> ParseJsonValueEnd(std::string_view object_body, std::size_t position) {
+    if (position >= object_body.size()) {
+        return std::nullopt;
+    }
+
+    const char character = object_body[position];
+
+    if (character == '"') {
+        const auto token = ParseJsonStringToken(object_body, position);
+        if (!token.has_value()) {
+            return std::nullopt;
+        }
+
+        return token->first;
+    }
+
+    if (character == '{') {
+        const auto closing =
+            FindMatchingDelimiter(object_body, position, '{', '}');
+        if (!closing.has_value()) {
+            return std::nullopt;
+        }
+
+        return *closing + 1;
+    }
+
+    if (character == '[') {
+        const auto closing =
+            FindMatchingDelimiter(object_body, position, '[', ']');
+        if (!closing.has_value()) {
+            return std::nullopt;
+        }
+
+        return *closing + 1;
+    }
+
+    std::size_t end = position;
+    while (end < object_body.size() && object_body[end] != ',') {
+        ++end;
+    }
+
+    return end;
+}
+
+std::optional<std::string_view> RootObjectBody(std::string_view json_text) {
+    const std::string_view trimmed = TrimWhitespace(json_text);
+
+    if (trimmed.empty() || trimmed.front() != '{') {
+        return std::nullopt;
+    }
+
+    const auto closing = FindMatchingDelimiter(trimmed, 0, '{', '}');
+    if (!closing.has_value()) {
+        return std::nullopt;
+    }
+
+    if (SkipWhitespace(trimmed, *closing + 1) != trimmed.size()) {
+        return std::nullopt;
+    }
+
+    return trimmed.substr(1, *closing - 1);
+}
+
+std::optional<std::string_view> ObjectBodyFromRawValue(std::string_view raw_value) {
+    const std::string_view trimmed = TrimWhitespace(raw_value);
+    if (trimmed.empty() || trimmed.front() != '{') {
+        return std::nullopt;
+    }
+
+    const auto closing = FindMatchingDelimiter(trimmed, 0, '{', '}');
+    if (!closing.has_value()) {
+        return std::nullopt;
+    }
+
+    if (SkipWhitespace(trimmed, *closing + 1) != trimmed.size()) {
+        return std::nullopt;
+    }
+
+    return trimmed.substr(1, *closing - 1);
+}
+
+std::optional<std::string_view> FindTopLevelRawValueInObject(
+    std::string_view object_body,
+    std::string_view key
+) {
+    std::size_t position = 0;
+
+    while (true) {
+        position = SkipWhitespace(object_body, position);
+        if (position >= object_body.size()) {
+            return std::nullopt;
+        }
+
+        if (object_body[position] == ',') {
+            ++position;
+            continue;
+        }
+
+        if (object_body[position] != '"') {
+            return std::nullopt;
+        }
+
+        const auto key_token = ParseJsonStringToken(object_body, position);
+        if (!key_token.has_value()) {
+            return std::nullopt;
+        }
+
+        position = SkipWhitespace(object_body, key_token->first);
+        if (position >= object_body.size() || object_body[position] != ':') {
+            return std::nullopt;
+        }
+
+        position = SkipWhitespace(object_body, position + 1);
+        if (position >= object_body.size()) {
+            return std::nullopt;
+        }
+
+        const std::size_t value_begin = position;
+        const auto value_end = ParseJsonValueEnd(object_body, position);
+        if (!value_end.has_value()) {
+            return std::nullopt;
+        }
+
+        if (key_token->second == key) {
+            return TrimWhitespace(object_body.substr(value_begin, *value_end - value_begin));
+        }
+
+        position = SkipWhitespace(object_body, *value_end);
+        if (position < object_body.size() && object_body[position] == ',') {
+            ++position;
+        }
+    }
+}
+
+std::vector<std::string> SplitPath(const std::string& key_path) {
+    std::vector<std::string> segments;
+    std::size_t begin = 0;
+
+    while (begin <= key_path.size()) {
+        const std::size_t end = key_path.find('.', begin);
+        const std::size_t count =
+            end == std::string::npos ? key_path.size() - begin : end - begin;
+        if (count == 0) {
+            return {};
+        }
+
+        segments.push_back(key_path.substr(begin, count));
+        if (end == std::string::npos) {
+            break;
+        }
+
+        begin = end + 1;
+    }
+
+    return segments;
+}
+
+std::optional<std::string_view> FindRawValueByPath(
+    const std::string& json_text,
+    const std::string& key_path
+) {
+    const auto segments = SplitPath(key_path);
+    if (segments.empty()) {
+        return std::nullopt;
+    }
+
+    auto current_object = RootObjectBody(json_text);
+    if (!current_object.has_value()) {
+        return std::nullopt;
+    }
+
+    for (std::size_t index = 0; index < segments.size(); ++index) {
+        const auto raw_value = FindTopLevelRawValueInObject(*current_object, segments[index]);
+        if (!raw_value.has_value()) {
+            return std::nullopt;
+        }
+
+        if (index + 1 == segments.size()) {
+            return raw_value;
+        }
+
+        current_object = ObjectBodyFromRawValue(*raw_value);
+        if (!current_object.has_value()) {
+            return std::nullopt;
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<std::string> ParseRawJsonStringValue(std::string_view raw_value) {
+    const std::string_view trimmed = TrimWhitespace(raw_value);
+    if (trimmed.empty() || trimmed.front() != '"') {
+        return std::nullopt;
+    }
+
+    const auto token = ParseJsonStringToken(trimmed, 0);
+    if (!token.has_value()) {
+        return std::nullopt;
+    }
+
+    if (SkipWhitespace(trimmed, token->first) != trimmed.size()) {
+        return std::nullopt;
+    }
+
+    return token->second;
+}
+
+std::optional<double> ParseRawJsonDoubleValue(std::string_view raw_value) {
+    const std::string text(TrimWhitespace(raw_value));
+    if (text.empty()) {
+        return std::nullopt;
+    }
+
+    std::size_t parsed_characters = 0;
+    try {
+        const double value = std::stod(text, &parsed_characters);
+        if (parsed_characters != text.size()) {
+            return std::nullopt;
+        }
+
+        return value;
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+std::optional<int> ParseRawJsonIntValue(std::string_view raw_value) {
+    const std::string text(TrimWhitespace(raw_value));
+    if (text.empty()) {
+        return std::nullopt;
+    }
+
+    std::size_t parsed_characters = 0;
+    try {
+        const int value = std::stoi(text, &parsed_characters);
+        if (parsed_characters != text.size()) {
+            return std::nullopt;
+        }
+
+        return value;
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+std::vector<std::string> ParseRawJsonStringArray(std::string_view raw_value) {
+    const std::string_view trimmed = TrimWhitespace(raw_value);
+    if (trimmed.empty() || trimmed.front() != '[') {
+        return {};
+    }
+
+    const auto closing = FindMatchingDelimiter(trimmed, 0, '[', ']');
+    if (!closing.has_value()) {
+        return {};
+    }
+
+    if (SkipWhitespace(trimmed, *closing + 1) != trimmed.size()) {
+        return {};
+    }
+
+    const std::string_view array_body = trimmed.substr(1, *closing - 1);
+    std::vector<std::string> values;
+    std::size_t position = 0;
+
+    while (true) {
+        position = SkipWhitespace(array_body, position);
+        if (position >= array_body.size()) {
+            break;
+        }
+
+        if (array_body[position] == ',') {
+            ++position;
+            continue;
+        }
+
+        if (array_body[position] != '"') {
+            return {};
+        }
+
+        const auto token = ParseJsonStringToken(array_body, position);
+        if (!token.has_value()) {
+            return {};
+        }
+
+        values.push_back(token->second);
+        position = SkipWhitespace(array_body, token->first);
+
+        if (position < array_body.size() && array_body[position] == ',') {
+            ++position;
+        }
+    }
+
+    return values;
 }
 
 }  // namespace
@@ -58,71 +457,48 @@ std::optional<std::string> FindStringValue(
     const std::string& json_text,
     const std::string& key
 ) {
-    const std::string escaped_key = EscapeRegex(key);
-    const std::string pattern =
-        "\"" + escaped_key + "\"\\s*:\\s*\"([^\"\\\\]*(?:\\\\.[^\"\\\\]*)*)\"";
-    return FindMatch(json_text, pattern);
+    const auto raw_value = FindRawValueByPath(json_text, key);
+    if (!raw_value.has_value()) {
+        return std::nullopt;
+    }
+
+    return ParseRawJsonStringValue(*raw_value);
 }
 
 std::optional<double> FindDoubleValue(
     const std::string& json_text,
     const std::string& key
 ) {
-    const std::string escaped_key = EscapeRegex(key);
-    const std::string pattern =
-        "\"" + escaped_key + "\"\\s*:\\s*"
-        "([-+]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][-+]?\\d+)?)";
-
-    const auto match = FindMatch(json_text, pattern);
-    if (!match.has_value()) {
+    const auto raw_value = FindRawValueByPath(json_text, key);
+    if (!raw_value.has_value()) {
         return std::nullopt;
     }
 
-    return std::stod(*match);
+    return ParseRawJsonDoubleValue(*raw_value);
 }
 
 std::optional<int> FindIntValue(
     const std::string& json_text,
     const std::string& key
 ) {
-    const std::string escaped_key = EscapeRegex(key);
-    const std::string pattern = "\"" + escaped_key + "\"\\s*:\\s*(-?\\d+)";
-
-    const auto match = FindMatch(json_text, pattern);
-    if (!match.has_value()) {
+    const auto raw_value = FindRawValueByPath(json_text, key);
+    if (!raw_value.has_value()) {
         return std::nullopt;
     }
 
-    return std::stoi(*match);
+    return ParseRawJsonIntValue(*raw_value);
 }
 
 std::vector<std::string> FindStringArrayValues(
     const std::string& json_text,
     const std::string& key
 ) {
-    const std::string escaped_key = EscapeRegex(key);
-    const std::string array_pattern =
-        "\"" + escaped_key + "\"\\s*:\\s*\\[([\\s\\S]*?)\\]";
-
-    const auto array_body = FindMatch(json_text, array_pattern);
-    if (!array_body.has_value()) {
+    const auto raw_value = FindRawValueByPath(json_text, key);
+    if (!raw_value.has_value()) {
         return {};
     }
 
-    const std::regex item_pattern(
-        "\"([^\"\\\\]*(?:\\\\.[^\"\\\\]*)*)\"",
-        std::regex::ECMAScript
-    );
-
-    std::vector<std::string> values;
-    auto begin = std::sregex_iterator(array_body->begin(), array_body->end(), item_pattern);
-    const auto end = std::sregex_iterator();
-
-    for (auto iterator = begin; iterator != end; ++iterator) {
-        values.push_back((*iterator)[1].str());
-    }
-
-    return values;
+    return ParseRawJsonStringArray(*raw_value);
 }
 
 std::string RequireStringValue(

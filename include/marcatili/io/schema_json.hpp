@@ -9,6 +9,7 @@ namespace marcatili::io {
 
 // These helpers intentionally support only the small, controlled JSON schema
 // used by the repository inputs. They are not meant to be general JSON parsers.
+// Keys may be provided as dotted paths (for example: "geometry.a").
 std::optional<std::string> FindStringValue(
     const std::string& json_text,
     const std::string& key
@@ -50,4 +51,3 @@ std::vector<std::string> RequireStringArrayValues(
 );
 
 }  // namespace marcatili::io
-

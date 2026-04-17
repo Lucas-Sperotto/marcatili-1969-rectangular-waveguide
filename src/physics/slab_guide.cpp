@@ -6,57 +6,20 @@
 #include <limits>
 #include <stdexcept>
 
+#include "marcatili/math/root_finding.hpp"
+#include "marcatili/math/waveguide_math.hpp"
+
 namespace marcatili {
 namespace {
 
-constexpr double kPi = 3.14159265358979323846;
-
-double Square(double value) {
-    return value * value;
-}
+using math::ComputeA;
+using math::kPi;
+using math::PenetrationDepth;
+using math::SafeUpperBound;
+using math::Square;
 
 double NaN() {
     return std::numeric_limits<double>::quiet_NaN();
-}
-
-double ComputeA(double wavelength, double n1, double nv) {
-    return wavelength / (2.0 * std::sqrt(Square(n1) - Square(nv)));
-}
-
-double RootSolveByBisection(
-    const std::function<double(double)>& function,
-    double lower,
-    double upper
-) {
-    double left = lower;
-    double right = upper;
-    double f_left = function(left);
-
-    for (int iteration = 0; iteration < 200; ++iteration) {
-        const double midpoint = 0.5 * (left + right);
-        const double f_mid = function(midpoint);
-
-        if (std::abs(f_mid) < 1e-12 || std::abs(right - left) < 1e-12) {
-            return midpoint;
-        }
-
-        if (f_left * f_mid <= 0.0) {
-            right = midpoint;
-        } else {
-            left = midpoint;
-            f_left = f_mid;
-        }
-    }
-
-    return 0.5 * (left + right);
-}
-
-double SafeUpperBound(double a_value, double b_value) {
-    return std::min(a_value, b_value) * (1.0 - 1e-10);
-}
-
-double PenetrationDepth(double A_value, double transverse_wave_number) {
-    return 1.0 / std::sqrt(Square(kPi / A_value) - Square(transverse_wave_number));
 }
 
 void ValidateConfig(const SingleGuideConfig& config) {
@@ -218,7 +181,7 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
         return result;
     }
 
-    result.ky = RootSolveByBisection(characteristic_function, lower_bound, upper_bound);
+    result.ky = math::SolveRootByBisection(characteristic_function, lower_bound, upper_bound);
 
     result.approximation_checks.ky_a2_over_pi_squared = Square(result.ky * result.A2 / kPi);
     result.approximation_checks.ky_a4_over_pi_squared = Square(result.ky * result.A4 / kPi);

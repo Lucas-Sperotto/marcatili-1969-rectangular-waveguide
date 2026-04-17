@@ -7,8 +7,12 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "marcatili/math/waveguide_math.hpp"
+
 namespace marcatili {
 namespace {
+
+using math::ComputeA;
 
 constexpr double kPi = 3.14159265358979323846;
 
@@ -18,10 +22,6 @@ double Square(double value) {
 
 double NaN() {
     return std::numeric_limits<double>::quiet_NaN();
-}
-
-double ComputeA(double wavelength, double n1, double nv) {
-    return wavelength / (2.0 * std::sqrt(Square(n1) - Square(nv)));
 }
 
 std::string FormatCompactNumber(double value) {

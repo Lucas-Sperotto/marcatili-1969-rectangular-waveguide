@@ -5,59 +5,17 @@
 #include <limits>
 #include <stdexcept>
 
+#include "marcatili/math/root_finding.hpp"
+#include "marcatili/math/waveguide_math.hpp"
+
 namespace marcatili {
 namespace {
 
-constexpr double kPi = 3.14159265358979323846;
-
-double Square(double value) {
-    return value * value;
-}
+using math::kPi;
+using math::Square;
 
 double NaN() {
     return std::numeric_limits<double>::quiet_NaN();
-}
-
-double RootSolveByBisection(
-    const std::function<double(double)>& function,
-    double lower,
-    double upper
-) {
-    double left = lower;
-    double right = upper;
-    double f_left = function(left);
-    double f_right = function(right);
-
-    if (f_left == 0.0) {
-        return left;
-    }
-
-    if (f_right == 0.0) {
-        return right;
-    }
-
-    if (f_left * f_right > 0.0) {
-        throw std::runtime_error("Bisection interval does not bracket a root.");
-    }
-
-    for (int iteration = 0; iteration < 200; ++iteration) {
-        const double midpoint = 0.5 * (left + right);
-        const double f_mid = function(midpoint);
-
-        if (std::abs(f_mid) < 1e-12 || std::abs(right - left) < 1e-12) {
-            return midpoint;
-        }
-
-        if (f_left * f_mid <= 0.0) {
-            right = midpoint;
-            f_right = f_mid;
-        } else {
-            left = midpoint;
-            f_left = f_mid;
-        }
-    }
-
-    return 0.5 * (left + right);
 }
 
 void ValidateConfig(const CouplerPointConfig& config) {
@@ -94,7 +52,7 @@ double SolveExactKxRatio(const CouplerPointConfig& config) {
                    static_cast<double>(config.p) * kPi;
         };
 
-        return RootSolveByBisection(equation_6, 1e-12, 1.0 - 1e-12);
+        return math::SolveRootByBisection(equation_6, 1e-12, 1.0 - 1e-12);
     }
 
     const double r = config.index_ratio_squared;
@@ -107,7 +65,7 @@ double SolveExactKxRatio(const CouplerPointConfig& config) {
                static_cast<double>(config.p) * kPi;
     };
 
-    return RootSolveByBisection(equation_20, 1e-12, 1.0 - 1e-12);
+    return math::SolveRootByBisection(equation_20, 1e-12, 1.0 - 1e-12);
 }
 
 double SolveClosedFormKxRatio(const CouplerPointConfig& config) {

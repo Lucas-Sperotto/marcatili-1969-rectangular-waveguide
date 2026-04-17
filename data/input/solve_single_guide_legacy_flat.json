@@ -1,0 +1,16 @@
+{
+  "case_id": "SG-POINT-LEGACY-FLAT-001",
+  "article_target": "Legacy flat-schema compatibility case for solve_single_guide input parsing",
+  "solver_model": "closed_form",
+  "mode_family": "E_y",
+  "p": 1,
+  "q": 1,
+  "wavelength": 1.0e-6,
+  "a": 3.54e-6,
+  "b": 1.77e-6,
+  "n1": 1.5,
+  "n2": 1.4851485148514851,
+  "n3": 1.4851485148514851,
+  "n4": 1.4851485148514851,
+  "n5": 1.4851485148514851
+}

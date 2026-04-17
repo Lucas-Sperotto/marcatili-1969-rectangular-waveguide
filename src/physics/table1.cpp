@@ -4,15 +4,15 @@
 #include <limits>
 #include <stdexcept>
 
+#include "marcatili/math/waveguide_math.hpp"
+
 namespace marcatili {
 namespace {
 
+using math::ComputeA;
+
 double NaN() {
     return std::numeric_limits<double>::quiet_NaN();
-}
-
-double ComputeA(double wavelength, double n1, double nv) {
-    return wavelength / (2.0 * std::sqrt(n1 * n1 - nv * nv));
 }
 
 void ValidateConfig(const Table1Config& config) {

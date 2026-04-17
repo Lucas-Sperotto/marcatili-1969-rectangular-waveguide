@@ -56,6 +56,24 @@ marcatili::SingleGuideConfig ParseSingleGuideConfig(
 ) {
     marcatili::SingleGuideConfig config;
 
+    const auto require_int_any = [&](const std::string& dotted_key, const std::string& flat_key) {
+        const auto dotted_value = FindIntValue(json_text, dotted_key);
+        if (dotted_value.has_value()) {
+            return *dotted_value;
+        }
+
+        return RequireIntValue(json_text, flat_key);
+    };
+
+    const auto require_double_any = [&](const std::string& dotted_key, const std::string& flat_key) {
+        const auto dotted_value = FindDoubleValue(json_text, dotted_key);
+        if (dotted_value.has_value()) {
+            return *dotted_value;
+        }
+
+        return RequireDoubleValue(json_text, flat_key);
+    };
+
     config.case_id = RequireStringValue(json_text, "case_id");
     config.article_target = FindStringValue(json_text, "article_target").value_or("");
     config.csv_output_path =
@@ -65,16 +83,16 @@ marcatili::SingleGuideConfig ParseSingleGuideConfig(
     );
     config.family =
         marcatili::ParseSingleGuideFamily(RequireStringValue(json_text, "mode_family"));
-    config.p = RequireIntValue(json_text, "p");
-    config.q = RequireIntValue(json_text, "q");
-    config.wavelength = RequireDoubleValue(json_text, "wavelength");
-    config.a = RequireDoubleValue(json_text, "a");
-    config.b = RequireDoubleValue(json_text, "b");
-    config.n1 = RequireDoubleValue(json_text, "n1");
-    config.n2 = RequireDoubleValue(json_text, "n2");
-    config.n3 = RequireDoubleValue(json_text, "n3");
-    config.n4 = RequireDoubleValue(json_text, "n4");
-    config.n5 = RequireDoubleValue(json_text, "n5");
+    config.p = require_int_any("mode_indices.p", "p");
+    config.q = require_int_any("mode_indices.q", "q");
+    config.wavelength = require_double_any("geometry.wavelength", "wavelength");
+    config.a = require_double_any("geometry.a", "a");
+    config.b = require_double_any("geometry.b", "b");
+    config.n1 = require_double_any("materials.n1", "n1");
+    config.n2 = require_double_any("materials.n2", "n2");
+    config.n3 = require_double_any("materials.n3", "n3");
+    config.n4 = require_double_any("materials.n4", "n4");
+    config.n5 = require_double_any("materials.n5", "n5");
 
     return config;
 }
@@ -88,7 +106,7 @@ std::string BuildSingleGuideJsonReport(
     json << "{\n";
     json << "  \"app\": \"solve_single_guide\",\n";
     json << "  \"status\": \"" << EscapeJson(result.status) << "\",\n";
-    json << "  \"model\": \"closed_form_approximation\",\n";
+    json << "  \"model\": \"" << EscapeJson(ToString(result.config.solver_model)) << "\",\n";
     json << "  \"input_file\": " << JsonStringOrNull(input_file) << ",\n";
     json << "  \"output_json_file\": " << JsonStringOrNull(output_json_file) << ",\n";
     json << "  \"output_csv_file\": " << JsonStringOrNull(result.config.csv_output_path) << ",\n";
