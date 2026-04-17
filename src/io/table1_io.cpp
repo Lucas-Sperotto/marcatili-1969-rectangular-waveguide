@@ -5,6 +5,8 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "marcatili/io/schema_json.hpp"
 #include "marcatili/io/text_io.hpp"
@@ -39,12 +41,16 @@ std::string JsonNumberOrNull(double value) {
 }
 
 std::string CsvNumber(double value) {
+    if (!std::isfinite(value)) {
+        return "nan";
+    }
+
     std::ostringstream stream;
     stream << std::setprecision(17) << value;
     return stream.str();
 }
 
-std::string DefaultSummaryCsvPath(const std::string& cli_output_json) {
+std::string BuildDefaultSummaryCsvPath(const std::string& cli_output_json) {
     if (cli_output_json.empty()) {
         return "";
     }
@@ -52,7 +58,7 @@ std::string DefaultSummaryCsvPath(const std::string& cli_output_json) {
     return ReplaceExtension(cli_output_json, ".summary.csv");
 }
 
-std::string DefaultDetailsCsvPath(const std::string& cli_output_json) {
+std::string BuildDefaultDetailsCsvPath(const std::string& cli_output_json) {
     if (cli_output_json.empty()) {
         return "";
     }
@@ -60,8 +66,80 @@ std::string DefaultDetailsCsvPath(const std::string& cli_output_json) {
     return ReplaceExtension(cli_output_json, ".details.csv");
 }
 
-marcatili::Table1RowSpec ParseTable1RowSpec(const std::string& text) {
+std::optional<double> FindDoubleWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto dotted_value = FindDoubleValue(json_text, dotted_key);
+    if (dotted_value.has_value()) {
+        return dotted_value;
+    }
+
+    return FindDoubleValue(json_text, flat_key);
+}
+
+double RequireDoubleWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto value = FindDoubleWithFallback(json_text, dotted_key, flat_key);
+    if (!value.has_value()) {
+        throw std::runtime_error(
+            "Missing required numeric key: " + dotted_key + " (or " + flat_key + ")"
+        );
+    }
+
+    return *value;
+}
+
+std::optional<int> FindIntWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto dotted_value = FindIntValue(json_text, dotted_key);
+    if (dotted_value.has_value()) {
+        return dotted_value;
+    }
+
+    return FindIntValue(json_text, flat_key);
+}
+
+std::optional<std::string> FindStringWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto dotted_value = FindStringValue(json_text, dotted_key);
+    if (dotted_value.has_value()) {
+        return dotted_value;
+    }
+
+    return FindStringValue(json_text, flat_key);
+}
+
+void AppendJsonField(
+    std::ostringstream& json,
+    const std::string& key,
+    const std::string& raw_value,
+    bool trailing_comma = true,
+    int indent = 2
+) {
+    json << std::string(indent, ' ')
+         << "\"" << key << "\": " << raw_value;
+
+    if (trailing_comma) {
+        json << ",";
+    }
+
+    json << "\n";
+}
+
+marcatili::Table1RowSpec ParseTable1RowSpecLegacy(const std::string& text) {
     std::stringstream parser(text);
+
     std::string row_id;
     std::string article_panel_id;
     std::string a_over_b_text;
@@ -88,12 +166,20 @@ marcatili::Table1RowSpec ParseTable1RowSpec(const std::string& text) {
     marcatili::Table1RowSpec row;
     row.row_id = row_id;
     row.article_panel_id = article_panel_id;
-    row.a_over_b = std::stod(a_over_b_text);
-    row.n2 = std::stod(n2_text);
-    row.n3 = std::stod(n3_text);
-    row.n4 = std::stod(n4_text);
-    row.n5 = std::stod(n5_text);
-    row.article_dimension_normalized = std::stod(article_dimension_text);
+
+    try {
+        row.a_over_b = std::stod(a_over_b_text);
+        row.n2 = std::stod(n2_text);
+        row.n3 = std::stod(n3_text);
+        row.n4 = std::stod(n4_text);
+        row.n5 = std::stod(n5_text);
+        row.article_dimension_normalized = std::stod(article_dimension_text);
+    } catch (const std::exception&) {
+        throw std::runtime_error(
+            "Invalid numeric values in rows entry: " + text
+        );
+    }
+
     return row;
 }
 
@@ -111,6 +197,41 @@ marcatili::Table1RowSpec ParseTable1RowSpecObject(const std::string& object_json
     return row;
 }
 
+std::vector<marcatili::Table1RowSpec> ParseRowSpecs(const std::string& json_text) {
+    std::vector<marcatili::Table1RowSpec> rows;
+
+    const auto object_rows = FindObjectArrayValues(json_text, "rows");
+    if (!object_rows.empty()) {
+        rows.reserve(object_rows.size());
+        for (const auto& row_object : object_rows) {
+            rows.push_back(ParseTable1RowSpecObject(row_object));
+        }
+        return rows;
+    }
+
+    const auto string_rows = FindStringArrayValues(json_text, "rows");
+    if (!string_rows.empty()) {
+        rows.reserve(string_rows.size());
+        for (const auto& row_text : string_rows) {
+            rows.push_back(ParseTable1RowSpecLegacy(row_text));
+        }
+        return rows;
+    }
+
+    const auto raw_rows = FindRawJsonValue(json_text, "rows");
+    if (raw_rows.has_value()) {
+        throw std::runtime_error(
+            "Invalid rows format. Use either an array of row objects "
+            "or the legacy compact string format."
+        );
+    }
+
+    throw std::runtime_error(
+        "Missing required rows. Use an array of row objects "
+        "or the legacy compact string format."
+    );
+}
+
 }  // namespace
 
 marcatili::Table1Config ParseTable1Config(
@@ -121,25 +242,52 @@ marcatili::Table1Config ParseTable1Config(
 
     config.case_id = RequireStringValue(json_text, "case_id");
     config.article_target = FindStringValue(json_text, "article_target").value_or("");
+
     config.summary_csv_output_path =
         FindStringValue(json_text, "csv_summary_file")
-            .value_or(DefaultSummaryCsvPath(cli_output_json));
+            .value_or(BuildDefaultSummaryCsvPath(cli_output_json));
+
     config.details_csv_output_path =
         FindStringValue(json_text, "csv_details_file")
-            .value_or(DefaultDetailsCsvPath(cli_output_json));
+            .value_or(BuildDefaultDetailsCsvPath(cli_output_json));
+
     config.table_entry_interpretation =
-        FindStringValue(json_text, "table_entry_interpretation")
-            .value_or("a_times_n1_over_lambda");
-    config.wavelength = RequireDoubleValue(json_text, "wavelength");
-    config.n1 = RequireDoubleValue(json_text, "n1");
-    config.search.max_p = FindIntValue(json_text, "search_max_p").value_or(4);
-    config.search.max_q = FindIntValue(json_text, "search_max_q").value_or(4);
+        FindStringWithFallback(
+            json_text,
+            "table.table_entry_interpretation",
+            "table_entry_interpretation"
+        ).value_or("a_times_n1_over_lambda");
+
+    config.wavelength =
+        RequireDoubleWithFallback(json_text, "geometry.wavelength", "wavelength");
+    config.n1 =
+        RequireDoubleWithFallback(json_text, "materials.n1", "n1");
+
+    config.search.max_p =
+        FindIntWithFallback(json_text, "search.max_p", "search_max_p").value_or(4);
+    config.search.max_q =
+        FindIntWithFallback(json_text, "search.max_q", "search_max_q").value_or(4);
+
     config.search.b_normalized_min =
-        FindDoubleValue(json_text, "search_b_normalized_min").value_or(0.01);
+        FindDoubleWithFallback(
+            json_text,
+            "search.b_normalized_min",
+            "search_b_normalized_min"
+        ).value_or(0.01);
+
     config.search.b_normalized_max =
-        FindDoubleValue(json_text, "search_b_normalized_max").value_or(60.0);
+        FindDoubleWithFallback(
+            json_text,
+            "search.b_normalized_max",
+            "search_b_normalized_max"
+        ).value_or(60.0);
+
     config.search.cutoff_tolerance =
-        FindDoubleValue(json_text, "search_cutoff_tolerance").value_or(1e-6);
+        FindDoubleWithFallback(
+            json_text,
+            "search.cutoff_tolerance",
+            "search_cutoff_tolerance"
+        ).value_or(1e-6);
 
     const auto solver_model_texts = FindStringArrayValues(json_text, "solver_models");
     if (solver_model_texts.empty()) {
@@ -152,24 +300,7 @@ marcatili::Table1Config ParseTable1Config(
         }
     }
 
-    const auto object_rows = FindObjectArrayValues(json_text, "rows");
-    if (!object_rows.empty()) {
-        for (const auto& row_object : object_rows) {
-            config.rows.push_back(ParseTable1RowSpecObject(row_object));
-        }
-    } else {
-        const auto string_rows = FindStringArrayValues(json_text, "rows");
-        for (const auto& row_text : string_rows) {
-            config.rows.push_back(ParseTable1RowSpec(row_text));
-        }
-
-        if (config.rows.empty()) {
-            throw std::runtime_error(
-                "Missing required rows. Use an array of row objects "
-                "or the legacy compact string format."
-            );
-        }
-    }
+    config.rows = ParseRowSpecs(json_text);
 
     return config;
 }
@@ -180,31 +311,63 @@ std::string BuildTable1JsonReport(
     const std::string& output_json_file
 ) {
     std::ostringstream json;
-
     json << "{\n";
-    json << "  \"app\": \"reproduce_table1\",\n";
-    json << "  \"status\": \"" << EscapeJson(result.status) << "\",\n";
-    json << "  \"input_file\": " << JsonStringOrNull(input_file) << ",\n";
-    json << "  \"output_json_file\": " << JsonStringOrNull(output_json_file) << ",\n";
-    json << "  \"output_summary_csv_file\": "
-         << JsonStringOrNull(result.config.summary_csv_output_path) << ",\n";
-    json << "  \"output_details_csv_file\": "
-         << JsonStringOrNull(result.config.details_csv_output_path) << ",\n";
-    json << "  \"case_id\": \"" << EscapeJson(result.config.case_id) << "\",\n";
-    json << "  \"article_target\": " << JsonStringOrNull(result.config.article_target) << ",\n";
-    json << "  \"table_entry_interpretation\": \""
-         << EscapeJson(result.config.table_entry_interpretation) << "\",\n";
-    json << "  \"reference_normalization\": "
-         << JsonStringOrNull(
-                "table entries multiplied by lambda / n1 and interpreted here as dimension a"
-            ) << ",\n";
+
+    AppendJsonField(json, "app", "\"reproduce_table1\"");
+    AppendJsonField(json, "status", "\"" + EscapeJson(result.status) + "\"");
+    AppendJsonField(json, "input_file", JsonStringOrNull(input_file));
+    AppendJsonField(json, "output_json_file", JsonStringOrNull(output_json_file));
+    AppendJsonField(
+        json,
+        "output_summary_csv_file",
+        JsonStringOrNull(result.config.summary_csv_output_path)
+    );
+    AppendJsonField(
+        json,
+        "output_details_csv_file",
+        JsonStringOrNull(result.config.details_csv_output_path)
+    );
+    AppendJsonField(json, "case_id", "\"" + EscapeJson(result.config.case_id) + "\"");
+    AppendJsonField(json, "article_target", JsonStringOrNull(result.config.article_target));
+    AppendJsonField(
+        json,
+        "table_entry_interpretation",
+        "\"" + EscapeJson(result.config.table_entry_interpretation) + "\""
+    );
+    AppendJsonField(
+        json,
+        "reference_normalization",
+        JsonStringOrNull(
+            "table entries multiplied by lambda / n1 and interpreted here as dimension a"
+        )
+    );
+
     json << "  \"search\": {\n";
-    json << "    \"max_p\": " << result.config.search.max_p << ",\n";
-    json << "    \"max_q\": " << result.config.search.max_q << ",\n";
-    json << "    \"b_normalized_min\": " << JsonNumber(result.config.search.b_normalized_min) << ",\n";
-    json << "    \"b_normalized_max\": " << JsonNumber(result.config.search.b_normalized_max) << ",\n";
-    json << "    \"cutoff_tolerance\": " << JsonNumber(result.config.search.cutoff_tolerance) << "\n";
+    AppendJsonField(json, "max_p", std::to_string(result.config.search.max_p), true, 4);
+    AppendJsonField(json, "max_q", std::to_string(result.config.search.max_q), true, 4);
+    AppendJsonField(
+        json,
+        "b_normalized_min",
+        JsonNumber(result.config.search.b_normalized_min),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "b_normalized_max",
+        JsonNumber(result.config.search.b_normalized_max),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "cutoff_tolerance",
+        JsonNumber(result.config.search.cutoff_tolerance),
+        false,
+        4
+    );
     json << "  },\n";
+
     json << "  \"solver_models\": [\n";
     for (std::size_t index = 0; index < result.config.solver_models.size(); ++index) {
         json << "    \"" << EscapeJson(ToString(result.config.solver_models[index])) << "\"";
@@ -214,44 +377,109 @@ std::string BuildTable1JsonReport(
         json << "\n";
     }
     json << "  ],\n";
-    json << "  \"row_summaries\": [\n";
 
+    json << "  \"row_summaries\": [\n";
     for (std::size_t index = 0; index < result.row_summaries.size(); ++index) {
         const auto& row = result.row_summaries[index];
+
         json << "    {\n";
-        json << "      \"row_id\": \"" << EscapeJson(row.row_id) << "\",\n";
-        json << "      \"article_panel_id\": " << JsonStringOrNull(row.article_panel_id) << ",\n";
-        json << "      \"solver_model\": \"" << EscapeJson(ToString(row.solver_model)) << "\",\n";
-        json << "      \"a_over_b\": " << JsonNumber(row.a_over_b) << ",\n";
-        json << "      \"article_dimension_normalized\": "
-             << JsonNumber(row.article_dimension_normalized) << ",\n";
-        json << "      \"computed_dimension_normalized\": "
-             << JsonNumberOrNull(row.computed_dimension_normalized) << ",\n";
-        json << "      \"limiting_cutoff_found\": "
-             << (row.limiting_cutoff_found ? "true" : "false") << ",\n";
-        json << "      \"limiting_mode_id\": " << JsonStringOrNull(row.limiting_mode_id) << ",\n";
-        json << "      \"computed_b_normalized\": "
-             << JsonNumberOrNull(row.computed_b_normalized) << ",\n";
-        json << "      \"computed_a_normalized\": "
-             << JsonNumberOrNull(row.computed_a_normalized) << ",\n";
-        json << "      \"computed_b_over_A4\": "
-             << JsonNumberOrNull(row.computed_b_over_A4) << ",\n";
-        json << "      \"absolute_error\": " << JsonNumberOrNull(row.absolute_error) << ",\n";
-        json << "      \"relative_error\": " << JsonNumberOrNull(row.relative_error) << ",\n";
-        json << "      \"ex11_guided_just_below_cutoff\": "
-             << (row.ex11_guided_just_below_cutoff ? "true" : "false") << ",\n";
-        json << "      \"ey11_guided_just_below_cutoff\": "
-             << (row.ey11_guided_just_below_cutoff ? "true" : "false") << "\n";
+        AppendJsonField(json, "row_id", "\"" + EscapeJson(row.row_id) + "\"", true, 6);
+        AppendJsonField(json, "article_panel_id", JsonStringOrNull(row.article_panel_id), true, 6);
+        AppendJsonField(
+            json,
+            "solver_model",
+            "\"" + EscapeJson(ToString(row.solver_model)) + "\"",
+            true,
+            6
+        );
+        AppendJsonField(json, "a_over_b", JsonNumber(row.a_over_b), true, 6);
+        AppendJsonField(
+            json,
+            "article_dimension_normalized",
+            JsonNumber(row.article_dimension_normalized),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "computed_dimension_normalized",
+            JsonNumberOrNull(row.computed_dimension_normalized),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "limiting_cutoff_found",
+            row.limiting_cutoff_found ? "true" : "false",
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "limiting_mode_id",
+            JsonStringOrNull(row.limiting_mode_id),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "computed_b_normalized",
+            JsonNumberOrNull(row.computed_b_normalized),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "computed_a_normalized",
+            JsonNumberOrNull(row.computed_a_normalized),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "computed_b_over_A4",
+            JsonNumberOrNull(row.computed_b_over_A4),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "absolute_error",
+            JsonNumberOrNull(row.absolute_error),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "relative_error",
+            JsonNumberOrNull(row.relative_error),
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "ex11_guided_just_below_cutoff",
+            row.ex11_guided_just_below_cutoff ? "true" : "false",
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "ey11_guided_just_below_cutoff",
+            row.ey11_guided_just_below_cutoff ? "true" : "false",
+            false,
+            6
+        );
         json << "    }";
+
         if (index + 1 != result.row_summaries.size()) {
             json << ",";
         }
         json << "\n";
     }
-
     json << "  ]\n";
-    json << "}\n";
 
+    json << "}\n";
     return json.str();
 }
 

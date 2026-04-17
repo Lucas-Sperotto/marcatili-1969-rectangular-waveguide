@@ -1,101 +1,118 @@
 # marcatili-1969-rectangular-waveguide
 
-Repositório em C++17 para reproduzir, de forma didática e reprodutível, o artigo *Dielectric Rectangular Waveguide and Directional Coupler for Integrated Optics* (Marcatili, 1969).
+Repositório em **C++17** para reproduzir, de forma didática e reprodutível, o artigo **“Dielectric Rectangular Waveguide and Directional Coupler for Integrated Optics”** (Marcatili, 1969).
 
-## Objetivo
+O foco do projeto é ligar, de maneira clara, três camadas:
 
-Este projeto busca reconstruir:
+- **artigo original**;
+- **documentação técnica e pedagógica**;
+- **implementação numérica reprodutível**.
 
-1. a formulação do guia dielétrico retangular;
-2. as aproximações analíticas usadas por Marcatili;
-3. as figuras e tabelas centrais do artigo;
-4. o modelo do acoplador direcional;
-5. uma trilha clara entre documentação, implementação e validação.
+## Visão geral
 
-Nesta etapa, a base do projeto já inclui:
+O repositório já inclui:
 
-1. um solver do guia único com versões aproximada e exata;
-2. a reprodução operacional da Fig. 6, incluindo casos retangulares e limites de lâmina;
-3. uma primeira reprodução do nomograma da Fig. 7;
-4. uma reproducao operacional da Fig. 8 para o caso com interface metalizada, com comparacao lado a lado contra o scan;
-5. uma primeira reproducao operacional da Fig. 10 a partir da equacao de acoplamento normalizado;
-6. uma primeira reproducao operacional da Fig. 11 a partir da mesma equacao de acoplamento, agora com a raiz transversal da Eq. (20);
-7. base organizada para extensoes do acoplador e para os casos perturbados ainda nao implementados.
+- solver do **guia único** com versões `closed_form` e `exact`;
+- reprodução operacional da **Fig. 6**;
+- primeira reprodução do nomograma da **Fig. 7**;
+- reprodução operacional da **Fig. 8** com comparação ao scan do artigo;
+- reprodução operacional da **Fig. 10**;
+- reprodução operacional da **Fig. 11**;
+- base organizada para expansão do **acoplador direcional** e dos **casos perturbados**.
 
-## Como ler o repositório
+## Leitura rápida
 
-Uma forma boa de navegar pelo projeto é esta:
+Uma sequência recomendada para entender o projeto é:
 
-1. comece pelos casos em `data/input/` para ver quais parametros entram;
-2. leia os executaveis em `src/apps/` como "roteiros curtos" de execucao;
-3. depois desca para `src/io/` e `src/physics/`, onde estao o schema e a matematica;
-4. por fim, veja `scripts/plot_fig*.py`, que transformam `CSV` em figuras.
+1. ler este `README.md`;
+2. abrir os arquivos de entrada em `data/input/`;
+3. ler os executáveis em `src/apps/`;
+4. descer para `src/io/`, `src/math/` e `src/physics/`;
+5. por fim, ver os scripts de plot em `scripts/`.
 
-Documentos pedagogicos recomendados:
+Documentos recomendados para a trilha técnica:
 
-- `docs/10_fluxo_geral_do_repositorio.md`
-- `docs/11_closed_form_vs_exact.md`
-- `docs/12_trilha_equacoes_para_codigo.md`
-- `docs/13_validacao_e_limites_do_modelo.md`
-- `docs/14_diagramas_de_fluxo_e_sequencia.md`
-- `docs/15_roteiro_de_estudo.md`
+- [Fluxo geral do repositório](docs/10_fluxo_geral_do_repositorio.md)
+- [Closed form vs exact](docs/11_closed_form_vs_exact.md)
+- [Trilha equações → código](docs/12_trilha_equacoes_para_codigo.md)
+- [Validação e limites do modelo](docs/13_validacao_e_limites_do_modelo.md)
+- [Diagramas de fluxo e sequência](docs/14_diagramas_de_fluxo_e_sequencia.md)
+- [Roteiro de estudo](docs/15_roteiro_de_estudo.md)
 
-## Estrutura
+## Tradução do artigo
 
-- `docs/`: documentação, tradução, notas editoriais e material matemático.
-- `docs/refs/`: referências, PDF do artigo, notas de OCR e verificações manuais.
-- `data/`: arquivos de entrada e saídas numéricas em `CSV` e `JSON`.
-- `include/`: cabeçalhos do núcleo C++.
-- `src/`: implementação compartilhada.
-- `src/apps/`: executáveis do projeto.
-- `scripts/`: scripts Python externos e scripts de automação.
-- `tests/`: testes automáticos e casos de verificação.
-- `scripts/run/`: scripts de build, limpeza e reprodução.
+A tradução e organização comentada do artigo estão distribuídas nos arquivos abaixo:
+
+- [Resumo inicial](docs/00_resumo.md)
+- [1. Introduction](docs/01_introduction.md)
+- [2. Formulação do problema de valor de contorno](docs/02_formulacao_do_problema_de_valor_de_contorno.md)
+- [Dicionário de símbolos](docs/02_symbol_dictionary.md)
+- [3.1 Modos \(E^y\)](docs/03.1_modos_Ey.md)
+- [3.2 Modos \(E^x\)](docs/03.2_modos_Ex.md)
+- [3.3 Exemplos](docs/03.3_exemplos.md)
+- [3. Guia imerso em vários dielétricos](docs/03_guia_imerso_em_varios_dieletricos.md)
+- [4. Acoplador direcional](docs/04_acoplador_direcional.md)
+- [5. Acoplador direcional com guias ligeiramente diferentes](docs/05_Acoplador%20direcional%20constru%C3%ADdo%20com%20guias%20ligeiramente%20diferentes.md)
+- [6. Resumo e conclusões](docs/06_resumo_e_conclusoes.md)
+- [7. Apêndice A](docs/07_apendice_A.md)
+- [8. Referências](docs/08_referencias.md)
+
+Referências de apoio:
+
+- [PDF do artigo](docs/refs/j.1538-7305.1969.tb01166.x.pdf)
+- [Notas sobre figuras](docs/00.1_figuras.md)
+- [Casos de teste](docs/00.2_casos_de_teste.md)
+- [Relatório de divergências das figuras](docs/00.4_relatorio_divergencias_figuras.md)
+
+## Estrutura do repositório
+
+- `docs/`: documentação técnica, tradução, notas editoriais e material matemático;
+- `docs/refs/`: referências e PDF do artigo;
+- `data/input/`: arquivos de entrada dos casos;
+- `data/output/`: saídas numéricas e figuras geradas;
+- `include/`: cabeçalhos do núcleo C++;
+- `src/`: implementação compartilhada;
+- `src/apps/`: executáveis;
+- `scripts/`: scripts Python e automações;
+- `scripts/run/`: build, limpeza e reprodução;
+- `tests/`: testes e verificações.
 
 ## Estado atual dos executáveis
 
-- `solve_single_guide`: resolve um caso pontual do guia único com solver `closed_form` ou `exact` e gera saídas em `JSON` e `CSV`.
-- `solve_coupler`: resolve um ponto do acoplador direcional no modelo normalizado da Eq. (34), com escolha da equacao transversal (`eq6` ou `eq20`) e saidas em `JSON` e `CSV`.
-- `reproduce_fig6`: executa um sweep em $b/A_4$ e gera curvas numéricas em `CSV` e resumo em `JSON` para um painel de Fig. 6, com suporte a solver aproximado, exato e ao limite de lâmina.
-- `reproduce_fig7`: reproduz o nomograma da Fig. 7 como conjunto de retas modais, retas de $C$ e interseções de referência em `JSON` e `CSV`.
-- `reproduce_fig8`: executa um sweep em $a/A$ para o caso metalizado da Fig. 8, hoje com o conjunto modal de trabalho $E^y_{11}$, $E^x_{11}$ e $E^x_{21}$ explicitado no relatorio `JSON`.
-- `reproduce_fig10`: executa um sweep em $c/a$ para a Eq. (34) da Secao IV, usando Eq. (6) e Eq. (12) para obter $k_x$ no limite simetrico $n_3=n_5$, com familias em $a/A_5$.
-- `reproduce_fig11`: executa um sweep em $c/a$ para a Eq. (34) da Secao IV, usando a raiz exata da Eq. (20) para $\mathbf{k}_x$ e comparando as familias de $a/A_5$ para os dois casos de legenda $n_1/n_5 = 1.5$ e $n_1/n_5 = 1.1$.
-- `reproduce_table1`: procura o primeiro cutoff de modo superior em cada linha da Tabela I e gera comparações em `JSON` e `CSV` para as dimensões monomodo publicadas, tratando a entrada tabulada como a dimensão `a`.
+- `solve_single_guide`: resolve um caso do guia único com solver `closed_form` ou `exact`;
+- `solve_coupler`: resolve um ponto do acoplador no modelo normalizado da Eq. (34);
+- `reproduce_fig6`: reproduz curvas da Fig. 6;
+- `reproduce_fig7`: reproduz o nomograma da Fig. 7;
+- `reproduce_fig8`: reproduz o caso metalizado da Fig. 8;
+- `reproduce_fig10`: reproduz a curva de acoplamento da Fig. 10;
+- `reproduce_fig11`: reproduz a curva de acoplamento da Fig. 11;
+- `reproduce_table1`: compara as dimensões monomodo da Tabela I com os cálculos do repositório.
 
-Todos aceitam um arquivo de entrada:
+## Execução rápida
+
+Todos os executáveis recebem um arquivo de entrada.
 
 ```bash
 ./build/bin/solve_single_guide data/input/solve_single_guide.json
 ./build/bin/solve_coupler data/input/solve_coupler.json data/output/solve_coupler.json
+
 ./build/bin/reproduce_fig6 data/input/reproduce_fig6.json data/output/reproduce_fig6.json
 ./scripts/plot_fig6.py data/output/reproduce_fig6.csv -o data/output/reproduce_fig6.png
+
 ./build/bin/reproduce_fig7 data/input/reproduce_fig7.json data/output/reproduce_fig7.json
 ./scripts/plot_fig7.py data/output/reproduce_fig7.lines.csv --intersections-csv data/output/reproduce_fig7.intersections.csv -o data/output/reproduce_fig7.png
+
 ./build/bin/reproduce_fig8 data/input/reproduce_fig8.json data/output/reproduce_fig8.json
 ./scripts/plot_fig8.py data/output/reproduce_fig8.csv -o data/output/reproduce_fig8.png
+
 ./build/bin/reproduce_fig10 data/input/reproduce_fig10.json data/output/reproduce_fig10.json
 ./scripts/plot_fig10.py data/output/reproduce_fig10.csv -o data/output/reproduce_fig10.png
+
 ./build/bin/reproduce_fig11 data/input/reproduce_fig11.json data/output/reproduce_fig11.json
 ./scripts/plot_fig11.py data/output/reproduce_fig11.csv -o data/output/reproduce_fig11.png
-./scripts/run/build_fig7_article_comparison.sh
-./scripts/run/build_fig8_article_comparison.sh
-./scripts/run/build_fig10_article_comparison.sh
-./scripts/run/build_fig11_article_comparison.sh
-```
+````
 
-## `closed_form` e `exact`
-
-Os dois nomes aparecem em varios casos e merecem uma leitura cuidadosa:
-
-- `closed_form`: usa as formulas aproximadas em forma fechada derivadas por Marcatili, como Eq. (12)-(16) e Eq. (22)-(26);
-- `exact`: resolve numericamente as equacoes transcendentais do proprio modelo adotado, como Eq. (6), Eq. (7), Eq. (20) e Eq. (21).
-
-Importante: `exact` aqui nao significa resolver o problema vetorial 2D completo sem aproximacoes. Significa resolver exatamente, por metodos numericos, a versao transcendental do modelo de Marcatili implementado no repositorio.
-
-Para uma explicacao didatica mais longa, veja `docs/11_closed_form_vs_exact.md`.
-
-## Build e execução
+## Build e automação
 
 ```bash
 ./scripts/run/build.sh
@@ -110,37 +127,67 @@ Para uma explicacao didatica mais longa, veja `docs/11_closed_form_vs_exact.md`.
 ./scripts/run/clean.sh
 ```
 
-Por padrao, `clean.sh` preserva artefatos versionados em `data/output` para nao sujar o `git status`.
-Se quiser remover tambem os arquivos rastreados, use:
+Para remover também saídas rastreadas pelo Git:
 
 ```bash
 CLEAN_TRACKED_OUTPUT=1 ./scripts/run/clean.sh
 ```
 
-Se quiser executar os smoke tests registrados no `CTest`, rode:
+Para executar os smoke tests registrados no `CTest`:
 
 ```bash
 RUN_TESTS=1 ./scripts/run/build.sh
 ```
 
+## `closed_form` e `exact`
+
+Esses dois termos aparecem em vários pontos do repositório:
+
+* `closed_form`: usa as fórmulas aproximadas em forma fechada derivadas por Marcatili;
+* `exact`: resolve numericamente as equações transcendentais do modelo de Marcatili adotado no projeto.
+
+Importante: aqui `exact` **não** significa resolver o problema vetorial 2D completo sem aproximações. Significa resolver numericamente, de forma exata, a versão transcendental do modelo implementado no repositório.
+
+Veja também: [docs/11_closed_form_vs_exact.md](docs/11_closed_form_vs_exact.md)
+
 ## Convenções do projeto
 
-- núcleo numérico em `C++17`;
-- sem dependências desnecessárias nesta fase inicial;
-- gráficos gerados apenas por scripts Python externos;
-- cada executável deve receber um arquivo de entrada;
-- o parser JSON interno e deliberadamente restrito ao schema do repositorio (strings, numeros, arrays de strings e arrays de objetos); ele nao e um parser JSON geral;
-- para novos casos, preferir arrays de objetos JSON em vez de campos compactos em string;
-- saídas numéricas devem permanecer em `CSV` ou `JSON`;
-- ambiguidades de OCR devem ser marcadas com `TODO`.
-- o primeiro solver implementado deve sempre explicitar quais equações do artigo está usando.
-- gráficos intermediários e finais devem nascer apenas dos artefatos numéricos em `CSV` e `JSON`.
+* núcleo numérico em `C++17`;
+* dependências externas mínimas nesta fase;
+* gráficos gerados apenas por scripts Python externos;
+* cada executável deve receber um arquivo de entrada;
+* o parser JSON interno é restrito ao schema do projeto;
+* novos casos devem preferir arrays de objetos JSON;
+* saídas numéricas devem permanecer em `CSV` e `JSON`;
+* ambiguidades de OCR devem ser marcadas com `TODO`;
+* cada solver novo deve explicitar quais equações do artigo está usando;
+* gráficos finais devem nascer apenas dos artefatos numéricos produzidos pelo código.
+
+## Mapa artigo → código
+
+Uma leitura prática do projeto pode seguir esta correspondência:
+
+* **Seções 2 e 3 do artigo** → `solve_single_guide`, `reproduce_fig6`, `reproduce_fig7`, `reproduce_fig8`
+* **Seção 4 do artigo** → `solve_coupler`, `reproduce_fig10`, `reproduce_fig11`
+* **Tabela I** → `reproduce_table1`
+* **Apêndice A** → base matemática do acoplador e das equações transcendentais
+
+## Estado de reprodução
+
+* **Fig. 6**: reprodução operacional implementada;
+* **Fig. 7**: reprodução operacional implementada, ainda em consolidação quantitativa;
+* **Fig. 8**: reprodução operacional implementada com comparação ao artigo;
+* **Fig. 10**: reprodução operacional implementada com comparação ao artigo;
+* **Fig. 11**: reprodução operacional implementada com comparação ao artigo;
+* **Tabela I**: comparação operacional implementada;
+* **casos perturbados da Seção V**: ainda não implementados.
 
 ## Roteiro de evolução
 
-1. consolidar a documentação técnica e o dicionário de símbolos em `docs/`;
-2. refinar a transcrição e a validação cruzada da Fig. 6;
-3. transformar a primeira base da Fig. 7 em comparação quantitativa com o artigo;
-4. consolidar a comparacao artigo x reproducao da Fig. 8, da Fig. 10 e da Fig. 11;
-5. expandir o nucleo do acoplador para cobrir os exemplos numericos da Secao IV;
-6. ligar esse mesmo nucleo ao futuro `solve_coupler`.
+1. consolidar a documentação técnica e o dicionário de símbolos;
+2. refinar a validação cruzada da Fig. 6;
+3. consolidar a comparação quantitativa da Fig. 7;
+4. consolidar as comparações artigo × reprodução das Figs. 8, 10 e 11;
+5. expandir o núcleo do acoplador para os exemplos numéricos da Seção IV;
+6. ligar esse núcleo ao `solve_coupler`;
+7. avançar para os casos perturbados da Seção V.

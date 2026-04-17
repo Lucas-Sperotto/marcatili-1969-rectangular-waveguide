@@ -5,6 +5,8 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "marcatili/io/schema_json.hpp"
 #include "marcatili/io/text_io.hpp"
@@ -39,12 +41,16 @@ std::string JsonNumberOrNull(double value) {
 }
 
 std::string CsvNumber(double value) {
+    if (!std::isfinite(value)) {
+        return "nan";
+    }
+
     std::ostringstream stream;
     stream << std::setprecision(17) << value;
     return stream.str();
 }
 
-std::string DefaultLinesCsvPath(const std::string& cli_output_json) {
+std::string BuildDefaultLinesCsvPath(const std::string& cli_output_json) {
     if (cli_output_json.empty()) {
         return "";
     }
@@ -52,7 +58,7 @@ std::string DefaultLinesCsvPath(const std::string& cli_output_json) {
     return ReplaceExtension(cli_output_json, ".lines.csv");
 }
 
-std::string DefaultIntersectionsCsvPath(const std::string& cli_output_json) {
+std::string BuildDefaultIntersectionsCsvPath(const std::string& cli_output_json) {
     if (cli_output_json.empty()) {
         return "";
     }
@@ -60,12 +66,102 @@ std::string DefaultIntersectionsCsvPath(const std::string& cli_output_json) {
     return ReplaceExtension(cli_output_json, ".intersections.csv");
 }
 
-double ParseStringAsDouble(const std::string& text, const std::string& field_name) {
-    try {
-        return std::stod(text);
-    } catch (const std::exception&) {
-        throw std::runtime_error("Invalid numeric string in " + field_name + ": " + text);
+std::optional<double> FindDoubleWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto dotted_value = FindDoubleValue(json_text, dotted_key);
+    if (dotted_value.has_value()) {
+        return dotted_value;
     }
+
+    return FindDoubleValue(json_text, flat_key);
+}
+
+double RequireDoubleWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto value = FindDoubleWithFallback(json_text, dotted_key, flat_key);
+    if (!value.has_value()) {
+        throw std::runtime_error(
+            "Missing required numeric key: " + dotted_key + " (or " + flat_key + ")"
+        );
+    }
+
+    return *value;
+}
+
+std::optional<int> FindIntWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto dotted_value = FindIntValue(json_text, dotted_key);
+    if (dotted_value.has_value()) {
+        return dotted_value;
+    }
+
+    return FindIntValue(json_text, flat_key);
+}
+
+std::optional<std::string> FindStringWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto dotted_value = FindStringValue(json_text, dotted_key);
+    if (dotted_value.has_value()) {
+        return dotted_value;
+    }
+
+    return FindStringValue(json_text, flat_key);
+}
+
+std::vector<std::string> FindStringArrayWithFallback(
+    const std::string& json_text,
+    const std::string& dotted_key,
+    const std::string& flat_key
+) {
+    const auto dotted_values = FindStringArrayValues(json_text, dotted_key);
+    if (!dotted_values.empty()) {
+        return dotted_values;
+    }
+
+    return FindStringArrayValues(json_text, flat_key);
+}
+
+void AppendJsonField(
+    std::ostringstream& json,
+    const std::string& key,
+    const std::string& raw_value,
+    bool trailing_comma = true,
+    int indent = 2
+) {
+    json << std::string(indent, ' ')
+         << "\"" << key << "\": " << raw_value;
+
+    if (trailing_comma) {
+        json << ",";
+    }
+
+    json << "\n";
+}
+
+std::string ResolveArticleReferenceModeLineId(const std::string& json_text) {
+    if (const auto line_id =
+            FindStringWithFallback(json_text, "article_reference.mode_line_id", "article_reference_mode_line_id")) {
+        return *line_id;
+    }
+
+    if (const auto mode_text =
+            FindStringWithFallback(json_text, "article_reference.mode", "article_reference_mode")) {
+        return marcatili::ParseFigure7ModeSpec(*mode_text).line_id;
+    }
+
+    return "";
 }
 
 }  // namespace
@@ -78,35 +174,64 @@ marcatili::Figure7Config ParseFigure7Config(
 
     config.case_id = RequireStringValue(json_text, "case_id");
     config.article_target = FindStringValue(json_text, "article_target").value_or("");
+
     config.lines_csv_output_path =
-        FindStringValue(json_text, "csv_lines_file").value_or(DefaultLinesCsvPath(cli_output_json));
+        FindStringValue(json_text, "csv_lines_file")
+            .value_or(BuildDefaultLinesCsvPath(cli_output_json));
+
     config.intersections_csv_output_path =
         FindStringValue(json_text, "csv_intersections_file")
-            .value_or(DefaultIntersectionsCsvPath(cli_output_json));
-    if (const auto article_reference_mode = FindStringValue(json_text, "article_reference_mode")) {
-        config.article_reference_mode_line_id =
-            marcatili::ParseFigure7ModeSpec(*article_reference_mode).line_id;
-    }
+            .value_or(BuildDefaultIntersectionsCsvPath(cli_output_json));
+
+    config.article_reference_mode_line_id = ResolveArticleReferenceModeLineId(json_text);
+
     config.article_reference_note =
-        FindStringValue(json_text, "article_reference_note").value_or("");
-    config.wavelength = RequireDoubleValue(json_text, "wavelength");
-    config.a = RequireDoubleValue(json_text, "a");
-    config.b = RequireDoubleValue(json_text, "b");
-    config.n1 = RequireDoubleValue(json_text, "n1");
-    config.n2 = RequireDoubleValue(json_text, "n2");
-    config.n3 = RequireDoubleValue(json_text, "n3");
-    config.n4 = RequireDoubleValue(json_text, "n4");
-    config.n5 = RequireDoubleValue(json_text, "n5");
-    config.line_point_count = FindIntValue(json_text, "line_point_count").value_or(200);
-    config.reference_c_value = FindDoubleValue(json_text, "reference_c_value").value_or(NaN());
+        FindStringWithFallback(json_text, "article_reference.note", "article_reference_note")
+            .value_or("");
+
+    config.wavelength =
+        RequireDoubleWithFallback(json_text, "geometry.wavelength", "wavelength");
+    config.a =
+        RequireDoubleWithFallback(json_text, "geometry.a", "a");
+    config.b =
+        RequireDoubleWithFallback(json_text, "geometry.b", "b");
+
+    config.n1 =
+        RequireDoubleWithFallback(json_text, "materials.n1", "n1");
+    config.n2 =
+        RequireDoubleWithFallback(json_text, "materials.n2", "n2");
+    config.n3 =
+        RequireDoubleWithFallback(json_text, "materials.n3", "n3");
+    config.n4 =
+        RequireDoubleWithFallback(json_text, "materials.n4", "n4");
+    config.n5 =
+        RequireDoubleWithFallback(json_text, "materials.n5", "n5");
+
+    config.line_point_count =
+        FindIntWithFallback(json_text, "nomogram.line_point_count", "line_point_count")
+            .value_or(200);
+
+    config.reference_c_value =
+        FindDoubleWithFallback(json_text, "nomogram.reference_c_value", "reference_c_value")
+            .value_or(NaN());
+
     config.article_reference_y_readoff =
-        FindDoubleValue(json_text, "article_reference_y_readoff").value_or(NaN());
+        FindDoubleWithFallback(
+            json_text,
+            "article_reference.y_readoff",
+            "article_reference_y_readoff"
+        ).value_or(NaN());
 
     for (const auto& mode_text : RequireStringArrayValues(json_text, "modes")) {
         config.modes.push_back(marcatili::ParseFigure7ModeSpec(mode_text));
     }
 
-    for (const auto& c_text : RequireStringArrayValues(json_text, "c_values")) {
+    const auto c_texts = FindStringArrayWithFallback(json_text, "c_lines", "c_values");
+    if (c_texts.empty()) {
+        throw std::runtime_error("Missing required string-array key: c_lines (or c_values)");
+    }
+
+    for (const auto& c_text : c_texts) {
         config.c_lines.push_back(marcatili::ParseFigure7CLineSpec(c_text));
     }
 
@@ -123,79 +248,166 @@ std::string BuildFigure7JsonReport(
     const std::string& output_json_file
 ) {
     std::ostringstream json;
-
     json << "{\n";
-    json << "  \"app\": \"reproduce_fig7\",\n";
-    json << "  \"status\": \"" << EscapeJson(result.status) << "\",\n";
-    json << "  \"input_file\": " << JsonStringOrNull(input_file) << ",\n";
-    json << "  \"output_json_file\": " << JsonStringOrNull(output_json_file) << ",\n";
-    json << "  \"output_lines_csv_file\": "
-         << JsonStringOrNull(result.config.lines_csv_output_path) << ",\n";
-    json << "  \"output_intersections_csv_file\": "
-         << JsonStringOrNull(result.config.intersections_csv_output_path) << ",\n";
-    json << "  \"case_id\": \"" << EscapeJson(result.config.case_id) << "\",\n";
-    json << "  \"article_target\": " << JsonStringOrNull(result.config.article_target) << ",\n";
-    json << "  \"geometry\": {\n";
-    json << "    \"wavelength\": " << JsonNumber(result.config.wavelength) << ",\n";
-    json << "    \"a\": " << JsonNumber(result.config.a) << ",\n";
-    json << "    \"b\": " << JsonNumber(result.config.b) << "\n";
-    json << "  },\n";
-    json << "  \"materials\": {\n";
-    json << "    \"n1\": " << JsonNumber(result.config.n1) << ",\n";
-    json << "    \"n2\": " << JsonNumber(result.config.n2) << ",\n";
-    json << "    \"n3\": " << JsonNumber(result.config.n3) << ",\n";
-    json << "    \"n4\": " << JsonNumber(result.config.n4) << ",\n";
-    json << "    \"n5\": " << JsonNumber(result.config.n5) << "\n";
-    json << "  },\n";
-    json << "  \"nomogram\": {\n";
-    json << "    \"line_point_count\": " << result.config.line_point_count << ",\n";
-    json << "    \"x_numerator\": " << JsonNumber(result.x_numerator) << ",\n";
-    json << "    \"y_numerator\": " << JsonNumber(result.y_numerator) << ",\n";
-    json << "    \"derived_c\": " << JsonNumber(result.derived_c) << ",\n";
-    json << "    \"reference_c_value\": " << JsonNumber(result.config.reference_c_value) << ",\n";
-    json << "    \"reference_c_absolute_error\": "
-         << JsonNumberOrNull(result.reference_c_absolute_error) << ",\n";
-    json << "    \"reference_c_relative_error\": "
-         << JsonNumberOrNull(result.reference_c_relative_error) << "\n";
-    json << "  },\n";
-    json << "  \"design_example\": {\n";
-    json << "    \"a_over_b\": " << JsonNumber(result.design_example.a_over_b) << ",\n";
-    json << "    \"symmetric_material_pairs\": "
-         << (result.design_example.symmetric_material_pairs ? "true" : "false") << ",\n";
-    json << "    \"delta_from_n35\": "
-         << JsonNumberOrNull(result.design_example.delta_from_n35) << ",\n";
-    json << "    \"delta_prime_from_n24\": "
-         << JsonNumberOrNull(result.design_example.delta_prime_from_n24) << ",\n";
-    json << "    \"sqrt_delta_prime_over_delta\": "
-         << JsonNumberOrNull(result.design_example.sqrt_delta_prime_over_delta) << "\n";
-    json << "  },\n";
-    json << "  \"article_reference_check\": ";
 
+    AppendJsonField(json, "app", "\"reproduce_fig7\"");
+    AppendJsonField(json, "status", "\"" + EscapeJson(result.status) + "\"");
+    AppendJsonField(json, "input_file", JsonStringOrNull(input_file));
+    AppendJsonField(json, "output_json_file", JsonStringOrNull(output_json_file));
+    AppendJsonField(
+        json,
+        "output_lines_csv_file",
+        JsonStringOrNull(result.config.lines_csv_output_path)
+    );
+    AppendJsonField(
+        json,
+        "output_intersections_csv_file",
+        JsonStringOrNull(result.config.intersections_csv_output_path)
+    );
+    AppendJsonField(json, "case_id", "\"" + EscapeJson(result.config.case_id) + "\"");
+    AppendJsonField(json, "article_target", JsonStringOrNull(result.config.article_target));
+
+    json << "  \"geometry\": {\n";
+    AppendJsonField(json, "wavelength", JsonNumber(result.config.wavelength), true, 4);
+    AppendJsonField(json, "a", JsonNumber(result.config.a), true, 4);
+    AppendJsonField(json, "b", JsonNumber(result.config.b), false, 4);
+    json << "  },\n";
+
+    json << "  \"materials\": {\n";
+    AppendJsonField(json, "n1", JsonNumber(result.config.n1), true, 4);
+    AppendJsonField(json, "n2", JsonNumber(result.config.n2), true, 4);
+    AppendJsonField(json, "n3", JsonNumber(result.config.n3), true, 4);
+    AppendJsonField(json, "n4", JsonNumber(result.config.n4), true, 4);
+    AppendJsonField(json, "n5", JsonNumber(result.config.n5), false, 4);
+    json << "  },\n";
+
+    json << "  \"nomogram\": {\n";
+    AppendJsonField(json, "line_point_count", std::to_string(result.config.line_point_count), true, 4);
+    AppendJsonField(json, "x_numerator", JsonNumber(result.x_numerator), true, 4);
+    AppendJsonField(json, "y_numerator", JsonNumber(result.y_numerator), true, 4);
+    AppendJsonField(json, "derived_c", JsonNumber(result.derived_c), true, 4);
+    AppendJsonField(
+        json,
+        "reference_c_value",
+        JsonNumberOrNull(result.config.reference_c_value),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "reference_c_absolute_error",
+        JsonNumberOrNull(result.reference_c_absolute_error),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "reference_c_relative_error",
+        JsonNumberOrNull(result.reference_c_relative_error),
+        false,
+        4
+    );
+    json << "  },\n";
+
+    json << "  \"design_example\": {\n";
+    AppendJsonField(json, "a_over_b", JsonNumber(result.design_example.a_over_b), true, 4);
+    AppendJsonField(
+        json,
+        "symmetric_material_pairs",
+        result.design_example.symmetric_material_pairs ? "true" : "false",
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "delta_from_n35",
+        JsonNumberOrNull(result.design_example.delta_from_n35),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "delta_prime_from_n24",
+        JsonNumberOrNull(result.design_example.delta_prime_from_n24),
+        true,
+        4
+    );
+    AppendJsonField(
+        json,
+        "sqrt_delta_prime_over_delta",
+        JsonNumberOrNull(result.design_example.sqrt_delta_prime_over_delta),
+        false,
+        4
+    );
+    json << "  },\n";
+
+    json << "  \"article_reference_check\": ";
     if (result.article_reference_check.available) {
         json << "{\n";
-        json << "    \"mode_line_id\": \"" << EscapeJson(result.article_reference_check.mode_line_id)
-             << "\",\n";
-        json << "    \"reference_c_value\": "
-             << JsonNumberOrNull(result.article_reference_check.c_value) << ",\n";
-        json << "    \"exact_x\": " << JsonNumberOrNull(result.article_reference_check.exact_x)
-             << ",\n";
-        json << "    \"exact_y\": " << JsonNumberOrNull(result.article_reference_check.exact_y)
-             << ",\n";
-        json << "    \"article_y_readoff\": "
-             << JsonNumberOrNull(result.article_reference_check.article_y_readoff) << ",\n";
-        json << "    \"article_y_absolute_error\": "
-             << JsonNumberOrNull(result.article_reference_check.article_y_absolute_error) << ",\n";
-        json << "    \"article_y_relative_error\": "
-             << JsonNumberOrNull(result.article_reference_check.article_y_relative_error) << ",\n";
-        json << "    \"note\": " << JsonStringOrNull(result.article_reference_check.note) << "\n";
+        AppendJsonField(
+            json,
+            "mode_line_id",
+            "\"" + EscapeJson(result.article_reference_check.mode_line_id) + "\"",
+            true,
+            4
+        );
+        AppendJsonField(
+            json,
+            "reference_c_value",
+            JsonNumberOrNull(result.article_reference_check.c_value),
+            true,
+            4
+        );
+        AppendJsonField(
+            json,
+            "exact_x",
+            JsonNumberOrNull(result.article_reference_check.exact_x),
+            true,
+            4
+        );
+        AppendJsonField(
+            json,
+            "exact_y",
+            JsonNumberOrNull(result.article_reference_check.exact_y),
+            true,
+            4
+        );
+        AppendJsonField(
+            json,
+            "article_y_readoff",
+            JsonNumberOrNull(result.article_reference_check.article_y_readoff),
+            true,
+            4
+        );
+        AppendJsonField(
+            json,
+            "article_y_absolute_error",
+            JsonNumberOrNull(result.article_reference_check.article_y_absolute_error),
+            true,
+            4
+        );
+        AppendJsonField(
+            json,
+            "article_y_relative_error",
+            JsonNumberOrNull(result.article_reference_check.article_y_relative_error),
+            true,
+            4
+        );
+        AppendJsonField(
+            json,
+            "note",
+            JsonStringOrNull(result.article_reference_check.note),
+            false,
+            4
+        );
         json << "  },\n";
     } else {
         json << "null,\n";
     }
 
     json << "  \"reference_intersections\": [\n";
-
     bool first = true;
+
     for (const auto& intersection : result.intersections) {
         if (!intersection.is_reference_c) {
             continue;
@@ -207,18 +419,53 @@ std::string BuildFigure7JsonReport(
         first = false;
 
         json << "    {\n";
-        json << "      \"mode_line_id\": \"" << EscapeJson(intersection.mode_line_id) << "\",\n";
-        json << "      \"c_line_id\": \"" << EscapeJson(intersection.c_line_id) << "\",\n";
-        json << "      \"mode_family\": \"" << EscapeJson(ToString(intersection.family)) << "\",\n";
-        json << "      \"p\": " << intersection.p << ",\n";
-        json << "      \"q\": " << intersection.q << ",\n";
-        json << "      \"x\": " << JsonNumber(intersection.x) << ",\n";
-        json << "      \"y\": " << JsonNumber(intersection.y) << ",\n";
-        json << "      \"domain_valid\": " << (intersection.domain_valid ? "true" : "false") << ",\n";
-        json << "      \"guided\": " << (intersection.guided ? "true" : "false") << ",\n";
-        json << "      \"kz\": " << JsonNumberOrNull(intersection.kz) << ",\n";
-        json << "      \"kz_normalized_against_n4\": "
-             << JsonNumberOrNull(intersection.kz_normalized_against_n4) << "\n";
+        AppendJsonField(
+            json,
+            "mode_line_id",
+            "\"" + EscapeJson(intersection.mode_line_id) + "\"",
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "c_line_id",
+            "\"" + EscapeJson(intersection.c_line_id) + "\"",
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "mode_family",
+            "\"" + EscapeJson(ToString(intersection.family)) + "\"",
+            true,
+            6
+        );
+        AppendJsonField(json, "p", std::to_string(intersection.p), true, 6);
+        AppendJsonField(json, "q", std::to_string(intersection.q), true, 6);
+        AppendJsonField(json, "x", JsonNumber(intersection.x), true, 6);
+        AppendJsonField(json, "y", JsonNumber(intersection.y), true, 6);
+        AppendJsonField(
+            json,
+            "domain_valid",
+            intersection.domain_valid ? "true" : "false",
+            true,
+            6
+        );
+        AppendJsonField(
+            json,
+            "guided",
+            intersection.guided ? "true" : "false",
+            true,
+            6
+        );
+        AppendJsonField(json, "kz", JsonNumberOrNull(intersection.kz), true, 6);
+        AppendJsonField(
+            json,
+            "kz_normalized_against_n4",
+            JsonNumberOrNull(intersection.kz_normalized_against_n4),
+            false,
+            6
+        );
         json << "    }";
     }
 

@@ -18,25 +18,64 @@ using math::PenetrationDepth;
 using math::SafeUpperBound;
 using math::Square;
 
+constexpr double kRootLowerBound = 1e-12;
+
 double NaN() {
     return std::numeric_limits<double>::quiet_NaN();
 }
 
+bool IsFiniteNumber(double value) {
+    return std::isfinite(value);
+}
+
+void ResetDependentOutputs(SingleGuideResult& result) {
+    result.ky = NaN();
+    result.kz = NaN();
+    result.eta2 = NaN();
+    result.eta4 = NaN();
+    result.kz_normalized_against_n4 = NaN();
+    result.domain_valid = false;
+    result.guided = false;
+}
+
+void InvalidateResult(SingleGuideResult& result, const char* status) {
+    result.status = status;
+    ResetDependentOutputs(result);
+}
+
 void ValidateConfig(const SingleGuideConfig& config) {
-    if (config.wavelength <= 0.0) {
-        throw std::runtime_error("wavelength must be positive.");
+    if (!IsFiniteNumber(config.wavelength) || config.wavelength <= 0.0) {
+        throw std::invalid_argument(
+            "SolveSlabGuide: wavelength must be a finite positive value."
+        );
     }
 
-    if (config.b <= 0.0) {
-        throw std::runtime_error("b must be positive for the slab model.");
+    if (!IsFiniteNumber(config.b) || config.b <= 0.0) {
+        throw std::invalid_argument(
+            "SolveSlabGuide: b must be a finite positive value for the slab model."
+        );
     }
 
+    // Mantemos p e q positivos por uniformidade com a interface do guia único,
+    // embora, no limite de lâmina, apenas q participe da quantização transversal.
     if (config.p <= 0 || config.q <= 0) {
-        throw std::runtime_error("mode indices p and q must be positive integers.");
+        throw std::invalid_argument(
+            "SolveSlabGuide: mode indices p and q must be positive integers."
+        );
     }
 
-    if (config.n1 <= std::max(config.n2, config.n4)) {
-        throw std::runtime_error("The slab model requires n1 > n2 and n1 > n4.");
+    if (!IsFiniteNumber(config.n1) || config.n1 <= 0.0 ||
+        !IsFiniteNumber(config.n2) || config.n2 <= 0.0 ||
+        !IsFiniteNumber(config.n4) || config.n4 <= 0.0) {
+        throw std::invalid_argument(
+            "SolveSlabGuide: n1, n2 and n4 must be finite positive values."
+        );
+    }
+
+    if (!(config.n1 > std::max(config.n2, config.n4))) {
+        throw std::invalid_argument(
+            "SolveSlabGuide: requires n1 > n2 and n1 > n4."
+        );
     }
 }
 
@@ -44,42 +83,67 @@ SingleGuideResult BuildBaseResult(const SingleGuideConfig& config) {
     SingleGuideResult result;
     result.config = config;
     result.status = "ok";
+
     result.k0 = 2.0 * kPi / config.wavelength;
     result.k1 = result.k0 * config.n1;
     result.k2 = result.k0 * config.n2;
-    result.k3 = result.k0 * config.n3;
+    result.k3 = NaN();
     result.k4 = result.k0 * config.n4;
-    result.k5 = result.k0 * config.n5;
+    result.k5 = NaN();
+
     result.A2 = ComputeA(config.wavelength, config.n1, config.n2);
-    result.A3 = ComputeA(config.wavelength, config.n1, config.n3);
+    result.A3 = NaN();
     result.A4 = ComputeA(config.wavelength, config.n1, config.n4);
-    result.A5 = ComputeA(config.wavelength, config.n1, config.n5);
-    // The slab limit keeps only one confined transverse dimension. We keep the
-    // single-guide result container so the reporting layer can stay uniform, but
-    // kx is pinned to zero because there is no separate x quantization here.
+    result.A5 = NaN();
+
+    // No limite de lâmina não há quantização independente em x.
     result.kx = 0.0;
     result.xi3 = NaN();
     result.xi5 = NaN();
+
     result.approximation_checks.kx_a3_over_pi_squared = 0.0;
     result.approximation_checks.kx_a5_over_pi_squared = 0.0;
+
     result.b_over_A4 = config.b / result.A4;
+
     return result;
 }
 
 void FinalizeResult(SingleGuideResult& result) {
     const double denominator = Square(result.k1) - Square(result.k4);
+
     result.kz_normalized_against_n4 =
-        denominator > 0.0 ? (Square(result.kz) - Square(result.k4)) / denominator : NaN();
+        (denominator > 0.0 && IsFiniteNumber(result.kz))
+            ? (Square(result.kz) - Square(result.k4)) / denominator
+            : NaN();
 
     result.guided =
+        IsFiniteNumber(result.kz) &&
         Square(result.kz) > Square(result.k4) &&
         Square(result.kz) <= Square(result.k1) &&
+        IsFiniteNumber(result.kz_normalized_against_n4) &&
         result.kz_normalized_against_n4 >= 0.0 &&
         result.kz_normalized_against_n4 <= 1.0;
+
+    result.domain_valid = true;
 
     if (!result.guided && result.status == "ok") {
         result.status = "below_cutoff";
     }
+}
+
+bool BracketsRoot(
+    const std::function<double(double)>& function,
+    double lower,
+    double upper
+) {
+    const double f_lower = function(lower);
+    const double f_upper = function(upper);
+
+    return IsFiniteNumber(f_lower) &&
+           IsFiniteNumber(f_upper) &&
+           f_lower <= 0.0 &&
+           f_upper >= 0.0;
 }
 
 }  // namespace
@@ -90,43 +154,51 @@ SingleGuideResult SolveSlabGuideClosedForm(const SingleGuideConfig& config) {
     SingleGuideResult result = BuildBaseResult(config);
 
     if (config.family == SingleGuideFamily::kEy) {
-        // This is the one-dimensional limit of the E_y branch: keep only the
-        // y quantization and its associated closed-form phase correction.
+        // Limite 1D da família E_y: mantém-se apenas a quantização em y
+        // com a correção de fase correspondente.
         const double y_denominator =
             1.0 +
             (Square(config.n2) * result.A2 + Square(config.n4) * result.A4) /
                 (kPi * Square(config.n1) * config.b);
-        result.ky = (config.q * kPi / config.b) / y_denominator;
+
+        result.ky = (static_cast<double>(config.q) * kPi / config.b) / y_denominator;
         result.equations_used = "slab limit of (13), (14), (16)";
     } else {
-        // Same idea for the E_x family, now following the slab version of the
-        // Eq. (23)-(26) branch.
-        const double y_denominator = 1.0 + (result.A2 + result.A4) / (kPi * config.b);
-        result.ky = (config.q * kPi / config.b) / y_denominator;
+        // Limite 1D da família E_x.
+        const double y_denominator =
+            1.0 + (result.A2 + result.A4) / (kPi * config.b);
+
+        result.ky = (static_cast<double>(config.q) * kPi / config.b) / y_denominator;
         result.equations_used = "slab limit of (23), (24), (26)";
     }
 
-    result.approximation_checks.ky_a2_over_pi_squared = Square(result.ky * result.A2 / kPi);
-    result.approximation_checks.ky_a4_over_pi_squared = Square(result.ky * result.A4 / kPi);
+    result.approximation_checks.ky_a2_over_pi_squared =
+        Square(result.ky * result.A2 / kPi);
+    result.approximation_checks.ky_a4_over_pi_squared =
+        Square(result.ky * result.A4 / kPi);
 
-    const double kz_squared = Square(result.k1) - Square(result.ky);
-    const double eta2_argument = 1.0 - result.approximation_checks.ky_a2_over_pi_squared;
-    const double eta4_argument = 1.0 - result.approximation_checks.ky_a4_over_pi_squared;
+    const double kz_squared =
+        Square(result.k1) - Square(result.ky);
 
-    result.domain_valid = kz_squared >= 0.0 && eta2_argument > 0.0 && eta4_argument > 0.0;
+    const double eta2_argument =
+        1.0 - result.approximation_checks.ky_a2_over_pi_squared;
+    const double eta4_argument =
+        1.0 - result.approximation_checks.ky_a4_over_pi_squared;
 
-    if (!result.domain_valid) {
-        result.status = "outside_closed_form_domain";
-        result.kz = NaN();
-        result.eta2 = NaN();
-        result.eta4 = NaN();
-        result.kz_normalized_against_n4 = NaN();
+    const bool domain_valid =
+        IsFiniteNumber(kz_squared) && kz_squared >= 0.0 &&
+        IsFiniteNumber(eta2_argument) && eta2_argument > 0.0 &&
+        IsFiniteNumber(eta4_argument) && eta4_argument > 0.0;
+
+    if (!domain_valid) {
+        InvalidateResult(result, "outside_closed_form_domain");
         return result;
     }
 
     result.kz = std::sqrt(kz_squared);
     result.eta2 = (result.A2 / kPi) / std::sqrt(eta2_argument);
     result.eta4 = (result.A4 / kPi) / std::sqrt(eta4_argument);
+
     FinalizeResult(result);
     return result;
 }
@@ -136,18 +208,18 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
 
     SingleGuideResult result = BuildBaseResult(config);
 
-    const auto upper_bound = SafeUpperBound(kPi / result.A2, kPi / result.A4);
-    const auto lower_bound = 1e-12;
+    const double lower_bound = kRootLowerBound;
+    const double upper_bound = SafeUpperBound(kPi / result.A2, kPi / result.A4);
 
     std::function<double(double)> characteristic_function;
 
     if (config.family == SingleGuideFamily::kEy) {
         result.equations_used = "slab limit of (7), (9), (10)";
-        // Exact slab mode = numerical root of the one-dimensional characteristic
-        // equation inherited from the E_y rectangular family.
+
         characteristic_function = [&](double ky_value) {
             const double eta2 = PenetrationDepth(result.A2, ky_value);
             const double eta4 = PenetrationDepth(result.A4, ky_value);
+
             return ky_value * config.b +
                    std::atan((Square(config.n2) / Square(config.n1)) * ky_value * eta2) +
                    std::atan((Square(config.n4) / Square(config.n1)) * ky_value * eta4) -
@@ -155,10 +227,11 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
         };
     } else {
         result.equations_used = "slab limit of (21), (19), (10)";
-        // Same numerical treatment for the E_x-type slab relation.
+
         characteristic_function = [&](double ky_value) {
             const double eta2 = PenetrationDepth(result.A2, ky_value);
             const double eta4 = PenetrationDepth(result.A4, ky_value);
+
             return ky_value * config.b +
                    std::atan(ky_value * eta2) +
                    std::atan(ky_value * eta4) -
@@ -166,57 +239,59 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
         };
     }
 
-    // The status codes distinguish two cases that matter scientifically:
-    // no admissible transcendental root in the model domain, versus a mode
-    // that simply stays below cutoff inside the scanned interval.
     const double f_lower = characteristic_function(lower_bound);
     const double f_upper = characteristic_function(upper_bound);
 
-    if (!(f_lower < 0.0)) {
-        result.status = "outside_exact_domain";
-        result.domain_valid = false;
-        result.ky = NaN();
-        result.kz = NaN();
-        result.eta2 = NaN();
-        result.eta4 = NaN();
-        result.kz_normalized_against_n4 = NaN();
+    if (!IsFiniteNumber(f_lower) || !IsFiniteNumber(f_upper) || !(f_lower < 0.0)) {
+        InvalidateResult(result, "outside_exact_domain");
         return result;
     }
 
+    // Quando a função continua não-positiva até o limite superior permitido,
+    // o modo permanece abaixo do cutoff dentro do intervalo físico admissível.
     if (f_upper <= 0.0) {
-        result.status = "below_cutoff";
-        result.domain_valid = false;
-        result.ky = NaN();
-        result.kz = NaN();
-        result.eta2 = NaN();
-        result.eta4 = NaN();
-        result.kz_normalized_against_n4 = NaN();
+        InvalidateResult(result, "below_cutoff");
         return result;
     }
 
-    result.ky = math::SolveRootByBisection(characteristic_function, lower_bound, upper_bound);
+    if (!BracketsRoot(characteristic_function, lower_bound, upper_bound)) {
+        InvalidateResult(result, "outside_exact_domain");
+        return result;
+    }
 
-    result.approximation_checks.ky_a2_over_pi_squared = Square(result.ky * result.A2 / kPi);
-    result.approximation_checks.ky_a4_over_pi_squared = Square(result.ky * result.A4 / kPi);
+    result.ky = math::SolveRootByBisection(
+        characteristic_function,
+        lower_bound,
+        upper_bound
+    );
 
-    const double kz_squared = Square(result.k1) - Square(result.ky);
-    const double eta2_argument = Square(kPi / result.A2) - Square(result.ky);
-    const double eta4_argument = Square(kPi / result.A4) - Square(result.ky);
+    result.approximation_checks.ky_a2_over_pi_squared =
+        Square(result.ky * result.A2 / kPi);
+    result.approximation_checks.ky_a4_over_pi_squared =
+        Square(result.ky * result.A4 / kPi);
 
-    result.domain_valid = kz_squared >= 0.0 && eta2_argument > 0.0 && eta4_argument > 0.0;
+    const double kz_squared =
+        Square(result.k1) - Square(result.ky);
 
-    if (!result.domain_valid) {
-        result.status = "outside_exact_domain";
-        result.kz = NaN();
-        result.eta2 = NaN();
-        result.eta4 = NaN();
-        result.kz_normalized_against_n4 = NaN();
+    const double eta2_argument =
+        Square(kPi / result.A2) - Square(result.ky);
+    const double eta4_argument =
+        Square(kPi / result.A4) - Square(result.ky);
+
+    const bool domain_valid =
+        IsFiniteNumber(kz_squared) && kz_squared >= 0.0 &&
+        IsFiniteNumber(eta2_argument) && eta2_argument > 0.0 &&
+        IsFiniteNumber(eta4_argument) && eta4_argument > 0.0;
+
+    if (!domain_valid) {
+        InvalidateResult(result, "outside_exact_domain");
         return result;
     }
 
     result.kz = std::sqrt(kz_squared);
     result.eta2 = 1.0 / std::sqrt(eta2_argument);
     result.eta4 = 1.0 / std::sqrt(eta4_argument);
+
     FinalizeResult(result);
     return result;
 }

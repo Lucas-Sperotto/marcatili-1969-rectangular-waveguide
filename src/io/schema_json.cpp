@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -24,7 +25,6 @@ std::size_t SkipWhitespace(std::string_view text, std::size_t position) {
 
 std::string_view TrimWhitespace(std::string_view text) {
     const std::size_t begin = SkipWhitespace(text, 0);
-
     if (begin >= text.size()) {
         return {};
     }
@@ -124,8 +124,8 @@ std::optional<std::pair<std::size_t, std::string>> ParseJsonStringToken(
                     decoded.push_back('\t');
                     break;
                 case 'u':
-                    // The repository inputs are ASCII in practice. Keep unicode escapes
-                    // lossless enough for diagnostics while remaining dependency-free.
+                    // Os inputs do repositório são ASCII na prática.
+                    // Mantemos suporte mínimo e estável sem depender de biblioteca externa.
                     decoded.push_back('?');
                     if (position + 4 < text.size()) {
                         position += 4;
@@ -155,7 +155,10 @@ std::optional<std::pair<std::size_t, std::string>> ParseJsonStringToken(
     return std::nullopt;
 }
 
-std::optional<std::size_t> ParseJsonValueEnd(std::string_view object_body, std::size_t position) {
+std::optional<std::size_t> ParseJsonValueEnd(
+    std::string_view object_body,
+    std::size_t position
+) {
     if (position >= object_body.size()) {
         return std::nullopt;
     }
@@ -172,8 +175,7 @@ std::optional<std::size_t> ParseJsonValueEnd(std::string_view object_body, std::
     }
 
     if (character == '{') {
-        const auto closing =
-            FindMatchingDelimiter(object_body, position, '{', '}');
+        const auto closing = FindMatchingDelimiter(object_body, position, '{', '}');
         if (!closing.has_value()) {
             return std::nullopt;
         }
@@ -182,8 +184,7 @@ std::optional<std::size_t> ParseJsonValueEnd(std::string_view object_body, std::
     }
 
     if (character == '[') {
-        const auto closing =
-            FindMatchingDelimiter(object_body, position, '[', ']');
+        const auto closing = FindMatchingDelimiter(object_body, position, '[', ']');
         if (!closing.has_value()) {
             return std::nullopt;
         }
@@ -220,6 +221,7 @@ std::optional<std::string_view> RootObjectBody(std::string_view json_text) {
 
 std::optional<std::string_view> ObjectBodyFromRawValue(std::string_view raw_value) {
     const std::string_view trimmed = TrimWhitespace(raw_value);
+
     if (trimmed.empty() || trimmed.front() != '{') {
         return std::nullopt;
     }
@@ -296,7 +298,8 @@ std::vector<std::string> SplitPath(const std::string& key_path) {
     while (begin <= key_path.size()) {
         const std::size_t end = key_path.find('.', begin);
         const std::size_t count =
-            end == std::string::npos ? key_path.size() - begin : end - begin;
+            (end == std::string::npos) ? (key_path.size() - begin) : (end - begin);
+
         if (count == 0) {
             return {};
         }
@@ -327,7 +330,8 @@ std::optional<std::string_view> FindRawValueByPath(
     }
 
     for (std::size_t index = 0; index < segments.size(); ++index) {
-        const auto raw_value = FindTopLevelRawValueInObject(*current_object, segments[index]);
+        const auto raw_value =
+            FindTopLevelRawValueInObject(*current_object, segments[index]);
         if (!raw_value.has_value()) {
             return std::nullopt;
         }
@@ -401,19 +405,19 @@ std::optional<int> ParseRawJsonIntValue(std::string_view raw_value) {
     }
 }
 
-std::vector<std::string> ParseRawJsonStringArray(std::string_view raw_value) {
+std::optional<std::vector<std::string>> ParseRawJsonStringArray(std::string_view raw_value) {
     const std::string_view trimmed = TrimWhitespace(raw_value);
     if (trimmed.empty() || trimmed.front() != '[') {
-        return {};
+        return std::nullopt;
     }
 
     const auto closing = FindMatchingDelimiter(trimmed, 0, '[', ']');
     if (!closing.has_value()) {
-        return {};
+        return std::nullopt;
     }
 
     if (SkipWhitespace(trimmed, *closing + 1) != trimmed.size()) {
-        return {};
+        return std::nullopt;
     }
 
     const std::string_view array_body = trimmed.substr(1, *closing - 1);
@@ -432,12 +436,12 @@ std::vector<std::string> ParseRawJsonStringArray(std::string_view raw_value) {
         }
 
         if (array_body[position] != '"') {
-            return {};
+            return std::nullopt;
         }
 
         const auto token = ParseJsonStringToken(array_body, position);
         if (!token.has_value()) {
-            return {};
+            return std::nullopt;
         }
 
         values.push_back(token->second);
@@ -451,19 +455,19 @@ std::vector<std::string> ParseRawJsonStringArray(std::string_view raw_value) {
     return values;
 }
 
-std::vector<std::string> ParseRawJsonObjectArray(std::string_view raw_value) {
+std::optional<std::vector<std::string>> ParseRawJsonObjectArray(std::string_view raw_value) {
     const std::string_view trimmed = TrimWhitespace(raw_value);
     if (trimmed.empty() || trimmed.front() != '[') {
-        return {};
+        return std::nullopt;
     }
 
     const auto closing = FindMatchingDelimiter(trimmed, 0, '[', ']');
     if (!closing.has_value()) {
-        return {};
+        return std::nullopt;
     }
 
     if (SkipWhitespace(trimmed, *closing + 1) != trimmed.size()) {
-        return {};
+        return std::nullopt;
     }
 
     const std::string_view array_body = trimmed.substr(1, *closing - 1);
@@ -482,13 +486,13 @@ std::vector<std::string> ParseRawJsonObjectArray(std::string_view raw_value) {
         }
 
         if (array_body[position] != '{') {
-            return {};
+            return std::nullopt;
         }
 
         const auto object_end =
             FindMatchingDelimiter(array_body, position, '{', '}');
         if (!object_end.has_value()) {
-            return {};
+            return std::nullopt;
         }
 
         values.emplace_back(
@@ -502,6 +506,18 @@ std::vector<std::string> ParseRawJsonObjectArray(std::string_view raw_value) {
     }
 
     return values;
+}
+
+std::string RequireRawValue(
+    const std::string& json_text,
+    const std::string& key
+) {
+    const auto raw_value = FindRawValueByPath(json_text, key);
+    if (!raw_value.has_value()) {
+        throw std::runtime_error("Missing required key: " + key);
+    }
+
+    return std::string(*raw_value);
 }
 
 }  // namespace
@@ -551,7 +567,8 @@ std::vector<std::string> FindStringArrayValues(
         return {};
     }
 
-    return ParseRawJsonStringArray(*raw_value);
+    const auto parsed = ParseRawJsonStringArray(*raw_value);
+    return parsed.has_value() ? *parsed : std::vector<std::string>{};
 }
 
 std::optional<std::string> FindRawJsonValue(
@@ -575,16 +592,19 @@ std::vector<std::string> FindObjectArrayValues(
         return {};
     }
 
-    return ParseRawJsonObjectArray(*raw_value);
+    const auto parsed = ParseRawJsonObjectArray(*raw_value);
+    return parsed.has_value() ? *parsed : std::vector<std::string>{};
 }
 
 std::string RequireStringValue(
     const std::string& json_text,
     const std::string& key
 ) {
-    const auto value = FindStringValue(json_text, key);
+    const std::string raw_value = RequireRawValue(json_text, key);
+    const auto value = ParseRawJsonStringValue(raw_value);
+
     if (!value.has_value()) {
-        throw std::runtime_error("Missing required string key: " + key);
+        throw std::runtime_error("Invalid required string key: " + key);
     }
 
     return *value;
@@ -594,9 +614,11 @@ double RequireDoubleValue(
     const std::string& json_text,
     const std::string& key
 ) {
-    const auto value = FindDoubleValue(json_text, key);
+    const std::string raw_value = RequireRawValue(json_text, key);
+    const auto value = ParseRawJsonDoubleValue(raw_value);
+
     if (!value.has_value()) {
-        throw std::runtime_error("Missing required numeric key: " + key);
+        throw std::runtime_error("Invalid required numeric key: " + key);
     }
 
     return *value;
@@ -606,9 +628,11 @@ int RequireIntValue(
     const std::string& json_text,
     const std::string& key
 ) {
-    const auto value = FindIntValue(json_text, key);
+    const std::string raw_value = RequireRawValue(json_text, key);
+    const auto value = ParseRawJsonIntValue(raw_value);
+
     if (!value.has_value()) {
-        throw std::runtime_error("Missing required integer key: " + key);
+        throw std::runtime_error("Invalid required integer key: " + key);
     }
 
     return *value;
@@ -618,24 +642,28 @@ std::vector<std::string> RequireStringArrayValues(
     const std::string& json_text,
     const std::string& key
 ) {
-    const auto values = FindStringArrayValues(json_text, key);
-    if (values.empty()) {
-        throw std::runtime_error("Missing required string-array key: " + key);
+    const std::string raw_value = RequireRawValue(json_text, key);
+    const auto values = ParseRawJsonStringArray(raw_value);
+
+    if (!values.has_value()) {
+        throw std::runtime_error("Invalid required string-array key: " + key);
     }
 
-    return values;
+    return *values;
 }
 
 std::vector<std::string> RequireObjectArrayValues(
     const std::string& json_text,
     const std::string& key
 ) {
-    const auto values = FindObjectArrayValues(json_text, key);
-    if (values.empty()) {
-        throw std::runtime_error("Missing required object-array key: " + key);
+    const std::string raw_value = RequireRawValue(json_text, key);
+    const auto values = ParseRawJsonObjectArray(raw_value);
+
+    if (!values.has_value()) {
+        throw std::runtime_error("Invalid required object-array key: " + key);
     }
 
-    return values;
+    return *values;
 }
 
 }  // namespace marcatili::io

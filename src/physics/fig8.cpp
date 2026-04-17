@@ -1,9 +1,10 @@
 #include "marcatili/physics/fig8.hpp"
 
 #include <cmath>
-#include <limits>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "marcatili/math/waveguide_math.hpp"
 #include "marcatili/physics/metal_guide.hpp"
@@ -13,39 +14,126 @@ namespace {
 
 using math::ComputeA;
 
-void ValidateConfig(const Figure8Config& config) {
-    if (config.wavelength <= 0.0) {
-        throw std::runtime_error("wavelength must be positive.");
-    }
+bool IsFiniteNumber(double value) {
+    return std::isfinite(value);
+}
 
-    if (config.a_over_b <= 0.0) {
-        throw std::runtime_error("a_over_b must be positive.");
+void ValidateModeSpec(const Figure8ModeSpec& mode) {
+    if (mode.p <= 0 || mode.q <= 0) {
+        throw std::invalid_argument(
+            "SolveFigure8: mode indices p and q must be positive integers."
+        );
     }
-
-    if (config.n1 <= config.n4) {
-        throw std::runtime_error("The current Fig. 8 model requires n1 > n4.");
-    }
-
-    if (config.a_over_A_min <= 0.0 || config.a_over_A_max <= config.a_over_A_min) {
-        throw std::runtime_error("a_over_A sweep bounds must define a positive interval.");
-    }
-
-    if (config.point_count < 2) {
-        throw std::runtime_error("point_count must be at least 2.");
-    }
-
-    if (config.solver_models.empty()) {
-        throw std::runtime_error("At least one solver model must be listed.");
-    }
-
-    if (config.modes.empty()) {
-        throw std::runtime_error("At least one mode must be listed in the modes array.");
-    }
-
 }
 
 std::string DefaultCurveId(const Figure8ModeSpec& mode) {
-    return ToString(mode.family) + "_" + std::to_string(mode.p) + "_" + std::to_string(mode.q);
+    return ToString(mode.family) + "_" +
+           std::to_string(mode.p) + "_" +
+           std::to_string(mode.q);
+}
+
+Figure8ModeSpec NormalizeModeSpec(const Figure8ModeSpec& mode) {
+    ValidateModeSpec(mode);
+
+    Figure8ModeSpec normalized = mode;
+    if (normalized.curve_id.empty()) {
+        normalized.curve_id = DefaultCurveId(normalized);
+    }
+
+    return normalized;
+}
+
+void ValidateConfig(const Figure8Config& config) {
+    if (!IsFiniteNumber(config.wavelength) || config.wavelength <= 0.0) {
+        throw std::invalid_argument(
+            "SolveFigure8: wavelength must be a finite positive value."
+        );
+    }
+
+    if (!IsFiniteNumber(config.a_over_b) || config.a_over_b <= 0.0) {
+        throw std::invalid_argument(
+            "SolveFigure8: a_over_b must be a finite positive value."
+        );
+    }
+
+    if (!IsFiniteNumber(config.n1) || config.n1 <= 0.0 ||
+        !IsFiniteNumber(config.n4) || config.n4 <= 0.0) {
+        throw std::invalid_argument(
+            "SolveFigure8: n1 and n4 must be finite positive values."
+        );
+    }
+
+    if (!(config.n1 > config.n4)) {
+        throw std::invalid_argument(
+            "SolveFigure8: the current Fig. 8 model requires n1 > n4."
+        );
+    }
+
+    if (!IsFiniteNumber(config.a_over_A_min) || !IsFiniteNumber(config.a_over_A_max)) {
+        throw std::invalid_argument(
+            "SolveFigure8: a_over_A sweep bounds must be finite."
+        );
+    }
+
+    if (config.a_over_A_min <= 0.0 || config.a_over_A_max <= config.a_over_A_min) {
+        throw std::invalid_argument(
+            "SolveFigure8: a_over_A sweep bounds must define a positive interval."
+        );
+    }
+
+    if (config.point_count < 2) {
+        throw std::invalid_argument(
+            "SolveFigure8: point_count must be at least 2."
+        );
+    }
+
+    if (config.solver_models.empty()) {
+        throw std::invalid_argument(
+            "SolveFigure8: at least one solver model must be listed."
+        );
+    }
+
+    if (config.modes.empty()) {
+        throw std::invalid_argument(
+            "SolveFigure8: at least one mode must be listed."
+        );
+    }
+
+    for (const auto& mode : config.modes) {
+        ValidateModeSpec(mode);
+    }
+}
+
+SingleGuideResult SolveFigure8Point(
+    const Figure8Config& config,
+    const Figure8ModeSpec& mode,
+    SingleGuideSolverModel solver_model,
+    double a,
+    double b
+) {
+    SingleGuideConfig point_config;
+    point_config.case_id =
+        config.case_id + "_" + mode.curve_id + "_" + ToString(solver_model);
+    point_config.article_target = config.article_target;
+    point_config.csv_output_path = "";
+    point_config.solver_model = solver_model;
+    point_config.family = mode.family;
+    point_config.p = mode.p;
+    point_config.q = mode.q;
+    point_config.wavelength = config.wavelength;
+    point_config.a = a;
+    point_config.b = b;
+
+    // Na implementação atual da Fig. 8, o meio externo é tratado com o mesmo
+    // índice em todas as regiões exteriores e a interface relevante é a
+    // metalizada, resolvida por SolveMetalGuide.
+    point_config.n1 = config.n1;
+    point_config.n2 = config.n4;
+    point_config.n3 = config.n4;
+    point_config.n4 = config.n4;
+    point_config.n5 = config.n4;
+
+    return SolveMetalGuide(point_config);
 }
 
 }  // namespace
@@ -61,15 +149,24 @@ Figure8ModeSpec ParseFigure8ModeSpec(const std::string& mode_text) {
     if (!std::getline(parser, family_text, ':') ||
         !std::getline(parser, p_text, ':') ||
         !std::getline(parser, q_text, ':')) {
-        throw std::runtime_error(
-            "Invalid mode specification: " + mode_text + ". Use family:p:q, e.g. E_y:1:1."
+        throw std::invalid_argument(
+            "ParseFigure8ModeSpec: invalid mode specification '" + mode_text +
+            "'. Use family:p:q, for example E_y:1:1."
         );
     }
 
     mode.family = ParseSingleGuideFamily(family_text);
-    mode.p = std::stoi(p_text);
-    mode.q = std::stoi(q_text);
-    mode.curve_id = DefaultCurveId(mode);
+
+    try {
+        mode.p = std::stoi(p_text);
+        mode.q = std::stoi(q_text);
+    } catch (const std::exception&) {
+        throw std::invalid_argument(
+            "ParseFigure8ModeSpec: invalid numeric indices in '" + mode_text + "'."
+        );
+    }
+
+    mode = NormalizeModeSpec(mode);
     return mode;
 }
 
@@ -80,16 +177,21 @@ Figure8Result SolveFigure8(const Figure8Config& config) {
     result.config = config;
     result.status = "ok";
 
-    // Fig. 8 uses a/A as the horizontal variable, where A is the n4-based decay
-    // scale of the surrounding low-impedance region. This keeps the sweep in the
-    // same normalized coordinate used in the article.
+    std::vector<Figure8ModeSpec> normalized_modes;
+    normalized_modes.reserve(config.modes.size());
+    for (const auto& mode : config.modes) {
+        normalized_modes.push_back(NormalizeModeSpec(mode));
+    }
+
+    // A variável horizontal da figura é a / A, com A calculado a partir de n4.
+    // Isso mantém o sweep na mesma coordenada adimensional usada no artigo.
     const double A = ComputeA(config.wavelength, config.n1, config.n4);
     const double step =
         (config.a_over_A_max - config.a_over_A_min) /
         static_cast<double>(config.point_count - 1);
 
     for (const auto& solver_model : config.solver_models) {
-        for (const auto& mode : config.modes) {
+        for (const auto& mode : normalized_modes) {
             Figure8CurveSummary curve_summary;
             curve_summary.mode = mode;
             curve_summary.solver_model = solver_model;
@@ -101,36 +203,22 @@ Figure8Result SolveFigure8(const Figure8Config& config) {
                 const double a = a_over_A * A;
                 const double b = a / config.a_over_b;
 
-                SingleGuideConfig point_config;
-                point_config.case_id = config.case_id + "_" + mode.curve_id;
-                point_config.article_target = config.article_target;
-                point_config.csv_output_path = "";
-                point_config.solver_model = solver_model;
-                point_config.family = mode.family;
-                point_config.p = mode.p;
-                point_config.q = mode.q;
-                point_config.wavelength = config.wavelength;
-                point_config.a = a;
-                point_config.b = b;
-                point_config.n1 = config.n1;
-                point_config.n2 = config.n4;
-                point_config.n3 = config.n4;
-                point_config.n4 = config.n4;
-                point_config.n5 = config.n4;
-
-                // The figure driver delegates all boundary-condition physics to the
-                // metal-guide solver. Its own job is to keep the sweep and labeling
-                // aligned with the article panel.
-                const auto point = SolveMetalGuide(point_config);
+                // O driver da figura apenas monta o sweep e delega a física
+                // ao solver do guia metalizado.
+                const auto point =
+                    SolveFigure8Point(config, mode, solver_model, a, b);
 
                 if (point.domain_valid) {
                     ++curve_summary.valid_points;
                 }
+
                 if (point.guided) {
                     ++curve_summary.guided_points;
                 }
 
-                result.samples.push_back({mode.curve_id, sample_index, a_over_A, point});
+                result.samples.push_back(
+                    {mode.curve_id, sample_index, a_over_A, point}
+                );
             }
 
             result.curves.push_back(curve_summary);

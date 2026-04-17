@@ -1,5 +1,6 @@
 #include "marcatili/physics/table1.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <stdexcept>
@@ -15,65 +16,151 @@ double NaN() {
     return std::numeric_limits<double>::quiet_NaN();
 }
 
-void ValidateConfig(const Table1Config& config) {
-    if (config.wavelength <= 0.0) {
-        throw std::runtime_error("wavelength must be positive.");
-    }
+bool IsFiniteNumber(double value) {
+    return std::isfinite(value);
+}
 
-    if (config.n1 <= 0.0) {
-        throw std::runtime_error("n1 must be positive.");
-    }
-
-    if (config.rows.empty()) {
-        throw std::runtime_error("At least one row must be listed in the rows array.");
-    }
-
-    if (config.solver_models.empty()) {
-        throw std::runtime_error("At least one solver model must be listed.");
-    }
-
-    if (config.search.max_p < 1 || config.search.max_q < 1) {
-        throw std::runtime_error("search.max_p and search.max_q must be positive.");
-    }
-
-    if (config.search.b_normalized_min <= 0.0 ||
-        config.search.b_normalized_max <= config.search.b_normalized_min) {
-        throw std::runtime_error(
-            "search.b_normalized_min and search.b_normalized_max must define a positive interval."
+void ValidateRowSpec(const Table1Config& config, const Table1RowSpec& row) {
+    if (row.row_id.empty()) {
+        throw std::invalid_argument(
+            "SolveTable1: each row must provide a non-empty row_id."
         );
     }
 
-    if (config.search.cutoff_tolerance <= 0.0) {
-        throw std::runtime_error("search.cutoff_tolerance must be positive.");
+    if (!IsFiniteNumber(row.a_over_b) || row.a_over_b <= 0.0) {
+        throw std::invalid_argument(
+            "SolveTable1: each row must provide a finite positive a_over_b."
+        );
+    }
+
+    if (!IsFiniteNumber(row.article_dimension_normalized) ||
+        row.article_dimension_normalized <= 0.0) {
+        throw std::invalid_argument(
+            "SolveTable1: each row must provide a finite positive article_dimension_normalized."
+        );
+    }
+
+    if (!IsFiniteNumber(row.n2) || row.n2 <= 0.0 ||
+        !IsFiniteNumber(row.n3) || row.n3 <= 0.0 ||
+        !IsFiniteNumber(row.n4) || row.n4 <= 0.0 ||
+        !IsFiniteNumber(row.n5) || row.n5 <= 0.0) {
+        throw std::invalid_argument(
+            "SolveTable1: row refractive indices n2..n5 must be finite positive values."
+        );
+    }
+
+    const double external_max =
+        std::max(std::max(row.n2, row.n3), std::max(row.n4, row.n5));
+
+    if (!(config.n1 > external_max)) {
+        throw std::invalid_argument(
+            "SolveTable1: each Table I row requires n1 > n2, n3, n4 and n5."
+        );
+    }
+}
+
+void ValidateConfig(const Table1Config& config) {
+    if (!IsFiniteNumber(config.wavelength) || config.wavelength <= 0.0) {
+        throw std::invalid_argument(
+            "SolveTable1: wavelength must be a finite positive value."
+        );
+    }
+
+    if (!IsFiniteNumber(config.n1) || config.n1 <= 0.0) {
+        throw std::invalid_argument(
+            "SolveTable1: n1 must be a finite positive value."
+        );
+    }
+
+    if (config.rows.empty()) {
+        throw std::invalid_argument(
+            "SolveTable1: at least one row must be listed."
+        );
+    }
+
+    if (config.solver_models.empty()) {
+        throw std::invalid_argument(
+            "SolveTable1: at least one solver model must be listed."
+        );
+    }
+
+    if (config.search.max_p < 1 || config.search.max_q < 1) {
+        throw std::invalid_argument(
+            "SolveTable1: search.max_p and search.max_q must be positive."
+        );
+    }
+
+    if (!IsFiniteNumber(config.search.b_normalized_min) ||
+        !IsFiniteNumber(config.search.b_normalized_max) ||
+        config.search.b_normalized_min <= 0.0 ||
+        config.search.b_normalized_max <= config.search.b_normalized_min) {
+        throw std::invalid_argument(
+            "SolveTable1: search.b_normalized_min and search.b_normalized_max must define a positive interval."
+        );
+    }
+
+    if (!IsFiniteNumber(config.search.cutoff_tolerance) ||
+        config.search.cutoff_tolerance <= 0.0) {
+        throw std::invalid_argument(
+            "SolveTable1: search.cutoff_tolerance must be a finite positive value."
+        );
     }
 
     if (config.table_entry_interpretation != "a_times_n1_over_lambda") {
-        throw std::runtime_error(
-            "Unsupported table_entry_interpretation. "
+        throw std::invalid_argument(
+            "SolveTable1: unsupported table_entry_interpretation. "
             "Current supported value: a_times_n1_over_lambda."
         );
     }
 
     for (const auto& row : config.rows) {
-        if (row.row_id.empty()) {
-            throw std::runtime_error("rows entries must provide a non-empty row_id.");
-        }
-
-        if (row.a_over_b <= 0.0) {
-            throw std::runtime_error("rows entries must provide a positive a_over_b.");
-        }
-
-        if (row.article_dimension_normalized <= 0.0) {
-            throw std::runtime_error(
-                "rows entries must provide a positive article_dimension_normalized."
-            );
-        }
-
-        const double external_max = std::max(std::max(row.n2, row.n3), std::max(row.n4, row.n5));
-        if (config.n1 <= external_max) {
-            throw std::runtime_error("Table I rows require n1 > n2, n3, n4, n5.");
-        }
+        ValidateRowSpec(config, row);
     }
+}
+
+double NormalizedBToPhysicalB(const Table1Config& config, double b_normalized) {
+    return b_normalized * config.wavelength / config.n1;
+}
+
+double ComputeCutoffBOverA4(
+    const Table1Config& config,
+    const Table1RowSpec& row,
+    double cutoff_b_normalized
+) {
+    const double physical_b = NormalizedBToPhysicalB(config, cutoff_b_normalized);
+    return physical_b / ComputeA(config.wavelength, config.n1, row.n4);
+}
+
+SingleGuideConfig BuildPointConfig(
+    const Table1Config& config,
+    const Table1RowSpec& row,
+    SingleGuideSolverModel solver_model,
+    SingleGuideFamily family,
+    int p,
+    int q,
+    double b_normalized
+) {
+    SingleGuideConfig point_config;
+    point_config.case_id =
+        config.case_id + "_" + row.row_id + "_" + BuildTable1ModeId(family, p, q);
+    point_config.article_target = config.article_target;
+    point_config.csv_output_path = "";
+    point_config.solver_model = solver_model;
+    point_config.family = family;
+    point_config.p = p;
+    point_config.q = q;
+    point_config.wavelength = config.wavelength;
+
+    point_config.b = NormalizedBToPhysicalB(config, b_normalized);
+    point_config.a = row.a_over_b * point_config.b;
+
+    point_config.n1 = config.n1;
+    point_config.n2 = row.n2;
+    point_config.n3 = row.n3;
+    point_config.n4 = row.n4;
+    point_config.n5 = row.n5;
+
+    return point_config;
 }
 
 bool EvaluateGuidance(
@@ -86,26 +173,12 @@ bool EvaluateGuidance(
     double b_normalized,
     SingleGuideResult* result
 ) {
-    SingleGuideConfig point_config;
-    point_config.case_id = config.case_id + "_" + row.row_id;
-    point_config.article_target = config.article_target;
-    point_config.csv_output_path = "";
-    point_config.solver_model = solver_model;
-    point_config.family = family;
-    point_config.p = p;
-    point_config.q = q;
-    point_config.wavelength = config.wavelength;
-    point_config.b = b_normalized * config.wavelength / config.n1;
-    point_config.a = row.a_over_b * point_config.b;
-    point_config.n1 = config.n1;
-    point_config.n2 = row.n2;
-    point_config.n3 = row.n3;
-    point_config.n4 = row.n4;
-    point_config.n5 = row.n5;
+    const SingleGuideConfig point_config =
+        BuildPointConfig(config, row, solver_model, family, p, q, b_normalized);
 
-    // Table I is reproduced by repeatedly asking a simpler question:
-    // "for this geometry and this candidate higher-order mode, is the mode guided?"
-    SingleGuideResult local_result = SolveSingleGuide(point_config);
+    // A Tabela I é reproduzida por uma pergunta operacional simples:
+    // “para esta geometria e este modo candidato, o modo está guiado?”
+    const SingleGuideResult local_result = SolveSingleGuide(point_config);
     const bool guided = local_result.guided;
 
     if (result != nullptr) {
@@ -135,8 +208,8 @@ Table1ModeCutoff FindModeCutoff(
     const double lower = config.search.b_normalized_min;
     const double upper = config.search.b_normalized_max;
 
-    // The search assumes monotone loss of guidance as the guide gets thinner.
-    // That is exactly the kind of engineering-oriented cutoff scan Table I needs.
+    // A busca assume monotonicidade qualitativa: ao afinar o guia,
+    // modos superiores deixam de ser guiados.
     if (EvaluateGuidance(config, row, solver_model, family, p, q, lower, nullptr)) {
         cutoff.cutoff_found = true;
         cutoff.cutoff_b_normalized = lower;
@@ -151,10 +224,8 @@ Table1ModeCutoff FindModeCutoff(
         double right = upper;
 
         for (int iteration = 0; iteration < 100; ++iteration) {
-            // We bisect in the normalized thickness coordinate rather than solving
-            // a new analytic cutoff formula, because the same engine can then be
-            // reused for both closed-form and transcendental modal solvers.
             const double midpoint = 0.5 * (left + right);
+
             if (EvaluateGuidance(config, row, solver_model, family, p, q, midpoint, nullptr)) {
                 right = midpoint;
             } else {
@@ -172,9 +243,88 @@ Table1ModeCutoff FindModeCutoff(
 
     cutoff.cutoff_a_normalized = row.a_over_b * cutoff.cutoff_b_normalized;
     cutoff.cutoff_b_over_A4 =
-        (cutoff.cutoff_b_normalized * config.wavelength / config.n1) /
-        ComputeA(config.wavelength, config.n1, row.n4);
+        ComputeCutoffBOverA4(config, row, cutoff.cutoff_b_normalized);
+
     return cutoff;
+}
+
+Table1RowSummary BuildInitialRowSummary(
+    const Table1Config& config,
+    const Table1RowSpec& row,
+    SingleGuideSolverModel solver_model
+) {
+    Table1RowSummary summary;
+    summary.row_id = row.row_id;
+    summary.article_panel_id = row.article_panel_id;
+    summary.solver_model = solver_model;
+
+    summary.a_over_b = row.a_over_b;
+    summary.n2 = row.n2;
+    summary.n3 = row.n3;
+    summary.n4 = row.n4;
+    summary.n5 = row.n5;
+
+    summary.article_dimension_normalized = row.article_dimension_normalized;
+    summary.computed_dimension_normalized = NaN();
+    summary.computed_b_normalized = NaN();
+    summary.computed_a_normalized = NaN();
+    summary.computed_b_over_A4 = NaN();
+    summary.absolute_error = NaN();
+    summary.relative_error = NaN();
+
+    return summary;
+}
+
+void FinalizeSummaryFromBestMode(
+    const Table1Config& config,
+    const Table1RowSpec& row,
+    SingleGuideSolverModel solver_model,
+    const Table1ModeCutoff& best_mode,
+    Table1RowSummary& summary
+) {
+    summary.limiting_cutoff_found = true;
+    summary.limiting_mode_id = best_mode.mode_id;
+    summary.limiting_family = best_mode.family;
+    summary.limiting_p = best_mode.p;
+    summary.limiting_q = best_mode.q;
+
+    summary.computed_b_normalized = best_mode.cutoff_b_normalized;
+    summary.computed_a_normalized = best_mode.cutoff_a_normalized;
+    summary.computed_dimension_normalized = best_mode.cutoff_a_normalized;
+    summary.computed_b_over_A4 = best_mode.cutoff_b_over_A4;
+
+    summary.absolute_error =
+        summary.computed_dimension_normalized - summary.article_dimension_normalized;
+    summary.relative_error =
+        summary.absolute_error / summary.article_dimension_normalized;
+
+    const double probe_b_normalized =
+        std::max(
+            config.search.b_normalized_min,
+            best_mode.cutoff_b_normalized - config.search.cutoff_tolerance
+        );
+
+    summary.ey11_guided_just_below_cutoff = EvaluateGuidance(
+        config,
+        row,
+        solver_model,
+        SingleGuideFamily::kEy,
+        1,
+        1,
+        probe_b_normalized,
+        nullptr
+    );
+
+    summary.ex11_guided_just_below_cutoff = EvaluateGuidance(
+        config,
+        row,
+        solver_model,
+        SingleGuideFamily::kEx,
+        1,
+        1,
+        probe_b_normalized,
+        nullptr
+    );
 }
 
 }  // namespace
@@ -192,25 +342,11 @@ Table1Result SolveTable1(const Table1Config& config) {
 
     for (const auto& row : config.rows) {
         for (const auto& solver_model : config.solver_models) {
-            // Each summary row asks for the first higher-order cutoff beyond the
-            // two fundamental modes E_y11 and E_x11. The smallest cutoff found
-            // defines the monomode limit reported against the article.
-            Table1RowSummary summary;
-            summary.row_id = row.row_id;
-            summary.article_panel_id = row.article_panel_id;
-            summary.solver_model = solver_model;
-            summary.a_over_b = row.a_over_b;
-            summary.n2 = row.n2;
-            summary.n3 = row.n3;
-            summary.n4 = row.n4;
-            summary.n5 = row.n5;
-            summary.article_dimension_normalized = row.article_dimension_normalized;
-            summary.computed_dimension_normalized = NaN();
-            summary.computed_b_normalized = NaN();
-            summary.computed_a_normalized = NaN();
-            summary.computed_b_over_A4 = NaN();
-            summary.absolute_error = NaN();
-            summary.relative_error = NaN();
+            // Cada linha procura o primeiro cutoff de modo superior além dos
+            // fundamentais E_y11 e E_x11. O menor cutoff encontrado define
+            // o limite monomodo comparado ao artigo.
+            Table1RowSummary summary =
+                BuildInitialRowSummary(config, row, solver_model);
 
             double best_cutoff = std::numeric_limits<double>::infinity();
             Table1ModeCutoff best_mode;
@@ -222,12 +358,13 @@ Table1Result SolveTable1(const Table1Config& config) {
                     }
 
                     for (const auto family : {SingleGuideFamily::kEy, SingleGuideFamily::kEx}) {
-                        // We scan both hybrid families because the article's monomode
-                        // bound is controlled by whichever higher-order branch appears first.
-                        const auto cutoff = FindModeCutoff(config, row, solver_model, family, p, q);
+                        const Table1ModeCutoff cutoff =
+                            FindModeCutoff(config, row, solver_model, family, p, q);
+
                         result.mode_cutoffs.push_back(cutoff);
 
-                        if (cutoff.cutoff_found && cutoff.cutoff_b_normalized < best_cutoff) {
+                        if (cutoff.cutoff_found &&
+                            cutoff.cutoff_b_normalized < best_cutoff) {
                             best_cutoff = cutoff.cutoff_b_normalized;
                             best_mode = cutoff;
                         }
@@ -236,46 +373,12 @@ Table1Result SolveTable1(const Table1Config& config) {
             }
 
             if (std::isfinite(best_cutoff)) {
-                summary.limiting_cutoff_found = true;
-                summary.limiting_mode_id = best_mode.mode_id;
-                summary.limiting_family = best_mode.family;
-                summary.limiting_p = best_mode.p;
-                summary.limiting_q = best_mode.q;
-                summary.computed_b_normalized = best_mode.cutoff_b_normalized;
-                summary.computed_a_normalized = best_mode.cutoff_a_normalized;
-                // Table I interpretation is explicit in config to avoid hidden assumptions.
-                summary.computed_dimension_normalized = best_mode.cutoff_a_normalized;
-                summary.computed_b_over_A4 = best_mode.cutoff_b_over_A4;
-                summary.absolute_error =
-                    summary.computed_dimension_normalized - summary.article_dimension_normalized;
-                summary.relative_error =
-                    summary.absolute_error / summary.article_dimension_normalized;
-
-                const double probe_b_normalized =
-                    std::max(
-                        config.search.b_normalized_min,
-                        best_mode.cutoff_b_normalized - config.search.cutoff_tolerance
-                    );
-
-                summary.ey11_guided_just_below_cutoff = EvaluateGuidance(
+                FinalizeSummaryFromBestMode(
                     config,
                     row,
                     solver_model,
-                    SingleGuideFamily::kEy,
-                    1,
-                    1,
-                    probe_b_normalized,
-                    nullptr
-                );
-                summary.ex11_guided_just_below_cutoff = EvaluateGuidance(
-                    config,
-                    row,
-                    solver_model,
-                    SingleGuideFamily::kEx,
-                    1,
-                    1,
-                    probe_b_normalized,
-                    nullptr
+                    best_mode,
+                    summary
                 );
             }
 
