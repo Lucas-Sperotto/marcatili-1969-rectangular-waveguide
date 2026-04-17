@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant U as Usuário
+    participant S as Shell
+    participant A as app reproduce_fig7
+    participant IO as camada io
+    participant P as physics fig7
+    participant FS as arquivos JSON/CSV
+    participant PY as scripts/plot_fig7.py
+
+    U->>S: ./build/bin/reproduce_fig7 input.json output.json
+    S->>A: argumentos
+    A->>IO: ParseFigure7Config(...)
+    IO-->>A: Figure7Config
+    A->>P: SolveFigure7(config)
+    P-->>A: Figure7Result
+    A->>IO: BuildFigure7JsonReport(...)
+    A->>IO: BuildFigure7LinesCsvReport(...)
+    A->>IO: BuildFigure7IntersectionsCsvReport(...)
+    IO->>FS: escreve JSON + lines.csv + intersections.csv
+    U->>S: ./scripts/plot_fig7.py lines.csv --intersections-csv intersections.csv -o output.png
+    S->>PY: dois CSVs + opções
+    PY->>FS: lê CSVs e escreve PNG

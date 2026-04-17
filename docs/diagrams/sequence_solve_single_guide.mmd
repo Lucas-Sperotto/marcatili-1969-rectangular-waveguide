@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant U as Usuário
+    participant S as Shell
+    participant A as app solve_single_guide
+    participant IO as camada io
+    participant P as camada physics
+    participant FS as arquivos JSON/CSV
+
+    U->>S: ./build/bin/solve_single_guide input.json output.json
+    S->>A: argumentos da linha de comando
+    A->>IO: ReadTextFile(input.json)
+    IO-->>A: texto JSON
+    A->>IO: ParseSingleGuideConfig(...)
+    IO-->>A: SingleGuideConfig
+    A->>P: SolveSingleGuide(config)
+    P-->>A: SingleGuideResult
+    A->>IO: BuildSingleGuideJsonReport(...)
+    A->>IO: BuildSingleGuideCsvReport(...)
+    IO->>FS: escreve output.json e output.csv
+    A-->>S: mensagem de sucesso

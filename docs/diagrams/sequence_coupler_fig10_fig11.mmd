@@ -1,0 +1,55 @@
+sequenceDiagram
+    participant U as Usuário
+    participant S as Shell
+    participant A as apps do acoplador
+    participant IO as camada io
+    participant F as physics fig10/fig11
+    participant C as physics coupler
+    participant FS as arquivos JSON/CSV
+    participant PY as scripts Python de plot
+
+    alt solve_coupler
+        U->>S: ./build/bin/solve_coupler input.json output.json
+        S->>A: argumentos
+        A->>IO: ParseCouplerPointConfig(...)
+        IO-->>A: CouplerPointConfig
+        A->>C: SolveCouplerPoint(config)
+        C-->>A: CouplerPointResult
+        A->>IO: BuildCouplerPointJsonReport(...)
+        A->>IO: BuildCouplerPointCsvReport(...)
+        IO->>FS: escreve JSON + CSV
+    else reproduce_fig10
+        U->>S: ./build/bin/reproduce_fig10 input.json output.json
+        S->>A: argumentos
+        A->>IO: ParseFigure10Config(...)
+        IO-->>A: Figure10Config
+        A->>F: SolveFigure10(config)
+        loop para cada curva a/A5 e ponto c/a
+            F->>C: SolveCouplerPoint(...)
+            C-->>F: ponto normalizado de acoplamento
+        end
+        F-->>A: Figure10Result
+        A->>IO: BuildFigure10JsonReport(...)
+        A->>IO: BuildFigure10CsvReport(...)
+        IO->>FS: escreve JSON + CSV
+        U->>S: ./scripts/plot_fig10.py output.csv -o output.png
+        S->>PY: csv + opções
+        PY->>FS: lê CSV e escreve PNG
+    else reproduce_fig11
+        U->>S: ./build/bin/reproduce_fig11 input.json output.json
+        S->>A: argumentos
+        A->>IO: ParseFigure11Config(...)
+        IO-->>A: Figure11Config
+        A->>F: SolveFigure11(config)
+        loop para cada n1/n5, a/A5 e ponto c/a
+            F->>C: SolveCouplerPoint(...)
+            C-->>F: ponto normalizado de acoplamento
+        end
+        F-->>A: Figure11Result
+        A->>IO: BuildFigure11JsonReport(...)
+        A->>IO: BuildFigure11CsvReport(...)
+        IO->>FS: escreve JSON + CSV
+        U->>S: ./scripts/plot_fig11.py output.csv -o output.png
+        S->>PY: csv + opções
+        PY->>FS: lê CSV e escreve PNG
+    end

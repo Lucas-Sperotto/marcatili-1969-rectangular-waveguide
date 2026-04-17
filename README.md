@@ -20,7 +20,25 @@ Nesta etapa, a base do projeto já inclui:
 4. uma reproducao operacional da Fig. 8 para o caso com interface metalizada, com comparacao lado a lado contra o scan;
 5. uma primeira reproducao operacional da Fig. 10 a partir da equacao de acoplamento normalizado;
 6. uma primeira reproducao operacional da Fig. 11 a partir da mesma equacao de acoplamento, agora com a raiz transversal da Eq. (20);
-7. placeholders organizados para o restante do acoplador e para as figuras ainda nao tratadas.
+7. base organizada para extensoes do acoplador e para os casos perturbados ainda nao implementados.
+
+## Como ler o repositório
+
+Uma forma boa de navegar pelo projeto é esta:
+
+1. comece pelos casos em `data/input/` para ver quais parametros entram;
+2. leia os executaveis em `src/apps/` como "roteiros curtos" de execucao;
+3. depois desca para `src/io/` e `src/physics/`, onde estao o schema e a matematica;
+4. por fim, veja `scripts/plot_fig*.py`, que transformam `CSV` em figuras.
+
+Documentos pedagogicos recomendados:
+
+- `docs/10_fluxo_geral_do_repositorio.md`
+- `docs/11_closed_form_vs_exact.md`
+- `docs/12_trilha_equacoes_para_codigo.md`
+- `docs/13_validacao_e_limites_do_modelo.md`
+- `docs/14_diagramas_de_fluxo_e_sequencia.md`
+- `docs/15_roteiro_de_estudo.md`
 
 ## Estrutura
 
@@ -37,7 +55,7 @@ Nesta etapa, a base do projeto já inclui:
 ## Estado atual dos executáveis
 
 - `solve_single_guide`: resolve um caso pontual do guia único com solver `closed_form` ou `exact` e gera saídas em `JSON` e `CSV`.
-- `solve_coupler`: placeholder, a ser alinhado com o nucleo de acoplamento introduzido para a Fig. 10.
+- `solve_coupler`: resolve um ponto do acoplador direcional no modelo normalizado da Eq. (34), com escolha da equacao transversal (`eq6` ou `eq20`) e saidas em `JSON` e `CSV`.
 - `reproduce_fig6`: executa um sweep em $b/A_4$ e gera curvas numéricas em `CSV` e resumo em `JSON` para um painel de Fig. 6, com suporte a solver aproximado, exato e ao limite de lâmina.
 - `reproduce_fig7`: reproduz o nomograma da Fig. 7 como conjunto de retas modais, retas de $C$ e interseções de referência em `JSON` e `CSV`.
 - `reproduce_fig8`: executa um sweep em $a/A$ para o caso metalizado da Fig. 8, hoje com o conjunto modal de trabalho $E^y_{11}$, $E^x_{11}$ e $E^x_{21}$ explicitado no relatorio `JSON`.
@@ -49,6 +67,7 @@ Todos aceitam um arquivo de entrada:
 
 ```bash
 ./build/bin/solve_single_guide data/input/solve_single_guide.json
+./build/bin/solve_coupler data/input/solve_coupler.json data/output/solve_coupler.json
 ./build/bin/reproduce_fig6 data/input/reproduce_fig6.json data/output/reproduce_fig6.json
 ./scripts/plot_fig6.py data/output/reproduce_fig6.csv -o data/output/reproduce_fig6.png
 ./build/bin/reproduce_fig7 data/input/reproduce_fig7.json data/output/reproduce_fig7.json
@@ -65,17 +84,37 @@ Todos aceitam um arquivo de entrada:
 ./scripts/run/build_fig11_article_comparison.sh
 ```
 
+## `closed_form` e `exact`
+
+Os dois nomes aparecem em varios casos e merecem uma leitura cuidadosa:
+
+- `closed_form`: usa as formulas aproximadas em forma fechada derivadas por Marcatili, como Eq. (12)-(16) e Eq. (22)-(26);
+- `exact`: resolve numericamente as equacoes transcendentais do proprio modelo adotado, como Eq. (6), Eq. (7), Eq. (20) e Eq. (21).
+
+Importante: `exact` aqui nao significa resolver o problema vetorial 2D completo sem aproximacoes. Significa resolver exatamente, por metodos numericos, a versao transcendental do modelo de Marcatili implementado no repositorio.
+
+Para uma explicacao didatica mais longa, veja `docs/11_closed_form_vs_exact.md`.
+
 ## Build e execução
 
 ```bash
 ./scripts/run/build.sh
+./scripts/run/clean_build_reproduce_all.sh
 ./scripts/run/reproduce_all.sh
 ./scripts/run/reproduce_fig6_panels.sh
 ./scripts/run/reproduce_fig7_nomogram.sh
 ./scripts/run/reproduce_fig8_case.sh
 ./scripts/run/reproduce_fig10_case.sh
 ./scripts/run/reproduce_fig11_case.sh
+./scripts/run/check_reproduction.sh
 ./scripts/run/clean.sh
+```
+
+Por padrao, `clean.sh` preserva artefatos versionados em `data/output` para nao sujar o `git status`.
+Se quiser remover tambem os arquivos rastreados, use:
+
+```bash
+CLEAN_TRACKED_OUTPUT=1 ./scripts/run/clean.sh
 ```
 
 Se quiser executar os smoke tests registrados no `CTest`, rode:
@@ -90,6 +129,8 @@ RUN_TESTS=1 ./scripts/run/build.sh
 - sem dependências desnecessárias nesta fase inicial;
 - gráficos gerados apenas por scripts Python externos;
 - cada executável deve receber um arquivo de entrada;
+- o parser JSON interno e deliberadamente restrito ao schema do repositorio (strings, numeros, arrays de strings e arrays de objetos); ele nao e um parser JSON geral;
+- para novos casos, preferir arrays de objetos JSON em vez de campos compactos em string;
 - saídas numéricas devem permanecer em `CSV` ou `JSON`;
 - ambiguidades de OCR devem ser marcadas com `TODO`.
 - o primeiro solver implementado deve sempre explicitar quais equações do artigo está usando.

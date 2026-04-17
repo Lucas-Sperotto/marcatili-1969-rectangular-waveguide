@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant U as Usuário
+    participant S as Shell
+    participant A as app reproduce_fig6
+    participant IO as camada io
+    participant P as physics fig6
+    participant G as physics single/slab
+    participant FS as arquivos JSON/CSV
+    participant PY as scripts/plot_fig6.py
+
+    U->>S: ./build/bin/reproduce_fig6 input.json output.json
+    S->>A: argumentos
+    A->>IO: ParseFigure6Config(...)
+    IO-->>A: Figure6Config
+    A->>P: SolveFigure6(config)
+    loop para cada variante, solver, modo e ponto do sweep
+        P->>G: SolveSingleGuide(...) ou SolveSlabGuide(...)
+        G-->>P: resultado pontual
+    end
+    P-->>A: Figure6Result
+    A->>IO: BuildFigure6JsonReport(...)
+    A->>IO: BuildFigure6CsvReport(...)
+    IO->>FS: escreve output.json e output.csv
+    U->>S: ./scripts/plot_fig6.py output.csv -o output.png
+    S->>PY: csv + opções
+    PY->>FS: lê CSV e escreve PNG
