@@ -37,14 +37,14 @@ Como a constante de propagação axial (`kz`) de diferentes modos varia com a di
 
 ### Grau atual de concordância
 
-**Bom**, com painéis fortes e alguns ajustes finos pendentes.
+**Bom**, com regressões quantitativas cobrindo um caso canônico e com ajustes finos ainda concentrados em leitura editorial.
 
-Os painéis `6h`, `6i`, `6j` e `6k` já mostram comportamento plausível e comparações úteis. Os casos `6c` e `6e` ainda pedem refinamento de borda vertical.
+Os painéis `6h`, `6i`, `6j` e `6k` já mostram comportamento plausível e comparações úteis. Os casos `6c` e `6e` ainda pedem refinamento de borda vertical e conferência OCR dos rótulos.
 
 ### Divergências científicas
 
 - A identificação exata de todos os modos em alguns painéis do artigo original é difícil devido à qualidade do scan, mas o comportamento geral é bem reproduzido.
-- O agrupamento modal em `6j` ainda merece ajuste fino.
+- O agrupamento modal em `6j` ainda merece ajuste fino editorial, não um bloqueio numérico do solver.
 
 ### Divergências editoriais
 
@@ -128,11 +128,11 @@ As curvas de dispersão para um guia que tem uma de suas faces coberta por metal
 
 ### Grau atual de concordância
 
-**Moderado para bom**, com a física geral convincente, mas com uma ambiguidade modal aberta.
+**Moderado para bom**, com a física geral convincente e uma hipótese modal de trabalho agora estabilizada em código e teste.
 
 ### Divergências científicas
 
-- **Ambiguidade Principal:** A identificação do "ramo intermediário" no scan original do artigo ainda é uma hipótese aberta. A implementação atual adota uma escolha plausível ($E^x_{21}$), mas a questão não está cientificamente encerrada.
+- **Ambiguidade Principal:** A identificação do "ramo intermediário" no scan original do artigo ainda é uma hipótese aberta. A implementação atual adota a família de trabalho $E^y_{11}$, $E^x_{11}$ e $E^x_{21}$, mas a questão não está cientificamente encerrada.
 - o símbolo final do eixo horizontal ainda merece conferência: $A$ versus $A_4$.
 
 ### Divergências editoriais
@@ -174,11 +174,11 @@ Quão forte é o acoplamento entre dois guias paralelos para o modo rotulado com
 
 ### Grau atual de concordância
 
-**Bom** no comportamento global, mas com uma pendência científica relevante.
+**Bom** no comportamento global, com regressão quantitativa no caso-base e uma pendência OCR ainda relevante.
 
 ### Divergências científicas
 
-- **Ambiguidade Principal:** A identificação da família de curvas intermediária (`1.0` vs. `1.6`) no scan original é um ponto de debate histórico. O repositório segue a interpretação mais consistente com o texto.
+- **Ambiguidade Principal:** A identificação da família de curvas intermediária (`1.0` vs. `1.6`) no scan original ainda não foi encerrada por fonte melhor. O repositório mantém a família `1.0` como baseline de trabalho, porque ela preserva o conjunto monotônico documentado nos casos-base.
 - O texto da Seção IV cita Eq. (6) e Eq. (12) (da família $E^y_{pq}$), embora o título da figura mencione modos $E^x_{pq}$. A implementação segue o texto.
 - a referência de Jones ainda não foi incorporada.
 
@@ -264,11 +264,12 @@ As maiores dimensões que um guia pode ter para suportar *apenas* os modos funda
 
 ### Grau atual de concordância
 
-**Moderado**, porque a mecânica numérica está boa, mas a interpretação editorial da quantidade tabulada ainda é sensível.
+**Bom**, porque a mecânica numérica agora distingue explicitamente cutoff encontrado, cutoff abaixo da faixa pesquisada e cutoff acima da janela.
 
 ### Divergências científicas
 
-- **Ambiguidade Principal:** A interpretação exata de qual dimensão (`a` ou `b`) o valor tabelado representa é uma hipótese. A implementação atual adota a interpretação de que é a largura `a`, mas isso permanece um ponto para validação final.
+- A interpretação operacional foi congelada como `a_times_n1_over_lambda`, consistente com a comparação entre o artigo, os casos-base e os campos `computed_a_normalized` da implementação.
+- O ponto científico que ainda resta aqui é menos “qual grandeza está sendo tabulada” e mais o fechamento editorial do fac-símile final da tabela.
 
 ### Divergências editoriais
 
@@ -277,7 +278,7 @@ As maiores dimensões que um guia pode ter para suportar *apenas* os modos funda
 
 ### Prioridade de correção
 
-**Alta**, porque a hipótese da grandeza tabulada afeta diretamente a leitura física do resultado.
+**Média-alta**, porque a leitura física central está estabilizada, mas o acabamento editorial da tabela ainda não está fechado.
 
 ## Resumo de prioridades
 
@@ -285,10 +286,10 @@ Se a correção for priorizada por impacto científico, a ordem recomendada é:
 
 1. Fig. 8
 2. Fig. 10
-3. Tabela I
-4. Fig. 6
-5. Fig. 7
-6. Fig. 11
+3. Fig. 6
+4. Fig. 7
+5. Fig. 11
+6. Tabela I
 
 Se a priorização for por acabamento editorial, a ordem muda para:
 

@@ -16,10 +16,17 @@ Este checklist formaliza os passos minimos para reproduzir os artefatos numerico
 ./scripts/run.sh check
 ```
 
+3. Validar a suite automatica:
+
+```bash
+/usr/bin/ctest --test-dir build --output-on-failure
+```
+
 ## Itens de aceitacao por fase
 
 - `build/` gerado sem erro de compilacao.
 - Executaveis principais executam com entrada por arquivo JSON.
+- Suite `CTest` passa com smoke tests e `tests/regression_checks.cpp`.
 - Saidas numericas em `data/output/*.json` e `data/output/*.csv`.
 - Graficos base em `data/output/*.png` para Figs. 7, 8, 10 e 11.
 - Paineis da Fig. 6 em `data/output/fig6/*.png`, com rotulos `(a)`, `(b)`, ...
@@ -29,7 +36,7 @@ Este checklist formaliza os passos minimos para reproduzir os artefatos numerico
 
 - Ambiguidades OCR de legenda/modal nas Figs. 8 e 10.
 - Referencias externas (Goell/Jones) ainda sem digitalizacao completa para comparacao numerica automatica.
-- Cobertura de testes ainda majoritariamente de smoke (faltam regressos quantitativos de curvas).
+- A cobertura automatica ja inclui smoke tests e regressao quantitativa, mas ainda falta uma camada final de aceitacao editorial/fac-simile.
 
 
 <!-- NAV START -->

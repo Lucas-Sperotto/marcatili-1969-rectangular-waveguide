@@ -196,8 +196,9 @@ São as expressões de $k_z$ para as duas famílias no acoplador.
 
 No repositório atual:
 
-- elas aparecem mais como pano de fundo conceitual do que como API explícita do acoplador;
-- o foco operacional está em `normalized_coupling`, não ainda em uma saída dimensional completa de $K$ e $L$.
+- elas aparecem como pano de fundo conceitual e como base da reconstrução dimensional opcional do acoplador;
+- `normalized_coupling` continua sendo a saída central;
+- quando `wavelength`, `n1` e `n5` estão presentes, `solve_coupler` também reporta $A_5$, $|K|$ e $L$ no mesmo modelo reduzido.
 
 ### Eq. (56) e Eq. (59)
 

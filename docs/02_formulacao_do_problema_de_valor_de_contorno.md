@@ -32,7 +32,6 @@ A ideia essencial é transformar um problema bidimensional rigoroso, com casamen
 
 Outro ponto importante é a interpretação modal. Embora os modos sejam rigorosamente híbridos, eles possuem uma polarização predominante, o que permite classificá-los em duas famílias. Essa classificação será fundamental para interpretar as curvas de dispersão, os modos fundamentais e o comportamento do acoplador direcional.
 
-
 <!-- NAV START -->
 ---
 

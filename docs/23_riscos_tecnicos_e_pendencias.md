@@ -28,17 +28,14 @@ Urgência:
 | R1 | ambiguidade modal da Fig. 8 | alto | alta | rever scan, revisar texto do artigo e testar famílias concorrentes mantendo `TODO OCR` explícito |
 | R2 | família intermediária da Fig. 10 (`1.0` vs `1.6`) | alto | alta | gerar comparação controlada com ambas as famílias e congelar a leitura adotada com justificativa |
 | R3 | coerência entre rótulo modal da Fig. 10 e referência a Eq. (6)/(12) | alto | alta | manter hipótese explícita, registrar decisão editorial e buscar confirmação adicional no original |
-| R4 | interpretação da Tabela I como $a n_1/\lambda$ | alto | alta | confrontar a hipótese atual com o exemplo numérico do artigo e revisar documentação de suporte |
-| R5 | solver `exact` pode ser confundido com solução 2D rigorosa | médio | alta | continuar reforçando em docs e comentários que `exact` é exato apenas dentro do modelo de Marcatili |
-| R6 | parser JSON restrito por projeto | médio | média | manter documentação explícita do escopo do parser e evitar crescer o schema com sintaxes compactas frágeis |
-| R7 | presença residual de campos compactados em string em alguns casos antigos | médio | média | migrar casos canônicos para arrays de objetos JSON e deixar strings compactas apenas como compatibilidade legado |
-| R8 | cobertura de testes ainda dominada por smoke tests | alto | alta | criar regressões quantitativas por figura, curva e ponto de referência |
-| R9 | falta de referência externa digitalizada para Jones/Goell | médio | média | incorporar dados ou referências rastreáveis para reforçar validação do acoplador |
-| R10 | acoplador ainda centrado em saída normalizada, sem fechamento completo de $K$ e $L$ | médio | média | estender `solve_coupler` com saída dimensional e exemplos fechados do artigo |
-| R11 | diferenças entre fac-símile visual e concordância física | médio | média | documentar sempre se a divergência é científica ou apenas editorial antes de mexer no plot |
-| R12 | ajuste fino de alguns painéis da Fig. 6 ainda incompleto | médio | média | revisar painéis `6c`, `6e` e `6j` com critérios por painel |
-| R13 | eixo da Fig. 8 ainda pode ser $A$ ou $A_4$ | baixo | média | confirmar notação final no scan e congelar terminologia nos scripts e docs |
-| R14 | interpretação do limite de lâmina em alguns painéis pode ser supercarregada visualmente | baixo | baixa | simplificar apresentação final dos painéis de lâmina quando o foco for fac-símile |
+| R4 | solver `exact` pode ser confundido com solução 2D rigorosa | médio | média | continuar reforçando em docs e comentários que `exact` é exato apenas dentro do modelo de Marcatili |
+| R5 | parser JSON restrito por projeto | médio | média | manter documentação explícita do escopo do parser e evitar crescer o schema com sintaxes compactas frágeis |
+| R6 | presença residual de campos compactados em string em alguns casos antigos | médio | média | migrar casos canônicos restantes para arrays de objetos JSON e deixar strings compactas apenas como compatibilidade legado |
+| R7 | falta de referência externa digitalizada para Jones/Goell | médio | média | incorporar dados ou referências rastreáveis para reforçar validação do acoplador |
+| R8 | diferenças entre fac-símile visual e concordância física | médio | média | documentar sempre se a divergência é científica ou apenas editorial antes de mexer no plot |
+| R9 | ajuste fino de alguns painéis da Fig. 6 ainda incompleto | médio | média | revisar painéis `6c`, `6e` e `6j` com critérios por painel |
+| R10 | eixo da Fig. 8 ainda pode ser $A$ ou $A_4$ | baixo | média | confirmar notação final no scan e congelar terminologia nos scripts e docs |
+| R11 | interpretação do limite de lâmina em alguns painéis pode ser supercarregada visualmente | baixo | baixa | simplificar apresentação final dos painéis de lâmina quando o foco for fac-símile |
 
 ## Comentário por grupo
 
@@ -48,8 +45,7 @@ Os riscos mais importantes são:
 
 - R1: Fig. 8;
 - R2 e R3: Fig. 10;
-- R4: Tabela I;
-- R8: ausência de regressões quantitativas.
+- R7: referência externa de Jones/Goell.
 
 Esses riscos merecem prioridade porque podem mudar não apenas o “desenho” final da figura, mas a interpretação física que o repositório transmite.
 
@@ -57,9 +53,8 @@ Esses riscos merecem prioridade porque podem mudar não apenas o “desenho” f
 
 Os riscos de infraestrutura mais relevantes são:
 
-- R6: parser JSON minimalista;
-- R7: formatos compactos legados;
-- R8: testes ainda rasos.
+- R5: parser JSON minimalista;
+- R6: formatos compactos legados.
 
 Aqui o risco não é tanto “matemática errada”, mas sim:
 
@@ -71,10 +66,10 @@ Aqui o risco não é tanto “matemática errada”, mas sim:
 
 Há também riscos editoriais que não devem ser confundidos com falhas físicas:
 
-- R11: fac-símile visual versus concordância física;
-- R12: bordas e agrupamentos de Fig. 6;
-- R13: notação de eixo em Fig. 8;
-- R14: apresentação do limite de lâmina.
+- R8: fac-símile visual versus concordância física;
+- R9: bordas e agrupamentos de Fig. 6;
+- R10: notação de eixo em Fig. 8;
+- R11: apresentação do limite de lâmina.
 
 Esses pontos importam, mas devem ser tratados depois que os riscos científicos principais estiverem mais fechados.
 
@@ -82,17 +77,19 @@ Esses pontos importam, mas devem ser tratados depois que os riscos científicos 
 
 Além dos riscos, há pendências de desenvolvimento já bem delimitadas:
 
-1. adicionar regressões quantitativas para `reproduce_fig6`, `reproduce_fig7`, `reproduce_fig8`, `reproduce_fig10`, `reproduce_fig11` e `reproduce_table1`;
-2. consolidar a interpretação final da Tabela I;
-3. fechar a leitura OCR da Fig. 8;
-4. fechar a leitura OCR da Fig. 10;
+1. fechar a leitura OCR da Fig. 8;
+2. fechar a leitura OCR da Fig. 10;
+3. incorporar uma referência rastreável para Jones/Goell;
+4. migrar casos canônicos remanescentes para arrays de objetos JSON;
 5. decidir se o próximo foco é:
    - acabamento científico das figuras;
    - ou expansão do acoplador para casos perturbados.
 
 ## Conclusão
 
-O projeto não está num estado “frágil”. O que existe é um conjunto pequeno e bem identificado de riscos centrais que agora pode ser tratado de forma priorizada.
+O projeto não está num estado “frágil”. O núcleo físico principal, a distinção entre limite físico e erro de domínio, a saída dimensional básica do acoplador e a regressão quantitativa central já estão fechados.
+
+O que resta agora é um conjunto menor e mais localizado de ambiguidades OCR, referências externas e acabamento editorial.
 
 Isso é exatamente o que se espera de um repositório científico em maturação saudável.
 

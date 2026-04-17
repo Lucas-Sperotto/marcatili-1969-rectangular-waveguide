@@ -21,8 +21,8 @@ Esta matriz foi construída para servir como tabela de rastreabilidade entre:
 | forma fechada da família $E^x_{pq}$ | Eq. (22), Eq. (23) | `src/physics/single_guide.cpp`, `src/physics/coupler.cpp` | implementado | Eq. (22) já existe no núcleo do acoplador, mesmo que Fig. 11 baseline use apenas `exact` |
 | grandezas explícitas da família $E^x_{pq}$ | Eq. (24) a Eq. (26) | `src/physics/single_guide.cpp` | implementado | usados no solver `closed_form` da família $E^x_{pq}$ |
 | nomograma | Eq. (27) a Eq. (30) | `src/physics/fig7.cpp`, `src/io/fig7_io.cpp`, `data/input/reproduce_fig7.json` | implementado | a leitura OCR do modo de referência ainda tem nota aberta |
-| acoplamento entre guias | Eq. (33), Eq. (34) | `src/physics/coupler.cpp`, `src/physics/fig10.cpp`, `src/physics/fig11.cpp` | implementado parcialmente | forma normalizada implementada; saída dimensional completa ainda não é o foco da API |
-| comprimento de acoplamento e uso prático | Eq. (35) | documentação e casos de exemplo do acoplador | parcial | ainda não há fechamento completo de $L$ como saída consolidada do solver |
+| acoplamento entre guias | Eq. (33), Eq. (34) | `src/physics/coupler.cpp`, `src/physics/fig10.cpp`, `src/physics/fig11.cpp` | implementado | forma normalizada implementada e saída dimensional adicional disponível quando `wavelength`, `n1` e `n5` são fornecidos |
+| comprimento de acoplamento e uso prático | Eq. (35) | documentação e casos de exemplo do acoplador | parcial | `solve_coupler` já reporta $L$ no modelo reduzido, mas os exemplos textuais completos da Seção IV ainda pedem fechamento editorial |
 | transcendentes do apêndice para o acoplador $E^y_{pq}$ | Eq. (47) a Eq. (52) | `src/math/waveguide_math.cpp`, `src/physics/coupler.cpp`, `docs/07_apendice_A.md` | parcial | usados de forma reduzida e normalizada, não como solver completo de supermodos |
 | propagação axial e acoplamento do apêndice $E^y_{pq}$ | Eq. (53) a Eq. (56) | `src/physics/coupler.cpp`, `docs/04_acoplador_direcional.md`, `docs/07_apendice_A.md` | parcial | estrutura física refletida na Eq. (34), sem cobertura dimensional total |
 | limite assintótico do apêndice $E^y_{pq}$ | Eq. (57), Eq. (58) | `docs/03.1_modos_Ey.md`, `docs/11_closed_form_vs_exact.md`, `src/physics/single_guide.cpp` | conceitual + implementado | base da validade de `closed_form` |
@@ -32,10 +32,10 @@ Esta matriz foi construída para servir como tabela de rastreabilidade entre:
 | guia com interface metalizada | Fig. 8 | `src/physics/metal_guide.cpp`, `src/physics/fig8.cpp`, `src/io/fig8_io.cpp`, `scripts/plot_fig8.py`, `data/input/reproduce_fig8.json` | implementado com OCR aberto | física plausível, interpretação modal ainda em revisão |
 | acoplamento normalizado, caso Fig. 10 | Fig. 10 | `src/physics/coupler.cpp`, `src/physics/fig10.cpp`, `src/io/fig10_io.cpp`, `scripts/plot_fig10.py`, `data/input/reproduce_fig10.json` | implementado com hipótese aberta | pendência principal: família `1.0` versus `1.6` e referência de Jones |
 | acoplamento normalizado, caso Fig. 11 | Fig. 11 | `src/physics/coupler.cpp`, `src/physics/fig11.cpp`, `src/io/fig11_io.cpp`, `scripts/plot_fig11.py`, `data/input/reproduce_fig11.json` | implementado | baseline atual usa apenas solver `exact` |
-| dimensões monomodo | Tabela I | `src/physics/table1.cpp`, `src/io/table1_io.cpp`, `data/input/reproduce_table1.json` | implementado com hipótese explícita | interpretação tabulada ainda merece conferência editorial final |
+| dimensões monomodo | Tabela I | `src/physics/table1.cpp`, `src/io/table1_io.cpp`, `data/input/reproduce_table1.json` | implementado | `table_entry_interpretation = a_times_n1_over_lambda` congelada na API, com `cutoff_status` explícito e regressões quantitativas |
 | fluxo de casos por arquivo de entrada | entrada por JSON | `src/apps/*.cpp`, `src/io/*.cpp`, `data/input/*.json` | implementado | coerência estrutural forte |
 | saída numérica rastreável | JSON e CSV | `src/io/*.cpp`, `data/output/`, `scripts/plot_fig*.py` | implementado | um dos pontos mais sólidos do projeto |
-| validação automática de execução | smoke tests | `CMakeLists.txt`, `tests/README.md` | implementado parcialmente | há `10` smoke tests; faltam regressões quantitativas |
+| validação automática de execução | smoke tests + regressões | `CMakeLists.txt`, `tests/regression_checks.cpp` | implementado | há `10` smoke tests e `1` suíte de regressão cobrindo figuras, Tabela I, parser legado e correções físicas |
 
 ## Leitura da matriz
 
@@ -53,7 +53,7 @@ A matriz mostra um padrão claro:
 
 - o miolo do guia único está bem coberto;
 - o nomograma e as figuras principais existem e são reprodutíveis;
-- o acoplador está funcional em sua forma normalizada;
+- o acoplador está funcional em sua forma normalizada e já expõe uma camada dimensional do mesmo modelo reduzido;
 - o maior débito restante está no acabamento científico e no fechamento das ambiguidades abertas, não na ausência completa de implementação.
 
 

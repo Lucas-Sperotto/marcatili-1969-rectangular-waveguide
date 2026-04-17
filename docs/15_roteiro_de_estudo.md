@@ -36,7 +36,7 @@ Se você está começando, a melhor abordagem é seguir esta sequência:
 ### Passo 3: O Acoplador Direcional
 
 -   **O que fazer:** Leia a documentação sobre o acoplador (`docs/04_...` e `docs/07_...`) e examine o código em `src/physics/coupler.cpp`.
--   **Objetivo:** Entender como o coeficiente de acoplamento `K` é calculado a partir das propriedades do guia único, conforme a Eq. (34) do artigo.
+-   **Objetivo:** Entender como o coeficiente de acoplamento `K` é calculado a partir das propriedades do guia único, conforme a Eq. (34) do artigo, e como a API atual também reconstrói $A_5$, $|K|$ e $L$ quando entradas dimensionais são fornecidas.
 
 ### Passo 4: A Reprodução das Figuras
 
@@ -76,7 +76,7 @@ Esta leitura rápida ajuda a não confundir papel físico da figura com acabamen
 ### Tabela I
 
 -   **O que observar:** o primeiro cutoff de modo superior define a fronteira prática de operação monomodo.
--   **Cuidado:** a interpretação final da grandeza tabulada continua aberta e deve ser lida junto com `table_entry_interpretation` no caso-base atual.
+-   **Cuidado:** a interpretação operacional atual foi congelada como `table_entry_interpretation = a_times_n1_over_lambda`; o que ainda permanece aberto aqui é o acabamento editorial da tabela e não mais a semântica principal da API.
 
 Para o estado técnico detalhado de cada artefato, veja `docs/21_validacao_figura_por_figura.md`.
 
@@ -96,11 +96,11 @@ Este glossário explica os termos técnicos mais importantes do projeto.
 
 ### Modo Guiado
 -   **O que é:** Um padrão de campo eletromagnético que se propaga ao longo do guia sem escapar, confinado por reflexão interna total.
--   **No código:** Um resultado é considerado `guided` se sua constante de propagação axial `kz` for maior que a do meio externo e menor ou igual à do núcleo.
+-   **No código:** Um resultado é considerado `guided` se sua constante de propagação axial `kz` for maior que a do meio externo mais crítico e menor ou igual à do núcleo.
 
 ### Cutoff (Corte)
 -   **O que é:** A condição limite (de frequência ou dimensão) na qual um modo deixa de ser guiado. Abaixo do corte, a energia "vaza" para o revestimento.
--   **No código:** Identificado quando a condição de guiado não é mais satisfeita. O status do resultado muda para `below_cutoff`.
+-   **No código:** Identificado quando a condição de guiado não é mais satisfeita. O projeto hoje distingue esse limite físico (`below_cutoff`) de estados de domínio numérico (`outside_*_domain`), e a Tabela I ainda detalha `cutoff_status`.
 
 ### Campo Evanescente
 -   **O que é:** Fora do núcleo do guia, o campo não se anula abruptamente, mas decai exponencialmente. Esse campo "vazado" é o campo evanescente.

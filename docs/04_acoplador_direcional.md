@@ -34,6 +34,8 @@ $$
 
 **Observacao de reproducao do repositorio:** a implementacao atual da Fig. 10 segue exatamente essa referencia textual, isto e, usa Eq. (34) combinada com Eq. (6) no caso exato e Eq. (12) no caso aproximado. O texto e a notacao modal ainda merecem revisao de OCR, porque a figura e descrita como pertencente ao modo $E^{x}_{11}$, enquanto as equacoes citadas nessa frase pertencem a familia tratada na Secao III como $E^y$.
 
+**Estado atual da API:** `solve_coupler` continua reportando a forma normalizada de Eq. (34) como saida central, mas agora tambem pode reconstruir $A_5$, $a$, $c$, $|K|$ e $L$ quando `wavelength`, `n1` e `n5` sao fornecidos no caso de entrada. Essa dimensionalizacao segue o mesmo modelo reduzido usado nas Figs. 10 e 11.
+
 ![Figura 10 — Coeficiente de acoplamento para modos (E^{x}_{1q}).](img/fig_10.png)
 
 Figura 10  — Coeficiente de acoplamento para modos $E^{x}_{1q}$. — acoplamento calculado a partir das equações transcendentais; — — aproximações em forma fechada; — · — · — acoplamento entre duas hastes cilíndricas (A. L. Jones).

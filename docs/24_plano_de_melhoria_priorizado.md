@@ -13,12 +13,16 @@ O objetivo não é “fazer tudo ao mesmo tempo”, mas criar uma sequência que
 
 A ordem recomendada é:
 
-1. fechar rastreabilidade e pontos científicos abertos mais perigosos;
-2. reforçar validação numérica automática;
+1. manter fechados os bloqueios técnicos e a validação automática;
+2. fechar ambiguidades OCR centrais ainda abertas;
 3. refinar apresentação e fac-símile;
-4. expandir o escopo do acoplador.
+4. expandir o escopo do acoplador a partir da base dimensional já disponível.
 
 ## Fase 1: documentação e rastreabilidade
+
+### Status
+
+**concluída**
 
 ### Objetivo
 
@@ -52,8 +56,13 @@ Fechar a base documental necessária para que ninguém confunda:
 - toda ambiguidade central está explicitamente registrada;
 - existe uma ponte clara artigo $\to$ código $\to$ caso-base;
 - o leitor novo sabe o que o repositório resolve e o que ainda não resolve.
+- a Tabela I já expõe `table_entry_interpretation` e `cutoff_status`.
 
 ## Fase 2: validação numérica e checks automáticos
+
+### Status
+
+**concluída**
 
 ### Objetivo
 
@@ -62,8 +71,7 @@ Passar de “o executável roda” para “o comportamento numérico esperado es
 ### Arquivos-alvo
 
 - `CMakeLists.txt`
-- `tests/README.md`
-- futuros arquivos de teste dedicados
+- `tests/regression_checks.cpp`
 - `data/input/*.json`
 - `data/output/` de referência, quando apropriado
 
@@ -81,8 +89,13 @@ Passar de “o executável roda” para “o comportamento numérico esperado es
 - regressões quantitativas para Tabela I;
 - cobertura explícita da diferença entre `closed_form` e `exact` em casos representativos;
 - documentação das tolerâncias adotadas.
+- proteção explícita dos estados `below_cutoff`, `below_transverse_cutoff`, `below_search_min` e `above_search_max`.
 
 ## Fase 3: refinamento das figuras e fac-símile
+
+### Status
+
+**aberta**
 
 ### Objetivo
 
@@ -114,6 +127,10 @@ Melhorar a comparação visual sem confundir isso com correção física.
 - distinção documentada entre versão “didática limpa” e versão “article_style”.
 
 ## Fase 4: expansão do acoplador e casos perturbados
+
+### Status
+
+**parcial**
 
 ### Objetivo
 
@@ -149,10 +166,9 @@ Se o projeto continuar em iterações curtas, a sequência recomendada é:
 
 1. fechar Fig. 8;
 2. fechar Fig. 10;
-3. fechar interpretação da Tabela I;
-4. criar regressões quantitativas;
-5. só então investir pesado em fac-símile visual;
-6. depois expandir o acoplador dimensional.
+3. incorporar referência externa de Jones/Goell;
+4. só então investir pesado em fac-símile visual;
+5. depois expandir o acoplador para casos perturbados.
 
 ## O que não fazer cedo demais
 
@@ -177,6 +193,6 @@ Esse é o caminho com melhor relação entre esforço, risco e ganho científico
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](23_riscos_tecnicos_e_pendencias.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | Próximo
+**Navegação:** [Anterior](23_riscos_tecnicos_e_pendencias.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](25_dossie_de_fechamento_das_pendencias_centrais.md)
 
 <!-- NAV END -->

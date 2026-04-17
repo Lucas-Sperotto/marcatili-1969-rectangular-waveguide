@@ -161,6 +161,10 @@ $$
 - `transverse_equation = eq6 | eq20` (acoplador)
 - `mode_indices.p`, `mode_indices.q`
 - `normalized_geometry.a_over_A5`, `normalized_geometry.c_over_a`
+- `status_class = solution | physical_limit | domain_limit`
+- `cutoff_status = found | below_search_min | above_search_max | not_guided_in_search_window`
+- `critical_external_index`, `critical_external_wave_number`
+- `dimensional_outputs.A5`, `dimensional_outputs.coupling_magnitude`, `dimensional_outputs.full_transfer_length`
 
 ## Ambiguidades abertas (OCR)
 

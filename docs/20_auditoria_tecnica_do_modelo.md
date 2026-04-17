@@ -188,7 +188,6 @@ Há regiões em que o repositório não “fecha a questão”, mas registra a h
 
 - Fig. 8: ramo modal intermediário;
 - Fig. 10: coerência entre rótulo modal e referência a Eq. (6)/(12);
-- Tabela I: interpretação final da grandeza tabulada;
 - Fig. 8: símbolo de eixo $A$ versus $A_4$.
 
 Isso é um bom sinal metodológico. Melhor uma hipótese marcada do que uma falsa certeza.
@@ -208,6 +207,7 @@ Do ponto de vista numérico, a implementação atual é boa para o estágio do p
 Além disso, o repositório já possui:
 
 - `10` smoke tests via `CTest`;
+- `1` executável de regressão com checks quantitativos de física, parser e casos canônicos;
 - scripts de build e reprodução automatizados;
 - checklist de reprodução em `docs/09_checklist_reproducao.md`.
 
@@ -215,18 +215,18 @@ Além disso, o repositório já possui:
 
 O principal limite atual não é a robustez do solver, mas o tipo de teste disponível.
 
-Hoje a cobertura é majoritariamente:
+Hoje a cobertura combina:
 
 - smoke test de execução;
-- comparação visual;
-- conferência qualitativa de curvas.
+- regressões quantitativas por figura e por ponto de referência;
+- checks explícitos de semântica física (`below_cutoff`, `below_transverse_cutoff`, `above_search_max`);
+- comparação visual e conferência qualitativa de curvas.
 
 Ainda faltam, de forma explícita:
 
-- regressões quantitativas por figura;
-- tolerâncias numéricas por curva ou por ponto de referência;
-- critérios automáticos de aceitação física para a Tabela I;
-- validação numérica mais forte do acoplador dimensional.
+- validação externa da referência de Jones/Goell no acoplador;
+- fechamento OCR das ambiguidades centrais de Fig. 8 e Fig. 10;
+- uma camada de fac-símile visual tão forte quanto a camada numérica atual.
 
 ## 5.3 Significado da queda exponencial no acoplamento
 
@@ -266,6 +266,8 @@ Exemplos particularmente bons de rastreabilidade:
 - `solver_model = closed_form | exact`;
 - `transverse_equation = eq6 | eq20` no acoplador;
 - `table_entry_interpretation` explícito na Tabela I;
+- `cutoff_status = found | below_search_min | above_search_max | not_guided_in_search_window`;
+- `status_class = solution | physical_limit | domain_limit` nos solvers centrais;
 - `article_target` e `ocr_note` presentes em entradas importantes.
 
 Essa coerência é uma das partes mais sólidas do projeto hoje.
@@ -289,8 +291,8 @@ O modelo é mais frágil em:
 - vizinhança de cutoff;
 - casos em que o pequeno parâmetro assintótico deixa de ser pequeno;
 - leitura OCR de figuras com rótulos ruins;
-- uso do acoplador fora do escopo normalizado atual;
-- fechamento editorial da Tabela I.
+- leitura comparativa da referência cilíndrica de Jones;
+- refinamento fac-símile das figuras.
 
 Em particular, perto do cutoff:
 
