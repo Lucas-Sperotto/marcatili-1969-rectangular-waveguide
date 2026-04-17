@@ -13,3 +13,11 @@ Ele suporta um número discreto de modos guiados, que agrupamos em duas família
 ![Figura 4 — Guia imerso em diferentes dielétricos: (a) seção transversal e (b) distribuição de campo do modo fundamental (E^{y}_{11}).](img/fig_04.png)
 
 Figura 4 — Guia imerso em diferentes dielétricos: (a) seção transversal e (b) distribuição de campo do modo fundamental (E^{y}_{11}).
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](02_symbol_dictionary.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](03.1_modos_Ey.md)
+
+<!-- NAV END -->

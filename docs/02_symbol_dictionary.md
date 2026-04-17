@@ -167,3 +167,11 @@ $$
 - Rotulos de alguns modos na Fig. 8 (familia intermediaria).
 - Coerencia entre a descricao textual da Fig. 10 e a referencia de equacoes (6)/(12).
 - Confirmacao final de notacao de eixo na Fig. 8 ($A$ vs $A_4$).
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](02_formulacao_do_problema_de_valor_de_contorno.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](03_guia_imerso_em_varios_dieletricos.md)
+
+<!-- NAV END -->

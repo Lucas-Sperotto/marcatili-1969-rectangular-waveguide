@@ -1,4 +1,23 @@
-build/
+/build/
+/cmake-build-*/
+/compile_commands.json
+
 data/output/*.csv
 data/output/*.json
 
+/.codex
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+.vscode/
+.idea/
+
+.DS_Store
+*.swp
+*.swo

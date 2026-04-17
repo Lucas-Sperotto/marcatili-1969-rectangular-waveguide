@@ -240,3 +240,11 @@ Para entender o repositório de forma progressiva, a ordem sugerida é:
 4. [12_trilha_equacoes_para_codigo.md](12_trilha_equacoes_para_codigo.md)
 5. [14_diagramas_de_fluxo_e_sequencia.md](14_diagramas_de_fluxo_e_sequencia.md)
 6. [15_roteiro_de_estudo.md](15_roteiro_de_estudo.md)
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](09_checklist_reproducao.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](11_closed_form_vs_exact.md)
+
+<!-- NAV END -->

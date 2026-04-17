@@ -212,3 +212,11 @@ A implementação atual segue a interpretação mais consistente com a estrutura
 O repositório já está forte o bastante para estudo, reprodução e evolução incremental, mas ainda preserva explicitamente as regiões onde o artigo não está legível o suficiente para encerrar a discussão.
 
 Isso é uma qualidade científica do projeto, não uma fraqueza.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](12_trilha_equacoes_para_codigo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](14_diagramas_de_fluxo_e_sequencia.md)
+
+<!-- NAV END -->

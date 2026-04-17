@@ -30,3 +30,11 @@ Este checklist formaliza os passos minimos para reproduzir os artefatos numerico
 - Ambiguidades OCR de legenda/modal nas Figs. 8 e 10.
 - Referencias externas (Goell/Jones) ainda sem digitalizacao completa para comparacao numerica automatica.
 - Cobertura de testes ainda majoritariamente de smoke (faltam regressos quantitativos de curvas).
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](refs/README.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](10_fluxo_geral_do_repositorio.md)
+
+<!-- NAV END -->

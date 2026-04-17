@@ -59,3 +59,11 @@ Do ponto de vista do repositório, esta seção praticamente define o checklist 
 - validar os exemplos numéricos de separação e comprimento de acoplador.
 
 Também fica claro que a contribuição do artigo não é apenas teórica, mas também tecnológica: ele fornece argumentos concretos para o uso desses guias em circuitos ópticos integrados compactos e fabricáveis.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](05_Acoplador direcional construído com guias ligeiramente diferentes.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](07_apendice_A.md)
+
+<!-- NAV END -->

@@ -96,3 +96,10 @@ O projeto não está num estado “frágil”. O que existe é um conjunto peque
 
 Isso é exatamente o que se espera de um repositório científico em maturação saudável.
 
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](22_matriz_artigo_para_codigo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](24_plano_de_melhoria_priorizado.md)
+
+<!-- NAV END -->

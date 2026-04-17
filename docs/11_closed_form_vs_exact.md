@@ -161,3 +161,10 @@ Se a pergunta for “qual solver usar para estudar a estrutura do artigo?”, a 
 - [12_trilha_equacoes_para_codigo.md](12_trilha_equacoes_para_codigo.md)
 - [13_validacao_e_limites_do_modelo.md](13_validacao_e_limites_do_modelo.md)
 
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](10_fluxo_geral_do_repositorio.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](12_trilha_equacoes_para_codigo.md)
+
+<!-- NAV END -->

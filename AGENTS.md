@@ -1,5 +1,9 @@
 # AGENTS.md
 
+Este arquivo existe para orientar agentes automatizados e fluxos assistidos por IA neste repositorio.
+
+Ele complementa, e nao substitui, o `README.md` e o `CONTRIBUTING.md`. Para contribuidores humanos, o guia principal de colaboracao deve ser o `CONTRIBUTING.md`; para agentes, este arquivo preserva restricoes e prioridades que nao devem ser inferidas automaticamente.
+
 ## Objetivo
 
 Reproduzir, com clareza e fidelidade, o artigo de Marcatili (1969) sobre guia dielétrico retangular e acoplador direcional.

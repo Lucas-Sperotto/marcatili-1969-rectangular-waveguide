@@ -26,3 +26,11 @@ Esse raciocínio aplica-se a guias com larguras, alturas e índices de refraçã
 Esta seção introduz uma observação importante para projeto: pequenas diferenças geométricas entre dois guias acoplados não afetam imediatamente o coeficiente de acoplamento na primeira ordem. Em outras palavras, perto da configuração simétrica, o acoplamento varia de forma suave, e o caso assimétrico pode ser aproximado pelo caso simétrico correspondente à média geométrica das dimensões.
 
 Do ponto de vista numérico e experimental, isso é bastante útil. Significa que pequenas imperfeições de fabricação ou pequenas variações dimensionais podem, até certo ponto, ser tratadas como perturbações moderadas do caso ideal simétrico. No entanto, o próprio autor alerta para a limitação dessa conclusão: sem calcular termos de ordem superior, não se pode definir rigorosamente o intervalo de validade da aproximação.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](04_acoplador_direcional.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](06_resumo_e_conclusoes.md)
+
+<!-- NAV END -->

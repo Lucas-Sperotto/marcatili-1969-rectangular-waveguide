@@ -218,3 +218,11 @@ Essa separação ajuda muito quando queremos revisar:
 
 - a matemática sem mexer na apresentação;
 - a apresentação sem mexer na matemática.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](13_validacao_e_limites_do_modelo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](15_roteiro_de_estudo.md)
+
+<!-- NAV END -->

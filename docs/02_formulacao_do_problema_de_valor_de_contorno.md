@@ -31,3 +31,11 @@ Esta seção é central para entender toda a estratégia de Marcatili. Em vez de
 A ideia essencial é transformar um problema bidimensional rigoroso, com casamento completo de campos em todos os contornos, em um problema analítico tratável, no qual o casamento é imposto apenas nas interfaces mais relevantes da região central. Essa é a base que permitirá obter relações de dispersão aproximadas em forma fechada nas próximas seções.
 
 Outro ponto importante é a interpretação modal. Embora os modos sejam rigorosamente híbridos, eles possuem uma polarização predominante, o que permite classificá-los em duas famílias. Essa classificação será fundamental para interpretar as curvas de dispersão, os modos fundamentais e o comportamento do acoplador direcional.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](01_introduction.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](02_symbol_dictionary.md)
+
+<!-- NAV END -->

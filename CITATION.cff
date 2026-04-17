@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the software and also cite the original Marcatili (1969) paper."
+title: "marcatili-1969-rectangular-waveguide"
+type: software
+version: "0.1.0"
+license: "MIT"
+repository-code: "https://github.com/Lucas-Sperotto/marcatili-1969-rectangular-waveguide"
+url: "https://github.com/Lucas-Sperotto/marcatili-1969-rectangular-waveguide"
+abstract: "C++17 repository for reproducible and didactic implementation of Marcatili (1969) rectangular dielectric waveguide and directional coupler models."
+authors:
+  - family-names: "Sperotto"
+    given-names: "Lucas Kriesel"
+    email: "sperotto.lucas@outlook.com"
+keywords:
+  - "rectangular waveguide"
+  - "dielectric waveguide"
+  - "directional coupler"
+  - "integrated optics"
+  - "Marcatili"
+  - "C++17"

@@ -35,3 +35,11 @@ As propriedades de guiamento do guia de seção transversal retangular imerso em
 A motivação física principal é muito importante: ao escolher um contraste de índices pequeno, o confinamento continua ocorrendo, mas as dimensões transversais do guia podem ser maiores em relação ao comprimento de onda. Isso torna a fabricação menos crítica e ajuda a viabilizar estruturas para óptica integrada. Em outras palavras, Marcatili busca uma geometria simples, mecanicamente estável e com potencial de operação monomodo, sem exigir dimensões excessivamente pequenas.
 
 Além disso, a introdução já mostra uma ideia que será essencial ao longo do artigo: o acoplador direcional pode ser tratado como uma extensão natural do problema do guia único. Quando os guias estão muito afastados, o acoplamento desaparece e recupera-se o caso isolado; quando estão próximos, surgem modos acoplados e transferência de potência entre eles.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](00.6_revisao_camada_io.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](02_formulacao_do_problema_de_valor_de_contorno.md)
+
+<!-- NAV END -->

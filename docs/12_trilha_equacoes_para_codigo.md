@@ -232,3 +232,11 @@ Se você quiser localizar rapidamente uma equação no código:
 - [11_closed_form_vs_exact.md](11_closed_form_vs_exact.md)
 - [13_validacao_e_limites_do_modelo.md](13_validacao_e_limites_do_modelo.md)
 - [07_apendice_A.md](07_apendice_A.md)
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](11_closed_form_vs_exact.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](13_validacao_e_limites_do_modelo.md)
+
+<!-- NAV END -->

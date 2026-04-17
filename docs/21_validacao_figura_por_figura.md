@@ -298,3 +298,11 @@ Se a priorização for por acabamento editorial, a ordem muda para:
 4. Fig. 7
 5. Fig. 8
 6. Tabela I
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](20_auditoria_tecnica_do_modelo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](22_matriz_artigo_para_codigo.md)
+
+<!-- NAV END -->

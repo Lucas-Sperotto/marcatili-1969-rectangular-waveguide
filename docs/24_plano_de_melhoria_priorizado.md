@@ -173,3 +173,10 @@ O repositório já está numa fase em que a melhoria mais valiosa não é “ree
 
 Esse é o caminho com melhor relação entre esforço, risco e ganho científico.
 
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](23_riscos_tecnicos_e_pendencias.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | Próximo
+
+<!-- NAV END -->

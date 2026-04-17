@@ -163,3 +163,11 @@ Do ponto de vista computacional, esta é uma seção excelente para reprodução
 - uma análise de sensibilidade do acoplamento em relação ao índice de refração do meio intermediário.
 
 A parte final é particularmente interessante para aplicações em modulação e chaveamento óptico, pois mostra que pequenas variações do índice de refração entre os guias podem alterar significativamente a transferência de potência.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](03.3_exemplos.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](05_Acoplador direcional construído com guias ligeiramente diferentes.md)
+
+<!-- NAV END -->

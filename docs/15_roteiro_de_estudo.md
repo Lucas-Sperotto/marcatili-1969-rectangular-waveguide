@@ -143,3 +143,11 @@ Este glossário explica os termos técnicos mais importantes do projeto.
     -   Na Fig. 6, o eixo `y` é `(k_z² - k_4²) / (k_1² - k_4²)`. Este valor vai de 0 (no corte) a 1 (confinamento total).
     -   Na Fig. 10, o eixo `y` é um coeficiente de acoplamento normalizado.
 -   **Objetivo:** Permitir que um único gráfico descreva uma vasta gama de guias com diferentes materiais e dimensões.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](14_diagramas_de_fluxo_e_sequencia.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](20_auditoria_tecnica_do_modelo.md)
+
+<!-- NAV END -->

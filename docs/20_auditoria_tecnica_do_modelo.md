@@ -322,3 +322,10 @@ Essa é uma posição cientificamente adequada.
 - [13_validacao_e_limites_do_modelo.md](13_validacao_e_limites_do_modelo.md)
 - [21_validacao_figura_por_figura.md](21_validacao_figura_por_figura.md)
 
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](15_roteiro_de_estudo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](21_validacao_figura_por_figura.md)
+
+<!-- NAV END -->

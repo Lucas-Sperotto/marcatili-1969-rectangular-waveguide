@@ -288,3 +288,11 @@ Para implementação computacional, este apêndice sugere uma arquitetura muito 
 3. calcular $k_z$ ou $\mathbf{k}_{z0}$;
 4. calcular $K$ e $L$;
 5. comparar os resultados com os gráficos e exemplos do corpo principal.
+
+
+<!-- NAV START -->
+---
+
+**Navegação:** [Anterior](06_resumo_e_conclusoes.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](08_referencias.md)
+
+<!-- NAV END -->
