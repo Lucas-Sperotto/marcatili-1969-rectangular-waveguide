@@ -1,6 +1,24 @@
 {
-  "case_name": "bootstrap_fig11",
-  "article_scope": "Figure 11",
-  "expected_output": "placeholder_json"
+  "case_id": "CP-011-FIG11-001",
+  "article_target": "Figure 11: normalized directional-coupler curves for the mode labeled E_y11 in Section IV, following Eq. (34) with the exact transverse root from Eq. (20).",
+  "ocr_note": "The caption distinguishes solid curves for n1/n5 = 1.5 and dash-dot curves for n1/n5 = 1.1. The current baseline follows that reading and labels each family by a/A5 = 2a/lambda * sqrt(n1^2-n5^2).",
+  "c_over_a_min": 0.0,
+  "c_over_a_max": 3.0,
+  "point_count": 151,
+  "solver_models": [
+    "exact"
+  ],
+  "n1_over_n5_values": [
+    "1.5",
+    "1.1"
+  ],
+  "a_over_A5_values": [
+    "0.5",
+    "0.75",
+    "1.0",
+    "1.5",
+    "2.0",
+    "3.0",
+    "4.0"
+  ]
 }
-

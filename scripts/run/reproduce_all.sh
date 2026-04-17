@@ -48,3 +48,15 @@ if [[ -f "$OUTPUT_DIR/reproduce_fig8.csv" ]]; then
         "$OUTPUT_DIR/reproduce_fig8.csv" \
         -o "$OUTPUT_DIR/reproduce_fig8.png"
 fi
+
+if [[ -f "$OUTPUT_DIR/reproduce_fig10.csv" ]]; then
+    "$ROOT_DIR/scripts/plot_fig10.py" \
+        "$OUTPUT_DIR/reproduce_fig10.csv" \
+        -o "$OUTPUT_DIR/reproduce_fig10.png"
+fi
+
+if [[ -f "$OUTPUT_DIR/reproduce_fig11.csv" ]]; then
+    "$ROOT_DIR/scripts/plot_fig11.py" \
+        "$OUTPUT_DIR/reproduce_fig11.csv" \
+        -o "$OUTPUT_DIR/reproduce_fig11.png"
+fi

@@ -1,6 +1,21 @@
 {
-  "case_name": "bootstrap_fig10",
-  "article_scope": "Figure 10",
-  "expected_output": "placeholder_json"
+  "case_id": "CP-010-FIG10-001",
+  "article_target": "Figure 10: normalized directional-coupler curves for the mode labeled E_x11 in Section IV, following Eq. (34) with k_x from Eq. (6) exact and Eq. (12) closed form in the symmetric n3 = n5 limit.",
+  "ocr_note": "TODO OCR: the scan clearly shows the families 0.5, 0.75, 1.5, 2, 3 and 4, but one mid-slope label remains hard to read and may be 1.0 or 1.6. The current baseline uses the monotone family set 0.5, 0.75, 1.0, 1.5, 2.0, 3.0 and 4.0 for a/A5 = 2a/lambda * sqrt(n1^2-n5^2). The dash-dot Jones cylinder reference is still pending.",
+  "c_over_a_min": 0.0,
+  "c_over_a_max": 3.0,
+  "point_count": 151,
+  "solver_models": [
+    "exact",
+    "closed_form"
+  ],
+  "a_over_A5_values": [
+    "0.5",
+    "0.75",
+    "1.0",
+    "1.5",
+    "2.0",
+    "3.0",
+    "4.0"
+  ]
 }
-

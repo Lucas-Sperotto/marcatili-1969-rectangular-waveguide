@@ -32,17 +32,21 @@ $$
 \frac{2a}{\lambda}\left(n_1^2-n_5^2\right)^{1/2}\ge 1.
 $$
 
+**Observacao de reproducao do repositorio:** a implementacao atual da Fig. 10 segue exatamente essa referencia textual, isto e, usa Eq. (34) combinada com Eq. (6) no caso exato e Eq. (12) no caso aproximado. O texto e a notacao modal ainda merecem revisao de OCR, porque a figura e descrita como pertencente ao modo $E^{x}_{11}$, enquanto as equacoes citadas nessa frase pertencem a familia tratada na Secao III como $E^y$.
+
 ![Figura 10 — Coeficiente de acoplamento para modos (E^{x}_{1q}).](img/fig_10.png)
 
-Figura 10  — Coeficiente de acoplamento para modos (E^{x}_{1q}). — acoplamento calculado a partir das equações transcendentais; — — aproximações em forma fechada; — · — · — acoplamento entre duas hastes cilíndricas (A. L. Jones).
+Figura 10  — Coeficiente de acoplamento para modos $E^{x}_{1q}$. — acoplamento calculado a partir das equações transcendentais; — — aproximações em forma fechada; — · — · — acoplamento entre duas hastes cilíndricas (A. L. Jones).
 
 As linhas traço-ponto são os acoplamentos obtidos por A. L. Jones para dois cilindros paralelos de índice de refração $n_1=1.8$, imersos em um meio com $n_5=1.5$. Como esperado, se os diâmetros dos guias circulares forem iguais às larguras dos guias retangulares, e se as separações forem as mesmas, o acoplamento entre os guias circulares deve ser ligeiramente menor do que aquele entre os guias retangulares.
 
 A equação de acoplamento normalizado (34) para o modo $E^{y}_{11}$ foi representada na Fig. 11, usando para $\mathbf{k}_x$ a solução exata da equação (20). Para $n_1/n_5$ próximo da unidade, as curvas aproximam-se das curvas contínuas da Fig. 10, à medida que os modos $E^{x}_{11}$ e $E^{y}_{11}$ se aproximam da degenerescência. A influência da altura $b$ dos guias, dos índices de refração $n_2$ e $n_4$, e do valor de $q$ no acoplamento de qualquer um dos modos não é importante, pois esses parâmetros afetam apenas $k_z$.
 
-![Figura 11 — Coeficiente de acoplamento para modos (E^{x}_{1q}).](img/fig_11.png)
+**Observacao de reproducao do repositorio:** a implementacao atual da Fig. 11 segue exatamente essa frase, isto e, usa Eq. (34) combinada com a raiz exata da Eq. (20). O caso-base mantem as duas familias de legenda do scan, com linhas continuas para $n_1/n_5=1.5$ e linhas traco-ponto para $n_1/n_5=1.1$, e rotula cada curva pelo parametro $a/A_5 = \frac{2a}{\lambda}\left(n_1^2-n_5^2\right)^{1/2}$.
 
-Figura 11  — Coeficiente de acoplamento para modos (E^{x}_{1q}).** — acoplamento (E^{x}*{1q}) para (n_1/n_5 = 1.5); — · — · — acoplamento (E^{x}*{1q}) para (n_1/n_5 = 1.1).
+![Figura 11 — Coeficiente de acoplamento para modos E^y_{1q}.](img/fig_11.png)
+
+Figura 11  — Coeficiente de acoplamento para modos $E^{y}_{1q}$. — acoplamento para $n_1/n_5 = 1.5$; — · — · — acoplamento para $n_1/n_5 = 1.1$.
 
 Para trabalhar alguns exemplos, assumamos
 

@@ -12,6 +12,12 @@ Os arquivos gerados pelos executaveis devem ser gravados aqui.
 - `reproduce_fig8` passa a produzir um `JSON` e um `CSV` de sweep para o caso metalizado da Fig. 8.
 - `scripts/plot_fig8.py` gera o `PNG` correspondente ao caso-base da Fig. 8.
 - `scripts/compare_fig8_article.py` gera uma comparacao lado a lado entre o scan da Fig. 8 e a reproducao atual.
+- `reproduce_fig10` passa a produzir um `JSON` e um `CSV` de sweep para a Fig. 10 usando a equacao de acoplamento normalizado da Secao IV.
+- `scripts/plot_fig10.py` gera o `PNG` correspondente ao caso-base da Fig. 10.
+- `scripts/compare_fig10_article.py` gera uma comparacao lado a lado entre o scan da Fig. 10 e a reproducao atual.
+- `reproduce_fig11` passa a produzir um `JSON` e um `CSV` de sweep para a Fig. 11 usando a mesma equacao de acoplamento normalizado, agora com a raiz transversal da Eq. (20).
+- `scripts/plot_fig11.py` gera o `PNG` correspondente ao caso-base da Fig. 11.
+- `scripts/compare_fig11_article.py` gera uma comparacao lado a lado entre o scan da Fig. 11 e a reproducao atual.
 - `reproduce_table1` gera um `JSON`, um `CSV`-resumo por linha da tabela e um `CSV` com os cutoffs pesquisados por modo; nesta etapa, a comparacao principal usa a interpretacao da entrada tabulada como a dimensao `a`.
 - O subdiretorio `fig6/` concentra paineis individuais e comparacoes com o artigo.
 - Os demais executaveis ainda produzem relatorios placeholder em `JSON`.

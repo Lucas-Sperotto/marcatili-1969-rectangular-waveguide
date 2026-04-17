@@ -14,6 +14,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_library(marcatili_core STATIC
+    src/io/fig11_io.cpp
+    src/io/fig10_io.cpp
     src/io/fig8_io.cpp
     src/io/table1_io.cpp
     src/io/fig7_io.cpp
@@ -21,7 +23,10 @@ add_library(marcatili_core STATIC
     src/io/schema_json.cpp
     src/io/single_guide_io.cpp
     src/io/text_io.cpp
+    src/physics/coupler.cpp
     src/physics/metal_guide.cpp
+    src/physics/fig11.cpp
+    src/physics/fig10.cpp
     src/physics/fig8.cpp
     src/physics/table1.cpp
     src/physics/fig7.cpp
@@ -92,6 +97,20 @@ if(BUILD_TESTING)
         COMMAND reproduce_fig8
                 ${PROJECT_SOURCE_DIR}/data/input/reproduce_fig8.json
                 ${CMAKE_BINARY_DIR}/test_outputs/reproduce_fig8.json
+    )
+
+    add_test(
+        NAME reproduce_fig10_smoke
+        COMMAND reproduce_fig10
+                ${PROJECT_SOURCE_DIR}/data/input/reproduce_fig10.json
+                ${CMAKE_BINARY_DIR}/test_outputs/reproduce_fig10.json
+    )
+
+    add_test(
+        NAME reproduce_fig11_smoke
+        COMMAND reproduce_fig11
+                ${PROJECT_SOURCE_DIR}/data/input/reproduce_fig11.json
+                ${CMAKE_BINARY_DIR}/test_outputs/reproduce_fig11.json
     )
 
     add_test(
