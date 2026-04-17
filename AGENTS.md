@@ -26,7 +26,7 @@ Reproduzir, com clareza e fidelidade, o artigo de Marcatili (1969) sobre guia di
 
 ## Convenções para evolução do repositório
 
-1. Manter a estrutura principal em `docs`, `refs`, `data`, `include`, `src`, `apps`, `scripts`, `tests` e `run`.
-2. Tratar `apps/` como ponto de entrada e `src/`/`include/` como implementação reutilizável.
+1. Manter a estrutura principal em `docs`, `data`, `include`, `src`, `scripts` e `tests`, respeitando a organização escolhida no repositório.
+2. Tratar `src/apps/` como ponto de entrada e `src/`/`include/` como implementação reutilizável.
 3. Usar `data/input/` para casos de entrada e `data/output/` para resultados gerados.
 4. Implementar primeiro uma base mínima, verificável e organizada; depois expandir a matemática.

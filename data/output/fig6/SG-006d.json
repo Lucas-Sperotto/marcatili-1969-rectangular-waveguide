@@ -1,0 +1,451 @@
+{
+  "app": "reproduce_fig6",
+  "status": "ok",
+  "model": "closed_form_approximation",
+  "input_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/input/fig6/SG-006d.json",
+  "output_json_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/fig6/SG-006d.json",
+  "output_csv_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/fig6/SG-006d.csv",
+  "case_id": "SG-006d",
+  "article_target": "Figure 6d, slab-limit symmetric guide using the one-dimensional y-directed characteristic equations from the current repository transcription, with the explicit n4 variants visible in the scanned panel",
+  "panel_id": "SG-006d",
+  "sweep": {
+    "geometry_model": "slab",
+    "wavelength": 9.9999999999999995e-07,
+    "a_over_b": null,
+    "b_over_A4_min": 0.050000000000000003,
+    "b_over_A4_max": 4,
+    "point_count": 160
+  },
+  "solver_models": [
+    "closed_form",
+    "exact"
+  ],
+  "materials": {
+    "n1": 1.5,
+    "n2": 1.4851485148514851,
+    "n3": 1.4851485148514851,
+    "n4": 1.4851485148514851,
+    "n5": 1.4851485148514851
+  },
+  "material_variants": [
+    {
+      "variant_id": "n4<n1",
+      "n2": 1.4985014985014986,
+      "n3": 1.4985014985014986,
+      "n4": 1.4985014985014986,
+      "n5": 1.4985014985014986
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "n2": 1.3636363636363635,
+      "n3": 1.3636363636363635,
+      "n4": 1.3636363636363635,
+      "n5": 1.3636363636363635
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "n2": 1,
+      "n3": 1,
+      "n4": 1,
+      "n5": 1
+    }
+  ],
+  "curve_summaries": [
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_y_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 147,
+      "guided_points": 147
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_x_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 147,
+      "guided_points": 147
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_y_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 107,
+      "guided_points": 107
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_x_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 107,
+      "guided_points": 107
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_y_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 66,
+      "guided_points": 66
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_x_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 66,
+      "guided_points": 66
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_y_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 160,
+      "guided_points": 160
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_x_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 160,
+      "guided_points": 160
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_y_1_2",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 121,
+      "guided_points": 121
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_x_1_2",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 121,
+      "guided_points": 121
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_y_1_3",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 81,
+      "guided_points": 81
+    },
+    {
+      "variant_id": "n4<n1",
+      "curve_id": "E_x_1_3",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 81,
+      "guided_points": 81
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_y_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 142,
+      "guided_points": 142
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_x_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 147,
+      "guided_points": 147
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_y_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 102,
+      "guided_points": 102
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_x_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 107,
+      "guided_points": 107
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_y_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 62,
+      "guided_points": 62
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_x_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 66,
+      "guided_points": 66
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_y_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 160,
+      "guided_points": 160
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_x_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 160,
+      "guided_points": 160
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_y_1_2",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 121,
+      "guided_points": 121
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_x_1_2",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 121,
+      "guided_points": 121
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_y_1_3",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 81,
+      "guided_points": 81
+    },
+    {
+      "variant_id": "n4=n1/1.1",
+      "curve_id": "E_x_1_3",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 81,
+      "guided_points": 81
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_y_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 133,
+      "guided_points": 133
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_x_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 147,
+      "guided_points": 147
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_y_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 92,
+      "guided_points": 92
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_x_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 107,
+      "guided_points": 107
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_y_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 52,
+      "guided_points": 52
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_x_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 66,
+      "guided_points": 66
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_y_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 160,
+      "guided_points": 160
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_x_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 160,
+      "guided_points": 160
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_y_1_2",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 121,
+      "guided_points": 121
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_x_1_2",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 121,
+      "guided_points": 121
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_y_1_3",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 81,
+      "guided_points": 81
+    },
+    {
+      "variant_id": "n4=n1/1.5",
+      "curve_id": "E_x_1_3",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 81,
+      "guided_points": 81
+    }
+  ]
+}

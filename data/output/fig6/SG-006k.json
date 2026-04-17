@@ -1,0 +1,166 @@
+{
+  "app": "reproduce_fig6",
+  "status": "ok",
+  "model": "closed_form_approximation",
+  "input_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/input/fig6/SG-006k.json",
+  "output_json_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/fig6/SG-006k.json",
+  "output_csv_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/fig6/SG-006k.csv",
+  "case_id": "SG-006k",
+  "article_target": "Figure 6k, slab-limit asymmetric guide using the one-dimensional y-directed characteristic equations from the current repository transcription: n2 = n1/1.5 and n4 slightly below n1",
+  "panel_id": "SG-006k",
+  "sweep": {
+    "geometry_model": "slab",
+    "wavelength": 9.9999999999999995e-07,
+    "a_over_b": null,
+    "b_over_A4_min": 0.050000000000000003,
+    "b_over_A4_max": 4,
+    "point_count": 160
+  },
+  "solver_models": [
+    "closed_form",
+    "exact"
+  ],
+  "materials": {
+    "n1": 1.5,
+    "n2": 1,
+    "n3": 1.4851485148514851,
+    "n4": 1.4851485148514851,
+    "n5": 1.4851485148514851
+  },
+  "material_variants": [
+  ],
+  "curve_summaries": [
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 135,
+      "guided_points": 135
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 136,
+      "guided_points": 136
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 95,
+      "guided_points": 95
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 96,
+      "guided_points": 96
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 54,
+      "guided_points": 54
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 56,
+      "guided_points": 56
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 142,
+      "guided_points": 142
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 160,
+      "valid_points": 144,
+      "guided_points": 144
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_2",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 102,
+      "guided_points": 102
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_2",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 160,
+      "valid_points": 104,
+      "guided_points": 104
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_3",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 62,
+      "guided_points": 62
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_3",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 160,
+      "valid_points": 63,
+      "guided_points": 63
+    }
+  ]
+}
