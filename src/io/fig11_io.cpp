@@ -153,13 +153,13 @@ std::string BuildFigure11CsvReport(const marcatili::Figure11Result& result) {
            "normalized_coupling,domain_valid,status\n";
 
     for (const auto& sample : result.samples) {
-        csv << result.config.case_id << ","
-            << sample.ratio_id << ","
-            << sample.ratio_label << ","
-            << sample.curve_id << ","
-            << sample.curve_label << ","
-            << ToString(sample.point.config.solver_model) << ","
-            << ToString(sample.point.config.transverse_equation) << ","
+        csv << EscapeCsv(result.config.case_id) << ","
+            << EscapeCsv(sample.ratio_id) << ","
+            << EscapeCsv(sample.ratio_label) << ","
+            << EscapeCsv(sample.curve_id) << ","
+            << EscapeCsv(sample.curve_label) << ","
+            << EscapeCsv(ToString(sample.point.config.solver_model)) << ","
+            << EscapeCsv(ToString(sample.point.config.transverse_equation)) << ","
             << sample.point.config.p << ","
             << CsvNumber(1.0 / std::sqrt(sample.point.config.index_ratio_squared)) << ","
             << CsvNumber(sample.point.config.index_ratio_squared) << ","
@@ -171,7 +171,7 @@ std::string BuildFigure11CsvReport(const marcatili::Figure11Result& result) {
             << CsvNumber(sample.point.sqrt_one_minus_kx_A5_over_pi_squared) << ","
             << CsvNumber(sample.point.normalized_coupling) << ","
             << (sample.point.domain_valid ? "1" : "0") << ","
-            << sample.point.status << "\n";
+            << EscapeCsv(sample.point.status) << "\n";
     }
 
     return csv.str();

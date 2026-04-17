@@ -1,5 +1,6 @@
 #include "marcatili/io/fig6_io.hpp"
 
+#include <cctype>
 #include <cmath>
 #include <iomanip>
 #include <sstream>
@@ -47,6 +48,20 @@ std::string DefaultCsvPath(const std::string& cli_output_json) {
     return ReplaceExtension(cli_output_json, ".csv");
 }
 
+std::string TrimWhitespaceCopy(const std::string& text) {
+    std::size_t begin = 0;
+    while (begin < text.size() && std::isspace(static_cast<unsigned char>(text[begin])) != 0) {
+        ++begin;
+    }
+
+    std::size_t end = text.size();
+    while (end > begin && std::isspace(static_cast<unsigned char>(text[end - 1])) != 0) {
+        --end;
+    }
+
+    return text.substr(begin, end - begin);
+}
+
 marcatili::Figure6MaterialVariant ParseFigure6MaterialVariant(const std::string& text) {
     std::stringstream parser(text);
     std::string variant_id;
@@ -72,6 +87,16 @@ marcatili::Figure6MaterialVariant ParseFigure6MaterialVariant(const std::string&
     variant.n3 = std::stod(n3_text);
     variant.n4 = std::stod(n4_text);
     variant.n5 = std::stod(n5_text);
+    return variant;
+}
+
+marcatili::Figure6MaterialVariant ParseFigure6MaterialVariantObject(const std::string& object_json) {
+    marcatili::Figure6MaterialVariant variant;
+    variant.variant_id = RequireStringValue(object_json, "variant_id");
+    variant.n2 = RequireDoubleValue(object_json, "n2");
+    variant.n3 = RequireDoubleValue(object_json, "n3");
+    variant.n4 = RequireDoubleValue(object_json, "n4");
+    variant.n5 = RequireDoubleValue(object_json, "n5");
     return variant;
 }
 
@@ -120,8 +145,27 @@ marcatili::Figure6Config ParseFigure6Config(
         config.modes.push_back(marcatili::ParseFigure6ModeSpec(mode_text));
     }
 
-    for (const auto& variant_text : FindStringArrayValues(json_text, "material_variants")) {
-        config.material_variants.push_back(ParseFigure6MaterialVariant(variant_text));
+    const auto object_variants = FindObjectArrayValues(json_text, "material_variants");
+    if (!object_variants.empty()) {
+        for (const auto& variant_object : object_variants) {
+            config.material_variants.push_back(ParseFigure6MaterialVariantObject(variant_object));
+        }
+    } else {
+        const auto string_variants = FindStringArrayValues(json_text, "material_variants");
+        for (const auto& variant_text : string_variants) {
+            config.material_variants.push_back(ParseFigure6MaterialVariant(variant_text));
+        }
+
+        const auto raw_variants = FindRawJsonValue(json_text, "material_variants");
+        if (raw_variants.has_value()) {
+            const std::string trimmed = TrimWhitespaceCopy(*raw_variants);
+            if (string_variants.empty() && trimmed != "[]") {
+                throw std::runtime_error(
+                    "Invalid material_variants format. Use an array of objects "
+                    "([{variant_id,n2,n3,n4,n5}, ...]) or the legacy compact string format."
+                );
+            }
+        }
     }
 
     return config;
@@ -133,11 +177,10 @@ std::string BuildFigure6JsonReport(
     const std::string& output_json_file
 ) {
     std::ostringstream json;
-
     json << "{\n";
     json << "  \"app\": \"reproduce_fig6\",\n";
     json << "  \"status\": \"" << EscapeJson(result.status) << "\",\n";
-    json << "  \"model\": \"closed_form_approximation\",\n";
+    json << "  \"app_model\": \"figure6_sweep\",\n";
     json << "  \"input_file\": " << JsonStringOrNull(input_file) << ",\n";
     json << "  \"output_json_file\": " << JsonStringOrNull(output_json_file) << ",\n";
     json << "  \"output_csv_file\": " << JsonStringOrNull(result.config.csv_output_path) << ",\n";
@@ -222,13 +265,13 @@ std::string BuildFigure6CsvReport(const marcatili::Figure6Result& result) {
            "kx,ky,kz,kz_normalized_against_n4,xi3,xi5,eta2,eta4\n";
 
     for (const auto& sample : result.samples) {
-        csv << result.config.case_id << ","
-            << sample.panel_id << ","
-            << ToString(result.config.geometry_model) << ","
-            << sample.variant_id << ","
-            << sample.curve_id << ","
-            << ToString(sample.point.config.solver_model) << ","
-            << ToString(sample.point.config.family) << ","
+        csv << EscapeCsv(result.config.case_id) << ","
+            << EscapeCsv(sample.panel_id) << ","
+            << EscapeCsv(ToString(result.config.geometry_model)) << ","
+            << EscapeCsv(sample.variant_id) << ","
+            << EscapeCsv(sample.curve_id) << ","
+            << EscapeCsv(ToString(sample.point.config.solver_model)) << ","
+            << EscapeCsv(ToString(sample.point.config.family)) << ","
             << sample.point.config.p << ","
             << sample.point.config.q << ","
             << sample.sample_index << ","

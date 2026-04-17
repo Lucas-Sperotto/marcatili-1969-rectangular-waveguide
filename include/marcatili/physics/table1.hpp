@@ -31,6 +31,9 @@ struct Table1Config {
     std::string article_target;
     std::string summary_csv_output_path;
     std::string details_csv_output_path;
+    // Explicitly records how Table I entries are interpreted in normalized form.
+    // Current supported value: "a_times_n1_over_lambda".
+    std::string table_entry_interpretation = "a_times_n1_over_lambda";
     double wavelength = 0.0;
     double n1 = 0.0;
     Table1SearchConfig search;

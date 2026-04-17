@@ -97,6 +97,20 @@ marcatili::Table1RowSpec ParseTable1RowSpec(const std::string& text) {
     return row;
 }
 
+marcatili::Table1RowSpec ParseTable1RowSpecObject(const std::string& object_json) {
+    marcatili::Table1RowSpec row;
+    row.row_id = RequireStringValue(object_json, "row_id");
+    row.article_panel_id = FindStringValue(object_json, "article_panel_id").value_or("");
+    row.a_over_b = RequireDoubleValue(object_json, "a_over_b");
+    row.n2 = RequireDoubleValue(object_json, "n2");
+    row.n3 = RequireDoubleValue(object_json, "n3");
+    row.n4 = RequireDoubleValue(object_json, "n4");
+    row.n5 = RequireDoubleValue(object_json, "n5");
+    row.article_dimension_normalized =
+        RequireDoubleValue(object_json, "article_dimension_normalized");
+    return row;
+}
+
 }  // namespace
 
 marcatili::Table1Config ParseTable1Config(
@@ -113,6 +127,9 @@ marcatili::Table1Config ParseTable1Config(
     config.details_csv_output_path =
         FindStringValue(json_text, "csv_details_file")
             .value_or(DefaultDetailsCsvPath(cli_output_json));
+    config.table_entry_interpretation =
+        FindStringValue(json_text, "table_entry_interpretation")
+            .value_or("a_times_n1_over_lambda");
     config.wavelength = RequireDoubleValue(json_text, "wavelength");
     config.n1 = RequireDoubleValue(json_text, "n1");
     config.search.max_p = FindIntValue(json_text, "search_max_p").value_or(4);
@@ -135,8 +152,23 @@ marcatili::Table1Config ParseTable1Config(
         }
     }
 
-    for (const auto& row_text : RequireStringArrayValues(json_text, "rows")) {
-        config.rows.push_back(ParseTable1RowSpec(row_text));
+    const auto object_rows = FindObjectArrayValues(json_text, "rows");
+    if (!object_rows.empty()) {
+        for (const auto& row_object : object_rows) {
+            config.rows.push_back(ParseTable1RowSpecObject(row_object));
+        }
+    } else {
+        const auto string_rows = FindStringArrayValues(json_text, "rows");
+        for (const auto& row_text : string_rows) {
+            config.rows.push_back(ParseTable1RowSpec(row_text));
+        }
+
+        if (config.rows.empty()) {
+            throw std::runtime_error(
+                "Missing required rows. Use an array of row objects "
+                "or the legacy compact string format."
+            );
+        }
     }
 
     return config;
@@ -160,7 +192,12 @@ std::string BuildTable1JsonReport(
          << JsonStringOrNull(result.config.details_csv_output_path) << ",\n";
     json << "  \"case_id\": \"" << EscapeJson(result.config.case_id) << "\",\n";
     json << "  \"article_target\": " << JsonStringOrNull(result.config.article_target) << ",\n";
-    json << "  \"reference_normalization\": \"table entries multiplied by lambda / n1 and interpreted here as dimension a\",\n";
+    json << "  \"table_entry_interpretation\": \""
+         << EscapeJson(result.config.table_entry_interpretation) << "\",\n";
+    json << "  \"reference_normalization\": "
+         << JsonStringOrNull(
+                "table entries multiplied by lambda / n1 and interpreted here as dimension a"
+            ) << ",\n";
     json << "  \"search\": {\n";
     json << "    \"max_p\": " << result.config.search.max_p << ",\n";
     json << "    \"max_q\": " << result.config.search.max_q << ",\n";
@@ -221,17 +258,18 @@ std::string BuildTable1JsonReport(
 std::string BuildTable1SummaryCsvReport(const marcatili::Table1Result& result) {
     std::ostringstream csv;
 
-    csv << "case_id,row_id,article_panel_id,solver_model,a_over_b,n1,n2,n3,n4,n5,"
+    csv << "case_id,table_entry_interpretation,row_id,article_panel_id,solver_model,a_over_b,n1,n2,n3,n4,n5,"
            "article_dimension_normalized,computed_dimension_normalized,computed_b_normalized,computed_a_normalized,computed_b_over_A4,"
            "absolute_error,relative_error,limiting_cutoff_found,limiting_mode_id,"
            "limiting_mode_family,limiting_p,limiting_q,ex11_guided_just_below_cutoff,"
            "ey11_guided_just_below_cutoff\n";
 
     for (const auto& row : result.row_summaries) {
-        csv << result.config.case_id << ","
-            << row.row_id << ","
-            << row.article_panel_id << ","
-            << ToString(row.solver_model) << ","
+        csv << EscapeCsv(result.config.case_id) << ","
+            << EscapeCsv(result.config.table_entry_interpretation) << ","
+            << EscapeCsv(row.row_id) << ","
+            << EscapeCsv(row.article_panel_id) << ","
+            << EscapeCsv(ToString(row.solver_model)) << ","
             << CsvNumber(row.a_over_b) << ","
             << CsvNumber(result.config.n1) << ","
             << CsvNumber(row.n2) << ","
@@ -246,8 +284,8 @@ std::string BuildTable1SummaryCsvReport(const marcatili::Table1Result& result) {
             << CsvNumber(row.absolute_error) << ","
             << CsvNumber(row.relative_error) << ","
             << (row.limiting_cutoff_found ? "1" : "0") << ","
-            << row.limiting_mode_id << ","
-            << ToString(row.limiting_family) << ","
+            << EscapeCsv(row.limiting_mode_id) << ","
+            << EscapeCsv(ToString(row.limiting_family)) << ","
             << row.limiting_p << ","
             << row.limiting_q << ","
             << (row.ex11_guided_just_below_cutoff ? "1" : "0") << ","
@@ -260,16 +298,17 @@ std::string BuildTable1SummaryCsvReport(const marcatili::Table1Result& result) {
 std::string BuildTable1DetailsCsvReport(const marcatili::Table1Result& result) {
     std::ostringstream csv;
 
-    csv << "case_id,row_id,article_panel_id,solver_model,mode_id,mode_family,p,q,"
+    csv << "case_id,table_entry_interpretation,row_id,article_panel_id,solver_model,mode_id,mode_family,p,q,"
            "cutoff_found,cutoff_b_normalized,cutoff_a_normalized,cutoff_b_over_A4\n";
 
     for (const auto& cutoff : result.mode_cutoffs) {
-        csv << result.config.case_id << ","
-            << cutoff.row_id << ","
-            << cutoff.article_panel_id << ","
-            << ToString(cutoff.solver_model) << ","
-            << cutoff.mode_id << ","
-            << ToString(cutoff.family) << ","
+        csv << EscapeCsv(result.config.case_id) << ","
+            << EscapeCsv(result.config.table_entry_interpretation) << ","
+            << EscapeCsv(cutoff.row_id) << ","
+            << EscapeCsv(cutoff.article_panel_id) << ","
+            << EscapeCsv(ToString(cutoff.solver_model)) << ","
+            << EscapeCsv(cutoff.mode_id) << ","
+            << EscapeCsv(ToString(cutoff.family)) << ","
             << cutoff.p << ","
             << cutoff.q << ","
             << (cutoff.cutoff_found ? "1" : "0") << ","

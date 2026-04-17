@@ -1,6 +1,16 @@
 {
-  "case_name": "bootstrap_coupler",
-  "article_scope": "directional coupler",
-  "expected_output": "placeholder_json"
+  "case_id": "CP-POINT-010-BASE",
+  "article_target": "Directional coupler point from Eq. (34), using Eq. (6) for the transverse root in the symmetric n3 = n5 baseline.",
+  "solver_model": "exact",
+  "transverse_equation": "eq6",
+  "mode_indices": {
+    "p": 1
+  },
+  "normalized_geometry": {
+    "a_over_A5": 1.6,
+    "c_over_a": 2.5
+  },
+  "materials": {
+    "n1_over_n5": 1.5
+  }
 }
-

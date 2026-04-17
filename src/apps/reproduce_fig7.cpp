@@ -15,6 +15,8 @@ int main(int argc, char** argv) {
     const std::string output_json_file = argc == 3 ? argv[2] : "";
 
     try {
+        // Fig. 7 produces two CSV layers because the nomogram has two drawable data
+        // families: construction lines and selected line intersections.
         const std::string input_text = marcatili::io::ReadTextFile(input_file);
         const auto config = marcatili::io::ParseFigure7Config(input_text, output_json_file);
         const auto result = marcatili::SolveFigure7(config);

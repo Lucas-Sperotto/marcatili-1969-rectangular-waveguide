@@ -179,9 +179,9 @@ std::string BuildSingleGuideCsvReport(const marcatili::SingleGuideResult& result
            "kx_A3_over_pi_squared,kx_A5_over_pi_squared,"
            "ky_A2_over_pi_squared,ky_A4_over_pi_squared\n";
 
-    csv << result.config.case_id << ","
-        << ToString(result.config.solver_model) << ","
-        << ToString(result.config.family) << ","
+    csv << EscapeCsv(result.config.case_id) << ","
+        << EscapeCsv(ToString(result.config.solver_model)) << ","
+        << EscapeCsv(ToString(result.config.family)) << ","
         << result.config.p << ","
         << result.config.q << ","
         << CsvNumber(result.config.wavelength) << ","

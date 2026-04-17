@@ -26,6 +26,9 @@ double SolveExactRoot(
     const std::function<double(double)>& function,
     double upper_bound
 ) {
+    // The reduced characteristic equations are monotone on the guided interval,
+    // so a single sign-changing bracket is enough for a stable "exact" root of
+    // the Marcatili model.
     const double lower_bound = 1e-12;
     const double f_lower = function(lower_bound);
     const double f_upper = function(upper_bound);
@@ -111,6 +114,16 @@ SingleGuideSolverModel ParseSingleGuideSolverModel(const std::string& solver_mod
     );
 }
 
+/**
+ * @brief Solves the single guide problem using the closed-form approximation.
+ * @details This function implements the algebraic approximations for kx and ky
+ * derived under the "well-guided mode" assumption.
+ * - For E^y modes, it uses Eq. (12) and (13).
+ * - For E^x modes, it uses Eq. (22) and (23).
+ * This solver is computationally fast but less accurate near the cutoff condition.
+ * @param config The configuration for the single guide calculation.
+ * @return A struct containing the calculated results.
+ */
 SingleGuideResult SolveSingleGuideClosedForm(const SingleGuideConfig& config) {
     ValidateConfig(config);
 
@@ -131,16 +144,23 @@ SingleGuideResult SolveSingleGuideClosedForm(const SingleGuideConfig& config) {
     result.A5 = ComputeA(config.wavelength, config.n1, config.n5);
 
     if (config.family == SingleGuideFamily::kEy) {
+        // Implements the closed-form approximation for kx from Eq. (12).
         const double x_denominator = 1.0 + (result.A3 + result.A5) / (kPi * config.a);
+        // Implements the closed-form approximation for ky from Eq. (13).
         const double y_denominator =
             1.0 +
             (Square(config.n2) * result.A2 + Square(config.n4) * result.A4) /
                 (kPi * Square(config.n1) * config.b);
 
+        // Final expressions for kx and ky from Eq. (12) and (13).
         result.kx = (config.p * kPi / config.a) / x_denominator;
         result.ky = (config.q * kPi / config.b) / y_denominator;
         result.equations_used = "(10), (12), (13), (14), (15), (16)";
     } else {
+        // For the E_x family the same software pattern is reused, but the
+        // polarization-dependent weighting moves to the x equation, matching
+        // Eq. (20)-(26).
+        // Implements the closed-form approximation for kx from Eq. (22).
         const double x_denominator =
             1.0 +
             (Square(config.n3) * result.A3 + Square(config.n5) * result.A5) /
@@ -148,6 +168,7 @@ SingleGuideResult SolveSingleGuideClosedForm(const SingleGuideConfig& config) {
         const double y_denominator = 1.0 + (result.A2 + result.A4) / (kPi * config.b);
 
         result.kx = (config.p * kPi / config.a) / x_denominator;
+        // Implements the closed-form approximation for ky from Eq. (23).
         result.ky = (config.q * kPi / config.b) / y_denominator;
         result.equations_used = "(10), (22), (23), (24), (25), (26)";
     }
@@ -157,6 +178,8 @@ SingleGuideResult SolveSingleGuideClosedForm(const SingleGuideConfig& config) {
     result.approximation_checks.ky_a2_over_pi_squared = Square(result.ky * result.A2 / kPi);
     result.approximation_checks.ky_a4_over_pi_squared = Square(result.ky * result.A4 / kPi);
 
+    // These checks are not new physics; they are bookkeeping for the domain where
+    // the closed-form derivation remains self-consistent.
     const double kz_squared = Square(result.k1) - Square(result.kx) - Square(result.ky);
     const double xi3_argument = 1.0 - result.approximation_checks.kx_a3_over_pi_squared;
     const double xi5_argument = 1.0 - result.approximation_checks.kx_a5_over_pi_squared;
@@ -193,6 +216,9 @@ SingleGuideResult SolveSingleGuideClosedForm(const SingleGuideConfig& config) {
     result.kz_normalized_against_n4 =
         denominator > 0.0 ? (Square(result.kz) - Square(result.k4)) / denominator : NaN();
 
+    // The repository normalizes many dispersion plots against n4 because Fig. 6
+    // uses that lower-side cladding as the reference in b/A_4 and in the vertical
+    // axis. This is a reporting convention, not an extra approximation.
     result.guided =
         Square(result.kz) > Square(result.k4) &&
         Square(result.kz) <= Square(result.k1) &&
@@ -206,6 +232,17 @@ SingleGuideResult SolveSingleGuideClosedForm(const SingleGuideConfig& config) {
     return result;
 }
 
+/**
+ * @brief Solves the single guide problem by finding the root of the transcendental equations.
+ * @details This function implements the "exact" solver for Marcatili's reduced
+ * model. It numerically finds the roots for kx and ky using the bisection method.
+ * - For E^y modes, it solves Eq. (6) and (7).
+ * - For E^x modes, it solves Eq. (20) and (21).
+ * This solver is more accurate than the closed-form version, especially near
+ * the cutoff condition, but is computationally more intensive.
+ * @param config The configuration for the single guide calculation.
+ * @return A struct containing the calculated results.
+ */
 SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
     ValidateConfig(config);
 
@@ -227,6 +264,8 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
 
     try {
         if (config.family == SingleGuideFamily::kEy) {
+            // This lambda function implements the transcendental equation for kx
+            // from Eq. (6) of the paper, rearranged to find its root f(kx) = 0.
             const auto fx = [&](double kx_value) {
                 const double xi3 = PenetrationDepth(result.A3, kx_value);
                 const double xi5 = PenetrationDepth(result.A5, kx_value);
@@ -236,6 +275,8 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
                        static_cast<double>(config.p) * kPi;
             };
 
+            // This lambda function implements the transcendental equation for ky
+            // from Eq. (7) of the paper, rearranged to find its root f(ky) = 0.
             const auto fy = [&](double ky_value) {
                 const double eta2 = PenetrationDepth(result.A2, ky_value);
                 const double eta4 = PenetrationDepth(result.A4, ky_value);
@@ -255,6 +296,8 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
             );
             result.equations_used = "(6), (7), (8), (9), (10)";
         } else {
+            // This lambda function implements the transcendental equation for kx
+            // from Eq. (20) of the paper (for the E^x_pq family).
             const auto fx = [&](double kx_value) {
                 const double xi3 = PenetrationDepth(result.A3, kx_value);
                 const double xi5 = PenetrationDepth(result.A5, kx_value);
@@ -264,6 +307,8 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
                        static_cast<double>(config.p) * kPi;
             };
 
+            // This lambda function implements the transcendental equation for ky
+            // from Eq. (21) of the paper (for the E^x_pq family).
             const auto fy = [&](double ky_value) {
                 const double eta2 = PenetrationDepth(result.A2, ky_value);
                 const double eta4 = PenetrationDepth(result.A4, ky_value);
@@ -304,6 +349,9 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
     result.approximation_checks.ky_a2_over_pi_squared = Square(result.ky * result.A2 / kPi);
     result.approximation_checks.ky_a4_over_pi_squared = Square(result.ky * result.A4 / kPi);
 
+    // Once kx and ky are known, kz follows from Eq. (10). The xi/eta values are
+    // then derived decay lengths in the outer media, used both for diagnostics
+    // and for later coupler formulas.
     const double kz_squared = Square(result.k1) - Square(result.kx) - Square(result.ky);
     const double xi3_argument = Square(kPi / result.A3) - Square(result.kx);
     const double xi5_argument = Square(kPi / result.A5) - Square(result.kx);

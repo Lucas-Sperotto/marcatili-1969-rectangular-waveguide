@@ -15,6 +15,8 @@ int main(int argc, char** argv) {
     const std::string output_json_file = argc == 3 ? argv[2] : "";
 
     try {
+        // The plotting script will later compare these CSV samples to the scanned
+        // article panel, so the executable only needs to provide clean numeric traces.
         const std::string input_text = marcatili::io::ReadTextFile(input_file);
         const auto config = marcatili::io::ParseFigure8Config(input_text, output_json_file);
         const auto result = marcatili::SolveFigure8(config);

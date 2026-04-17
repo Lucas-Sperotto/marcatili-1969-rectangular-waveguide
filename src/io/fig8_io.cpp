@@ -201,10 +201,10 @@ std::string BuildFigure8CsvReport(const marcatili::Figure8Result& result) {
            "guided,domain_valid,kx,ky,kz,kz_normalized_against_n4\n";
 
     for (const auto& sample : result.samples) {
-        csv << result.config.case_id << ","
-            << sample.curve_id << ","
-            << ToString(sample.point.config.solver_model) << ","
-            << ToString(sample.point.config.family) << ","
+        csv << EscapeCsv(result.config.case_id) << ","
+            << EscapeCsv(sample.curve_id) << ","
+            << EscapeCsv(ToString(sample.point.config.solver_model)) << ","
+            << EscapeCsv(ToString(sample.point.config.family)) << ","
             << sample.point.config.p << ","
             << sample.point.config.q << ","
             << sample.sample_index << ","

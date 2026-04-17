@@ -79,10 +79,14 @@ void ValidateConfig(const Figure7Config& config) {
 }
 
 double ModeLineY(const Figure7ModeSpec& mode, double x) {
+    // In the nomogram, the modal families become straight or easily sampled curves
+    // in the normalized X-Y plane defined around Eq. (27)-(30).
     return (1.0 - Square(static_cast<double>(mode.p)) * x) / Square(static_cast<double>(mode.q));
 }
 
 double CLineY(double c_value, double x) {
+    // The construction line Y = C X is the graphical device used in the paper to
+    // read off a solution once C is known from the guide dimensions and indices.
     return c_value * x;
 }
 
@@ -137,6 +141,9 @@ Figure7Result SolveFigure7(const Figure7Config& config) {
     result.A4 = ComputeA(config.wavelength, config.n1, config.n4);
     result.A5 = ComputeA(config.wavelength, config.n1, config.n5);
 
+    // The nomogram is built from the closed-form guide model, not from the exact
+    // transcendental solver. That matches the role of Fig. 7 in the paper: it is
+    // a design aid derived from the approximate algebraic equations.
     const double x_denominator = 1.0 + (result.A3 + result.A5) / (kPi * config.a);
     const double y_denominator =
         1.0 +
@@ -171,6 +178,9 @@ Figure7Result SolveFigure7(const Figure7Config& config) {
     }
 
     for (const auto& mode : config.modes) {
+        // These samples are purely geometric traces of the nomogram lines.
+        // They do not yet evaluate a physical mode until they are intersected
+        // with a chosen C line.
         const double x_max = 1.0 / Square(static_cast<double>(mode.p));
         for (int sample_index = 0; sample_index < config.line_point_count; ++sample_index) {
             const double x = x_max * static_cast<double>(sample_index) /
@@ -251,6 +261,8 @@ Figure7Result SolveFigure7(const Figure7Config& config) {
     }
 
     if (!config.article_reference_mode_line_id.empty()) {
+        // This final block supports side-by-side validation against the example
+        // highlighted in the article without changing the rest of the nomogram data.
         for (const auto& intersection : result.intersections) {
             if (!intersection.is_reference_c ||
                 intersection.mode_line_id != config.article_reference_mode_line_id) {

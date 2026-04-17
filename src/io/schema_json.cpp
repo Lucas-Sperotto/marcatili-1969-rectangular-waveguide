@@ -451,6 +451,59 @@ std::vector<std::string> ParseRawJsonStringArray(std::string_view raw_value) {
     return values;
 }
 
+std::vector<std::string> ParseRawJsonObjectArray(std::string_view raw_value) {
+    const std::string_view trimmed = TrimWhitespace(raw_value);
+    if (trimmed.empty() || trimmed.front() != '[') {
+        return {};
+    }
+
+    const auto closing = FindMatchingDelimiter(trimmed, 0, '[', ']');
+    if (!closing.has_value()) {
+        return {};
+    }
+
+    if (SkipWhitespace(trimmed, *closing + 1) != trimmed.size()) {
+        return {};
+    }
+
+    const std::string_view array_body = trimmed.substr(1, *closing - 1);
+    std::vector<std::string> values;
+    std::size_t position = 0;
+
+    while (true) {
+        position = SkipWhitespace(array_body, position);
+        if (position >= array_body.size()) {
+            break;
+        }
+
+        if (array_body[position] == ',') {
+            ++position;
+            continue;
+        }
+
+        if (array_body[position] != '{') {
+            return {};
+        }
+
+        const auto object_end =
+            FindMatchingDelimiter(array_body, position, '{', '}');
+        if (!object_end.has_value()) {
+            return {};
+        }
+
+        values.emplace_back(
+            TrimWhitespace(array_body.substr(position, *object_end - position + 1))
+        );
+
+        position = SkipWhitespace(array_body, *object_end + 1);
+        if (position < array_body.size() && array_body[position] == ',') {
+            ++position;
+        }
+    }
+
+    return values;
+}
+
 }  // namespace
 
 std::optional<std::string> FindStringValue(
@@ -501,6 +554,30 @@ std::vector<std::string> FindStringArrayValues(
     return ParseRawJsonStringArray(*raw_value);
 }
 
+std::optional<std::string> FindRawJsonValue(
+    const std::string& json_text,
+    const std::string& key
+) {
+    const auto raw_value = FindRawValueByPath(json_text, key);
+    if (!raw_value.has_value()) {
+        return std::nullopt;
+    }
+
+    return std::string(*raw_value);
+}
+
+std::vector<std::string> FindObjectArrayValues(
+    const std::string& json_text,
+    const std::string& key
+) {
+    const auto raw_value = FindRawValueByPath(json_text, key);
+    if (!raw_value.has_value()) {
+        return {};
+    }
+
+    return ParseRawJsonObjectArray(*raw_value);
+}
+
 std::string RequireStringValue(
     const std::string& json_text,
     const std::string& key
@@ -544,6 +621,18 @@ std::vector<std::string> RequireStringArrayValues(
     const auto values = FindStringArrayValues(json_text, key);
     if (values.empty()) {
         throw std::runtime_error("Missing required string-array key: " + key);
+    }
+
+    return values;
+}
+
+std::vector<std::string> RequireObjectArrayValues(
+    const std::string& json_text,
+    const std::string& key
+) {
+    const auto values = FindObjectArrayValues(json_text, key);
+    if (values.empty()) {
+        throw std::runtime_error("Missing required object-array key: " + key);
     }
 
     return values;

@@ -36,6 +36,29 @@ std::string EscapeJson(const std::string& text) {
     return escaped.str();
 }
 
+std::string EscapeCsv(const std::string& text) {
+    bool requires_quotes = false;
+    std::ostringstream escaped;
+
+    for (const char ch : text) {
+        if (ch == '"' || ch == ',' || ch == '\n' || ch == '\r') {
+            requires_quotes = true;
+        }
+
+        if (ch == '"') {
+            escaped << "\"\"";
+        } else {
+            escaped << ch;
+        }
+    }
+
+    if (!requires_quotes) {
+        return escaped.str();
+    }
+
+    return "\"" + escaped.str() + "\"";
+}
+
 std::string ReadTextFile(const std::string& path) {
     std::ifstream input(path);
     if (!input) {
@@ -68,4 +91,3 @@ std::string ReplaceExtension(const std::string& path, const std::string& new_ext
 }
 
 }  // namespace marcatili::io
-

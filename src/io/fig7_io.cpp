@@ -234,10 +234,10 @@ std::string BuildFigure7LinesCsvReport(const marcatili::Figure7Result& result) {
     csv << "case_id,line_kind,line_id,mode_family,p,q,c_value,sample_index,x,y\n";
 
     for (const auto& sample : result.line_samples) {
-        csv << result.config.case_id << ","
-            << sample.line_kind << ","
-            << sample.line_id << ","
-            << ToString(sample.family) << ","
+        csv << EscapeCsv(result.config.case_id) << ","
+            << EscapeCsv(sample.line_kind) << ","
+            << EscapeCsv(sample.line_id) << ","
+            << EscapeCsv(ToString(sample.family)) << ","
             << sample.p << ","
             << sample.q << ","
             << CsvNumber(sample.c_value) << ","
@@ -256,10 +256,10 @@ std::string BuildFigure7IntersectionsCsvReport(const marcatili::Figure7Result& r
            "domain_valid,guided,kz,kz_normalized_against_n4\n";
 
     for (const auto& intersection : result.intersections) {
-        csv << result.config.case_id << ","
-            << intersection.mode_line_id << ","
-            << intersection.c_line_id << ","
-            << ToString(intersection.family) << ","
+        csv << EscapeCsv(result.config.case_id) << ","
+            << EscapeCsv(intersection.mode_line_id) << ","
+            << EscapeCsv(intersection.c_line_id) << ","
+            << EscapeCsv(ToString(intersection.family)) << ","
             << intersection.p << ","
             << intersection.q << ","
             << CsvNumber(intersection.c_value) << ","

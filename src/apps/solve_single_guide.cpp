@@ -1,3 +1,11 @@
+/**
+ * @file
+ * @brief Application to solve a single point for a rectangular dielectric guide.
+ * @details This executable reads a JSON configuration file, solves for the
+ * propagation characteristics of a single waveguide configuration using either
+ * the 'exact' or 'closed_form' solver, and writes the results to JSON and CSV files.
+ */
+
 #include <exception>
 #include <iostream>
 
@@ -16,15 +24,11 @@ int main(int argc, char** argv) {
 
     try {
         const std::string input_text = marcatili::io::ReadTextFile(input_file);
-        const auto config =
-            marcatili::io::ParseSingleGuideConfig(input_text, output_json_file);
+        const auto config = marcatili::io::ParseSingleGuideConfig(input_text, output_json_file);
         const auto result = marcatili::SolveSingleGuide(config);
 
         const std::string json_report = marcatili::io::BuildSingleGuideJsonReport(
-            result,
-            input_file,
-            output_json_file
-        );
+            result, input_file, output_json_file);
 
         if (output_json_file.empty()) {
             std::cout << json_report;
@@ -33,19 +37,15 @@ int main(int argc, char** argv) {
         }
 
         if (!result.config.csv_output_path.empty()) {
-            const std::string csv_report =
-                marcatili::io::BuildSingleGuideCsvReport(result);
-            marcatili::io::WriteTextFile(result.config.csv_output_path, csv_report);
+            marcatili::io::WriteTextFile(
+                result.config.csv_output_path, marcatili::io::BuildSingleGuideCsvReport(result));
         }
 
         if (!output_json_file.empty()) {
-            std::cout << "Wrote single-guide reports to "
-                      << output_json_file;
-
+            std::cout << "Wrote single guide reports to " << output_json_file;
             if (!result.config.csv_output_path.empty()) {
                 std::cout << " and " << result.config.csv_output_path;
             }
-
             std::cout << "\n";
         }
     } catch (const std::exception& error) {

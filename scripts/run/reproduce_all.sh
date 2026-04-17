@@ -6,7 +6,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BUILD_DIR="${BUILD_DIR:-$ROOT_DIR/build}"
 OUTPUT_DIR="${OUTPUT_DIR:-$ROOT_DIR/data/output}"
 
-"$ROOT_DIR/scripts/run/build.sh"
+if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
+    "$ROOT_DIR/scripts/run/build.sh"
+fi
 
 mkdir -p "$OUTPUT_DIR"
 

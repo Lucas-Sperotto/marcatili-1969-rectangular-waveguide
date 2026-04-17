@@ -62,6 +62,8 @@ Figure11CurveSpec ParseFigure11CurveSpec(const std::string& value_text) {
 Figure11IndexRatioSpec ParseFigure11IndexRatioSpec(const std::string& value_text) {
     Figure11IndexRatioSpec ratio;
     ratio.n1_over_n5 = std::stod(value_text);
+    // Eq. (20) is expressed in the code through r = (n5 / n1)^2, so the figure
+    // parser converts the more article-friendly legend n1/n5 into that ratio once.
     ratio.index_ratio_squared = 1.0 / (ratio.n1_over_n5 * ratio.n1_over_n5);
     ratio.label = FormatCompactNumber(ratio.n1_over_n5);
     ratio.ratio_id = "n1_over_n5=" + ratio.label;
@@ -82,6 +84,8 @@ Figure11Result SolveFigure11(const Figure11Config& config) {
     for (const auto& solver_model : config.solver_models) {
         for (const auto& index_ratio : config.index_ratios) {
             for (const auto& curve : config.curves) {
+                // Figure 11 adds one more sweep dimension relative to Figure 10:
+                // each a/A_5 family is repeated for each legend value of n1/n5.
                 Figure11CurveSummary curve_summary;
                 curve_summary.curve = curve;
                 curve_summary.index_ratio = index_ratio;
@@ -107,6 +111,8 @@ Figure11Result SolveFigure11(const Figure11Config& config) {
                     const auto point = SolveCouplerPoint(point_config);
 
                     if (sample_index == 0) {
+                        // As in Fig. 10, this makes the link between the family label
+                        // and the reused single-guide transverse root visible.
                         curve_summary.kx_A5_over_pi = point.kx_A5_over_pi;
                     }
 

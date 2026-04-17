@@ -16,6 +16,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_library(marcatili_core STATIC
     src/math/root_finding.cpp
     src/math/waveguide_math.cpp
+    src/io/coupler_io.cpp
     src/io/fig11_io.cpp
     src/io/fig10_io.cpp
     src/io/fig8_io.cpp
@@ -78,6 +79,13 @@ if(BUILD_TESTING)
         COMMAND solve_single_guide
                 ${PROJECT_SOURCE_DIR}/data/input/solve_single_guide_legacy_flat.json
                 ${CMAKE_BINARY_DIR}/test_outputs/solve_single_guide_legacy_flat.json
+    )
+
+    add_test(
+        NAME solve_coupler_smoke
+        COMMAND solve_coupler
+                ${PROJECT_SOURCE_DIR}/data/input/solve_coupler.json
+                ${CMAKE_BINARY_DIR}/test_outputs/solve_coupler.json
     )
 
     add_test(

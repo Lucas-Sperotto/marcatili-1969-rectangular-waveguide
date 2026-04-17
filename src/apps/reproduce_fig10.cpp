@@ -15,6 +15,8 @@ int main(int argc, char** argv) {
     const std::string output_json_file = argc == 3 ? argv[2] : "";
 
     try {
+        // This app is intentionally a sweep orchestrator for Eq. (34); legend logic
+        // and article-style rendering stay outside in the Python plotting layer.
         const std::string input_text = marcatili::io::ReadTextFile(input_file);
         const auto config = marcatili::io::ParseFigure10Config(input_text, output_json_file);
         const auto result = marcatili::SolveFigure10(config);

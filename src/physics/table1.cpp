@@ -47,6 +47,13 @@ void ValidateConfig(const Table1Config& config) {
         throw std::runtime_error("search.cutoff_tolerance must be positive.");
     }
 
+    if (config.table_entry_interpretation != "a_times_n1_over_lambda") {
+        throw std::runtime_error(
+            "Unsupported table_entry_interpretation. "
+            "Current supported value: a_times_n1_over_lambda."
+        );
+    }
+
     for (const auto& row : config.rows) {
         if (row.row_id.empty()) {
             throw std::runtime_error("rows entries must provide a non-empty row_id.");
@@ -96,6 +103,8 @@ bool EvaluateGuidance(
     point_config.n4 = row.n4;
     point_config.n5 = row.n5;
 
+    // Table I is reproduced by repeatedly asking a simpler question:
+    // "for this geometry and this candidate higher-order mode, is the mode guided?"
     SingleGuideResult local_result = SolveSingleGuide(point_config);
     const bool guided = local_result.guided;
 
@@ -126,6 +135,8 @@ Table1ModeCutoff FindModeCutoff(
     const double lower = config.search.b_normalized_min;
     const double upper = config.search.b_normalized_max;
 
+    // The search assumes monotone loss of guidance as the guide gets thinner.
+    // That is exactly the kind of engineering-oriented cutoff scan Table I needs.
     if (EvaluateGuidance(config, row, solver_model, family, p, q, lower, nullptr)) {
         cutoff.cutoff_found = true;
         cutoff.cutoff_b_normalized = lower;
@@ -140,6 +151,9 @@ Table1ModeCutoff FindModeCutoff(
         double right = upper;
 
         for (int iteration = 0; iteration < 100; ++iteration) {
+            // We bisect in the normalized thickness coordinate rather than solving
+            // a new analytic cutoff formula, because the same engine can then be
+            // reused for both closed-form and transcendental modal solvers.
             const double midpoint = 0.5 * (left + right);
             if (EvaluateGuidance(config, row, solver_model, family, p, q, midpoint, nullptr)) {
                 right = midpoint;
@@ -178,6 +192,9 @@ Table1Result SolveTable1(const Table1Config& config) {
 
     for (const auto& row : config.rows) {
         for (const auto& solver_model : config.solver_models) {
+            // Each summary row asks for the first higher-order cutoff beyond the
+            // two fundamental modes E_y11 and E_x11. The smallest cutoff found
+            // defines the monomode limit reported against the article.
             Table1RowSummary summary;
             summary.row_id = row.row_id;
             summary.article_panel_id = row.article_panel_id;
@@ -205,6 +222,8 @@ Table1Result SolveTable1(const Table1Config& config) {
                     }
 
                     for (const auto family : {SingleGuideFamily::kEy, SingleGuideFamily::kEx}) {
+                        // We scan both hybrid families because the article's monomode
+                        // bound is controlled by whichever higher-order branch appears first.
                         const auto cutoff = FindModeCutoff(config, row, solver_model, family, p, q);
                         result.mode_cutoffs.push_back(cutoff);
 
@@ -224,6 +243,7 @@ Table1Result SolveTable1(const Table1Config& config) {
                 summary.limiting_q = best_mode.q;
                 summary.computed_b_normalized = best_mode.cutoff_b_normalized;
                 summary.computed_a_normalized = best_mode.cutoff_a_normalized;
+                // Table I interpretation is explicit in config to avoid hidden assumptions.
                 summary.computed_dimension_normalized = best_mode.cutoff_a_normalized;
                 summary.computed_b_over_A4 = best_mode.cutoff_b_over_A4;
                 summary.absolute_error =

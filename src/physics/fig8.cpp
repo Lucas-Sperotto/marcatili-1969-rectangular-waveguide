@@ -80,6 +80,9 @@ Figure8Result SolveFigure8(const Figure8Config& config) {
     result.config = config;
     result.status = "ok";
 
+    // Fig. 8 uses a/A as the horizontal variable, where A is the n4-based decay
+    // scale of the surrounding low-impedance region. This keeps the sweep in the
+    // same normalized coordinate used in the article.
     const double A = ComputeA(config.wavelength, config.n1, config.n4);
     const double step =
         (config.a_over_A_max - config.a_over_A_min) /
@@ -115,6 +118,9 @@ Figure8Result SolveFigure8(const Figure8Config& config) {
                 point_config.n4 = config.n4;
                 point_config.n5 = config.n4;
 
+                // The figure driver delegates all boundary-condition physics to the
+                // metal-guide solver. Its own job is to keep the sweep and labeling
+                // aligned with the article panel.
                 const auto point = SolveMetalGuide(point_config);
 
                 if (point.domain_valid) {

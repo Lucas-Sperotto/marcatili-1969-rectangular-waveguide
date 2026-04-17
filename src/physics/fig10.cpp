@@ -68,6 +68,8 @@ Figure10Result SolveFigure10(const Figure10Config& config) {
 
     for (const auto& solver_model : config.solver_models) {
         for (const auto& curve : config.curves) {
+            // Each Figure 10 family is a constant a/A_5 curve swept against c/a.
+            // The actual coupling formula is centralized in SolveCouplerPoint.
             Figure10CurveSummary curve_summary;
             curve_summary.curve = curve;
             curve_summary.solver_model = solver_model;
@@ -83,6 +85,7 @@ Figure10Result SolveFigure10(const Figure10Config& config) {
                 point_config.solver_model = solver_model;
                 // Section IV cites Eq. (6) and Eq. (12) when introducing Fig. 10,
                 // even though the modal label in the scan is OCR-ambiguous.
+                // We keep that ambiguity explicit instead of silently "fixing" it.
                 point_config.transverse_equation = CouplerTransverseEquation::kEq6;
                 point_config.p = 1;
                 point_config.a_over_A5 = curve.a_over_A5;
@@ -91,6 +94,9 @@ Figure10Result SolveFigure10(const Figure10Config& config) {
                 const auto point = SolveCouplerPoint(point_config);
 
                 if (sample_index == 0) {
+                    // Recording the first-point root makes the report pedagogical:
+                    // readers can see which transverse u = k_x A_5 / pi value was
+                    // used for the whole family.
                     curve_summary.kx_A5_over_pi = point.kx_A5_over_pi;
                 }
 

@@ -14,6 +14,7 @@ enum class CouplerTransverseEquation {
 struct CouplerPointConfig {
     std::string case_id;
     std::string article_target;
+    std::string csv_output_path;
     SingleGuideSolverModel solver_model = SingleGuideSolverModel::kClosedForm;
     // Eq. (6) is used for the Fig. 10 repository baseline; Eq. (20) is used for Fig. 11.
     CouplerTransverseEquation transverse_equation = CouplerTransverseEquation::kEq6;
@@ -40,6 +41,7 @@ struct CouplerPointResult {
 };
 
 std::string ToString(CouplerTransverseEquation equation);
+CouplerTransverseEquation ParseCouplerTransverseEquation(const std::string& equation_text);
 CouplerPointResult SolveCouplerPoint(const CouplerPointConfig& config);
 
 }  // namespace marcatili

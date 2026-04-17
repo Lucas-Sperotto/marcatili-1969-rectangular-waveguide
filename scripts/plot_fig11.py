@@ -93,6 +93,10 @@ def build_plot(
         "exact": "black",
         "closed_form": "#6e6e6e",
     }
+    solver_labels = {
+        "exact": "exact (black)",
+        "closed_form": "closed_form (gray)",
+    }
     label_rows_by_curve: dict[str, dict[str, str]] = {}
     preferred_ratio = ratio_values[0] if ratio_values else None
 
@@ -147,6 +151,18 @@ def build_plot(
         )
         for ratio in ratio_values
     ]
+    solver_models_present = sorted({rows[0]["solver_model"] for rows in sorted_groups})
+    solver_handles = [
+        Line2D(
+            [0],
+            [0],
+            color=solver_colors.get(solver_model, "black"),
+            linestyle="-",
+            linewidth=1.8,
+            label=solver_labels.get(solver_model, solver_model),
+        )
+        for solver_model in solver_models_present
+    ]
     parameter_handle = Line2D(
         [0],
         [0],
@@ -154,7 +170,7 @@ def build_plot(
         linestyle="none",
         label=r"Labels: $a/A_5 = \frac{2a}{\lambda}\,(n_1^2-n_5^2)^{1/2}$",
     )
-    handles = ratio_handles + [parameter_handle]
+    handles = solver_handles + ratio_handles + [parameter_handle]
     axis.legend(handles=handles, loc="lower left", frameon=True, title="Curves")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

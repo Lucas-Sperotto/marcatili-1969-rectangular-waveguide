@@ -82,6 +82,9 @@ SingleGuideResult SolveFigure6Point(
     point_config.n4 = variant.n4;
     point_config.n5 = variant.n5;
 
+    // Fig. 6 is generated as a repeated single-point solve over a normalized sweep.
+    // The figure builder itself does not contain modal physics; it only assembles
+    // the correct per-point configuration for the selected panel.
     if (config.geometry_model == Figure6GeometryModel::kSlab) {
         return SolveSlabGuide(point_config);
     }
@@ -152,6 +155,9 @@ Figure6Result SolveFigure6(const Figure6Config& config) {
     }
 
     for (const auto& variant : variants) {
+        // Each panel is swept in the article's normalized horizontal coordinate b/A_4.
+        // Recomputing A_4 per material variant keeps that normalization faithful when
+        // n4 changes across subcases such as Fig. 6d.
         const double a4 =
             config.wavelength /
             (2.0 * std::sqrt(config.n1 * config.n1 - variant.n4 * variant.n4));
@@ -168,6 +174,8 @@ Figure6Result SolveFigure6(const Figure6Config& config) {
                 curve_summary.total_points = config.point_count;
 
                 for (int sample_index = 0; sample_index < config.point_count; ++sample_index) {
+                    // The plotted ordinate comes from the underlying point solver as
+                    // kz normalized against n4; this loop simply samples that curve.
                     const double b_over_a4 =
                         config.b_over_A4_min + step * static_cast<double>(sample_index);
                     const double b = b_over_a4 * a4;

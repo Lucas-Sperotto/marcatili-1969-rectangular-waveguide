@@ -54,6 +54,9 @@ SingleGuideResult BuildBaseResult(const SingleGuideConfig& config) {
     result.A3 = ComputeA(config.wavelength, config.n1, config.n3);
     result.A4 = ComputeA(config.wavelength, config.n1, config.n4);
     result.A5 = ComputeA(config.wavelength, config.n1, config.n5);
+    // The slab limit keeps only one confined transverse dimension. We keep the
+    // single-guide result container so the reporting layer can stay uniform, but
+    // kx is pinned to zero because there is no separate x quantization here.
     result.kx = 0.0;
     result.xi3 = NaN();
     result.xi5 = NaN();
@@ -87,6 +90,8 @@ SingleGuideResult SolveSlabGuideClosedForm(const SingleGuideConfig& config) {
     SingleGuideResult result = BuildBaseResult(config);
 
     if (config.family == SingleGuideFamily::kEy) {
+        // This is the one-dimensional limit of the E_y branch: keep only the
+        // y quantization and its associated closed-form phase correction.
         const double y_denominator =
             1.0 +
             (Square(config.n2) * result.A2 + Square(config.n4) * result.A4) /
@@ -94,6 +99,8 @@ SingleGuideResult SolveSlabGuideClosedForm(const SingleGuideConfig& config) {
         result.ky = (config.q * kPi / config.b) / y_denominator;
         result.equations_used = "slab limit of (13), (14), (16)";
     } else {
+        // Same idea for the E_x family, now following the slab version of the
+        // Eq. (23)-(26) branch.
         const double y_denominator = 1.0 + (result.A2 + result.A4) / (kPi * config.b);
         result.ky = (config.q * kPi / config.b) / y_denominator;
         result.equations_used = "slab limit of (23), (24), (26)";
@@ -136,6 +143,8 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
 
     if (config.family == SingleGuideFamily::kEy) {
         result.equations_used = "slab limit of (7), (9), (10)";
+        // Exact slab mode = numerical root of the one-dimensional characteristic
+        // equation inherited from the E_y rectangular family.
         characteristic_function = [&](double ky_value) {
             const double eta2 = PenetrationDepth(result.A2, ky_value);
             const double eta4 = PenetrationDepth(result.A4, ky_value);
@@ -146,6 +155,7 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
         };
     } else {
         result.equations_used = "slab limit of (21), (19), (10)";
+        // Same numerical treatment for the E_x-type slab relation.
         characteristic_function = [&](double ky_value) {
             const double eta2 = PenetrationDepth(result.A2, ky_value);
             const double eta4 = PenetrationDepth(result.A4, ky_value);
@@ -156,6 +166,9 @@ SingleGuideResult SolveSlabGuideExact(const SingleGuideConfig& config) {
         };
     }
 
+    // The status codes distinguish two cases that matter scientifically:
+    // no admissible transcendental root in the model domain, versus a mode
+    // that simply stays below cutoff inside the scanned interval.
     const double f_lower = characteristic_function(lower_bound);
     const double f_upper = characteristic_function(upper_bound);
 

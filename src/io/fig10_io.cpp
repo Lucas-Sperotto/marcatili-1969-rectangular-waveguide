@@ -151,11 +151,11 @@ std::string BuildFigure10CsvReport(const marcatili::Figure10Result& result) {
            "sqrt_one_minus_kx_A5_over_pi_squared,normalized_coupling,domain_valid,status\n";
 
     for (const auto& sample : result.samples) {
-        csv << result.config.case_id << ","
-            << sample.curve_id << ","
-            << sample.curve_label << ","
-            << ToString(sample.point.config.solver_model) << ","
-            << ToString(sample.point.config.transverse_equation) << ","
+        csv << EscapeCsv(result.config.case_id) << ","
+            << EscapeCsv(sample.curve_id) << ","
+            << EscapeCsv(sample.curve_label) << ","
+            << EscapeCsv(ToString(sample.point.config.solver_model)) << ","
+            << EscapeCsv(ToString(sample.point.config.transverse_equation)) << ","
             << sample.point.config.p << ","
             << CsvNumber(sample.point.a_over_A5) << ","
             << sample.sample_index << ","
@@ -165,7 +165,7 @@ std::string BuildFigure10CsvReport(const marcatili::Figure10Result& result) {
             << CsvNumber(sample.point.sqrt_one_minus_kx_A5_over_pi_squared) << ","
             << CsvNumber(sample.point.normalized_coupling) << ","
             << (sample.point.domain_valid ? "1" : "0") << ","
-            << sample.point.status << "\n";
+            << EscapeCsv(sample.point.status) << "\n";
     }
 
     return csv.str();

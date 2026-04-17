@@ -20,7 +20,12 @@ import colorsys
 from matplotlib.lines import Line2D
 
 X_TICKS = [0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.6, 4.0]
-Y_TICKS = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2]
+DEFAULT_Y_MAX = 1.2
+PANEL_Y_MAX_OVERRIDES = {
+    # Based on the current divergence report against the article scan.
+    "SG-006c": 1.0,
+    "SG-006e": 1.0,
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -40,7 +45,22 @@ def parse_args() -> argparse.Namespace:
         "--panel-title",
         help="Optional title override. Defaults to the panel_id stored in the CSV.",
     )
+    parser.add_argument(
+        "--y-max",
+        type=float,
+        help="Optional y-axis upper bound override. By default the script uses panel-specific limits.",
+    )
     return parser.parse_args()
+
+
+def panel_y_max(panel_id: str) -> float:
+    return PANEL_Y_MAX_OVERRIDES.get(panel_id, DEFAULT_Y_MAX)
+
+
+def y_ticks_for_limit(y_max: float) -> list[float]:
+    step = 0.2
+    tick_count = int(round(y_max / step))
+    return [round(step * index, 1) for index in range(tick_count + 1)]
 
 
 def mode_label(row: dict[str, str]) -> str:
@@ -73,7 +93,7 @@ def load_curves(csv_path: Path) -> tuple[str, dict[tuple[str, str, str], list[di
                 continue
 
             y_value = float(kz_normalized)
-            if y_value < 0.0 or y_value > 1.2:
+            if y_value < 0.0:
                 continue
 
             solver_model = row.get("solver_model", "closed_form")
@@ -94,7 +114,13 @@ def adjust_color(color: tuple[float, float, float, float], lightness_delta: floa
     return (shifted_red, shifted_green, shifted_blue, alpha)
 
 
-def build_plot(panel_id: str, grouped_rows: dict[tuple[str, str, str], list[dict[str, str]]], output_path: Path, title: str) -> None:
+def build_plot(
+    panel_id: str,
+    grouped_rows: dict[tuple[str, str, str], list[dict[str, str]]],
+    output_path: Path,
+    title: str,
+    y_max_override: float | None,
+) -> None:
     plt.style.use("seaborn-v0_8-whitegrid")
     figure, axis = plt.subplots(figsize=(9.0, 6.0))
 
@@ -170,10 +196,14 @@ def build_plot(panel_id: str, grouped_rows: dict[tuple[str, str, str], list[dict
                 )
             )
 
+    y_max = y_max_override if y_max_override is not None else panel_y_max(panel_id)
+    if y_max <= 0.0:
+        raise ValueError("y-axis upper bound must be positive.")
+
     axis.set_xlim(0.0, 4.0)
-    axis.set_ylim(0.0, 1.2)
+    axis.set_ylim(0.0, y_max)
     axis.set_xticks(X_TICKS)
-    axis.set_yticks(Y_TICKS)
+    axis.set_yticks(y_ticks_for_limit(y_max))
     axis.set_xlabel(r"$b / A_4$")
     axis.set_ylabel(r"$(k_z^2-k_4^2)/(k_1^2-k_4^2)$")
     axis.set_title(title or panel_id)
@@ -225,7 +255,13 @@ def main() -> int:
     if not grouped_rows:
         raise SystemExit("No plottable rows were found in the CSV.")
 
-    build_plot(panel_id, grouped_rows, output_path, args.panel_title or panel_id)
+    build_plot(
+        panel_id,
+        grouped_rows,
+        output_path,
+        args.panel_title or panel_id,
+        args.y_max,
+    )
     print(f"Wrote plot to {output_path}")
     return 0
 

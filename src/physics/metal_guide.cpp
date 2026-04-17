@@ -53,6 +53,10 @@ SingleGuideResult BuildBaseResult(const SingleGuideConfig& config) {
     result.A3 = ComputeA(config.wavelength, config.n1, config.n4);
     result.A4 = ComputeA(config.wavelength, config.n1, config.n4);
     result.A5 = ComputeA(config.wavelength, config.n1, config.n4);
+    // Fig. 8 is treated as a guide over a low-impedance or metalized boundary.
+    // In the current repository model we encode that by collapsing the outer
+    // dielectric scales to the same n4-based decay length and modifying only
+    // the transverse phase conditions.
     result.b_over_A4 = config.b / result.A4;
     return result;
 }
@@ -81,6 +85,8 @@ SingleGuideResult SolveMetalGuideClosedForm(const SingleGuideConfig& config) {
     SingleGuideResult result = BuildBaseResult(config);
 
     if (config.family == SingleGuideFamily::kEy) {
+        // The top boundary is replaced by a PEC-like phase shift. The result is
+        // still a Marcatili-style asymptotic formula, now adapted to Fig. 8.
         const double x_denominator = 1.0 + (result.A3 + result.A5) / (kPi * config.a);
         const double y_denominator =
             1.0 + (Square(config.n4) * result.A4) / (kPi * Square(config.n1) * config.b);
@@ -147,6 +153,7 @@ SingleGuideResult SolveMetalGuideExact(const SingleGuideConfig& config) {
     std::function<double(double)> fy;
 
     if (config.family == SingleGuideFamily::kEy) {
+        // Appendix-based exact branch for the adopted metal-boundary model.
         fx = [&](double kx_value) {
             const double xi = PenetrationDepth(result.A4, kx_value);
             return kx_value * config.a + 2.0 * std::atan(kx_value * xi) -
@@ -160,6 +167,8 @@ SingleGuideResult SolveMetalGuideExact(const SingleGuideConfig& config) {
                    (static_cast<double>(config.q) - 0.5) * kPi;
         };
     } else {
+        // The E_x branch uses the complementary weighting that matches Eq. (20)
+        // and Eq. (21) before the metal-boundary simplifications are applied.
         fx = [&](double kx_value) {
             const double xi = PenetrationDepth(result.A4, kx_value);
             return kx_value * config.a +
@@ -178,6 +187,8 @@ SingleGuideResult SolveMetalGuideExact(const SingleGuideConfig& config) {
     const double y_upper = kPi / result.A4 * (1.0 - 1e-10);
     const double lower = 1e-12;
 
+    // As in the single-guide solver, "exact" means exact for this reduced
+    // transcendental system, not for the full electromagnetic boundary problem.
     if (!(fx(lower) < 0.0 && fx(x_upper) > 0.0) ||
         !(fy(lower) < 0.0 && fy(y_upper) > 0.0)) {
         result.status = "outside_exact_domain";
