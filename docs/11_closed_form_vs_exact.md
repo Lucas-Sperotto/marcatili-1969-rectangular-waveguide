@@ -24,12 +24,6 @@ Portanto:
 - `closed_form` significa: usar as **fórmulas aproximadas em forma fechada** do artigo;
 - `exact` significa: resolver **numericamente** as **equações transcendentais do próprio modelo de Marcatili**.
 
-Não significa:
-
-- solução rigorosa do problema vetorial 2D completo;
-- solução por elementos finitos;
-- solução sem aproximações físicas.
-
 ## O que é `closed_form`
 
 No solver `closed_form`, o repositório usa as fórmulas explícitas derivadas a partir das equações transcendentais no regime de guiamento forte.
@@ -91,13 +85,13 @@ O método numérico usado hoje é bisseção em 1D, implementada em:
 
 Isso é robusto e suficiente para este estágio do projeto.
 
-### Análise Numérica do Solver `exact` (Para Alunos de CC)
+### Análise Numérica do Solver `exact`
 
-O coração do solver `exact` é um algoritmo de **busca de raízes**. O problema se resume a encontrar um valor `x` tal que `f(x) = 0`, onde `f(x)` é uma equação transcendental (como `tan(x) - x/k = 0`).
+O coração do solver `exact` é um algoritmo de **busca de raízes**. O problema se resume a encontrar um valor $x$ tal que $f(x) = 0$, onde $f(x)$ é uma equação transcendental (como $tan(x) - x/k = 0$).
 
 O método escolhido aqui, a **bisseção**, é um exemplo clássico de algoritmo de "dividir para conquistar".
 
-- **Como funciona:** Dado um intervalo `[a, b]` onde a função `f` troca de sinal (ou seja, `f(a) * f(b) < 0`), o método calcula o ponto médio `m = (a+b)/2`. O novo intervalo será `[a, m]` ou `[m, b]`, dependendo de onde a troca de sinal ocorre. O processo se repete até que o intervalo seja menor que uma tolerância desejada.
+- **Como funciona:** Dado um intervalo $[a, b]$ onde a função $f$ troca de sinal (ou seja, $f(a) * f(b) < 0$), o método calcula o ponto médio $m = (a+b)/2$. O novo intervalo será $[a, m]$ ou $[m, b]$, dependendo de onde a troca de sinal ocorre. O processo se repete até que o intervalo seja menor que uma tolerância desejada.
 - **Por que Bisseção?** A principal vantagem da bisseção é sua **robustez**. A convergência é **garantida** se a raiz estiver corretamente "bracketed" (cercada) no intervalo inicial. Sua taxa de convergência é linear (o erro é reduzido por um fator de 2 a cada iteração), o que é mais lento que outros métodos.
 - **Alternativas:**
 - **Método de Newton-Raphson:** Converge muito mais rápido (quadraticamente), mas exige o cálculo da derivada da função e pode divergir se o chute inicial não for bom. É "rápido, mas frágil".
@@ -161,13 +155,6 @@ Essa separação é exatamente o que permite comparar:
 - fidelidade do artigo;
 - domínio de validade das fórmulas assintóticas;
 - comportamento dos gráficos reproduzidos.
-
-## Resumo prático
-
-Se a pergunta for “qual solver usar para estudar a estrutura do artigo?”, a regra prática é:
-
-- use `closed_form` para entender a álgebra e gerar rapidamente as curvas aproximadas;
-- use `exact` para verificar quanto da diferença vem apenas da substituição algébrica das transcendentes.
 
 ## Leituras relacionadas
 

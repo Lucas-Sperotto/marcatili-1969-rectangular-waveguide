@@ -6,14 +6,14 @@ Um dos princípios fundamentais deste repositório é a **rastreabilidade** entr
 
 O problema de um guia dielétrico retangular é complexo. A genialidade de Marcatili foi simplificá-lo com duas aproximações principais:
 
-1. **Desprezar os campos nos cantos:** A análise considera apenas as regiões 1 a 5 da Fig. 3, ignorando as regiões hachuradas. Isso permite que as equações de Maxwell sejam separáveis nas variáveis `x` e `y`.
-2. **Contraste de índice fraco:** A suposição de que os índices de refração do núcleo (`n1`) e do revestimento (`n2` a `n5`) são próximos (`(n1/n_v) - 1 << 1`) implica que os modos são bem guiados e quase-TEM.
+1. **Desprezar os campos nos cantos:** A análise considera apenas as regiões 1 a 5 da Fig. 3, ignorando as regiões hachuradas. Isso permite que as equações de Maxwell sejam separáveis nas variáveis $x$ e $y$.
+2. **Contraste de índice fraco:** A suposição de que os índices de refração do núcleo ($n_1$) e do revestimento ($n_2$ a $n_5$) são próximos ($(n_1/n_v) - 1 << 1$) implica que os modos são bem guiados e quase-TEM.
 
-Isso transforma um problema de valor de contorno 2D complexo em dois problemas 1D independentes, um para cada direção transversal (`x` e `y`).
+Isso transforma um problema de valor de contorno 2D complexo em dois problemas 1D independentes, um para cada direção transversal ($x$ e $y$).
 
 ## Do Guia Único ao Código
 
-O comportamento de um modo é governado por suas constantes de propagação: `kx` e `ky` (transversais) e `kz` (axial). Elas estão ligadas pela **relação de dispersão**. O desafio é encontrar `kx` e `ky`. O código implementa as duas abordagens descritas no artigo: a solução numérica das equações transcendentais (`exact`) e a aproximação em forma fechada (`closed_form`).
+O comportamento de um modo é governado por suas constantes de propagação: $k_x$ e $k_y$ (transversais) e $k_z$ (axial). Elas estão ligadas pela **relação de dispersão**. O desafio é encontrar $k_x$ e $k_y$. O código implementa as duas abordagens descritas no artigo: a solução numérica das equações transcendentais (`exact`) e a aproximação em forma fechada (`closed_form`).
 
 ### Relação de Dispersão (Eq. 3 e 17)
 
@@ -45,11 +45,7 @@ No código:
 
 Observação:
 
-- no acoplador, a Eq. (6) é reescrita em termos de
-  $$
-  u = \frac{k_x A_5}{\pi},
-  $$
-  porque a Eq. (34) é expressa naturalmente nessa variável.
+- no acoplador, a Eq. (6) é reescrita em termos de $u = \frac{k_x A_5}{\pi}$, porque a Eq. (34) é expressa naturalmente nessa variável.
 
 ## Eq. (8), Eq. (9) e Eq. (10)
 

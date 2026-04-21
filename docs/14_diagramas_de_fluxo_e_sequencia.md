@@ -19,36 +19,36 @@ Este diagrama mostra como as diferentes partes do projeto se interconectam.
 
 ```mermaid
 graph TD
-    subgraph User
-        A[Configuração JSON] --> B{Execução de Script};
+    subgraph user["User"]
+        A[Configuração JSON] --> B{Execução de Script}
     end
 
-    subgraph "Orquestração (scripts/run/)"
-        B -- 1. Compila --> C{CMake};
-        B -- 2. Executa --> D[Apps C++];
-        B -- 4. Executa --> G[Scripts Python];
+    subgraph orchestracao["Orquestração (scripts/run/)"]
+        B -- 1. Compila --> C{CMake}
+        B -- 2. Executa --> D[Apps C++]
+        B -- 4. Executa --> G[Scripts Python]
     end
 
-    subgraph "Código Fonte (src/, include/)"
-        D -- Chama --> E[Camada de Física];
-        E -- Usa --> F[Camada de Matemática];
+    subgraph codigo["Código Fonte (src/, include/)"]
+        D -- Chama --> E[Camada de Física]
+        E -- Usa --> F[Camada de Matemática]
     end
 
-    subgraph "Dados (data/)"
-        A --> D;
-        D -- 3. Escreve --> H[Resultados CSV/JSON];
-        H --> G;
+    subgraph dados["Dados (data/)"]
+        A --> D
+        D -- 3. Escreve --> H[Resultados CSV/JSON]
+        H --> G
     end
 
-    subgraph "Artefatos Finais"
-        G -- 5. Gera --> I[Gráficos PNG];
+    subgraph artefatos["Artefatos Finais"]
+        G -- 5. Gera --> I[Gráficos PNG]
     end
 
-    style User fill:#cde4ff
-    style "Orquestração (scripts/run/)" fill:#e1d5e7
-    style "Código Fonte (src/, include/)" fill:#d5e8d4
-    style "Dados (data/)" fill:#f8cecc
-    style "Artefatos Finais" fill:#fff2cc
+    style user fill:#cde4ff
+    style orchestracao fill:#e1d5e7
+    style codigo fill:#d5e8d4
+    style dados fill:#f8cecc
+    style artefatos fill:#fff2cc
 ```
 
 ## 2. `solve_single_guide`
