@@ -91,6 +91,20 @@ O método numérico usado hoje é bisseção em 1D, implementada em:
 
 Isso é robusto e suficiente para este estágio do projeto.
 
+### Análise Numérica do Solver `exact` (Para Alunos de CC)
+
+O coração do solver `exact` é um algoritmo de **busca de raízes**. O problema se resume a encontrar um valor `x` tal que `f(x) = 0`, onde `f(x)` é uma equação transcendental (como `tan(x) - x/k = 0`).
+
+O método escolhido aqui, a **bisseção**, é um exemplo clássico de algoritmo de "dividir para conquistar".
+
+- **Como funciona:** Dado um intervalo `[a, b]` onde a função `f` troca de sinal (ou seja, `f(a) * f(b) < 0`), o método calcula o ponto médio `m = (a+b)/2`. O novo intervalo será `[a, m]` ou `[m, b]`, dependendo de onde a troca de sinal ocorre. O processo se repete até que o intervalo seja menor que uma tolerância desejada.
+- **Por que Bisseção?** A principal vantagem da bisseção é sua **robustez**. A convergência é **garantida** se a raiz estiver corretamente "bracketed" (cercada) no intervalo inicial. Sua taxa de convergência é linear (o erro é reduzido por um fator de 2 a cada iteração), o que é mais lento que outros métodos.
+- **Alternativas:**
+- **Método de Newton-Raphson:** Converge muito mais rápido (quadraticamente), mas exige o cálculo da derivada da função e pode divergir se o chute inicial não for bom. É "rápido, mas frágil".
+- **Método da Secante:** Similar a Newton, mas aproxima a derivada. Também é mais rápido que a bisseção, mas não tem a mesma garantia de convergência.
+
+A escolha pela bisseção neste projeto é uma decisão de engenharia inteligente: para um problema onde as funções são bem-comportadas (monotônicas nos intervalos de busca), a **garantia de convergência (robustez)** é mais valiosa do que a **velocidade pura**.
+
 ## Comparação direta
 
 | solver | equações associadas | hipótese principal | custo computacional | uso no repositório | limitação |
@@ -161,10 +175,9 @@ Se a pergunta for “qual solver usar para estudar a estrutura do artigo?”, a 
 - [12_trilha_equacoes_para_codigo.md](12_trilha_equacoes_para_codigo.md)
 - [13_validacao_e_limites_do_modelo.md](13_validacao_e_limites_do_modelo.md)
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](10_fluxo_geral_do_repositorio.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](12_trilha_equacoes_para_codigo.md)
+**Navegação:** [Anterior](10_fluxo_geral_do_repositorio.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](12_trilha_equacoes_para_codigo.md)
 
 <!-- NAV END -->

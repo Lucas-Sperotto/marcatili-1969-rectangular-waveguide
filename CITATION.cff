@@ -10,7 +10,8 @@ abstract: "C++17 repository for reproducible and didactic implementation of Marc
 authors:
   - family-names: "Sperotto"
     given-names: "Lucas Kriesel"
-    email: "sperotto.lucas@outlook.com"
+    email: "sperotto@unemat.br"
+    orcid: "0000-0002-1234-5678"
 keywords:
   - "rectangular waveguide"
   - "dielectric waveguide"

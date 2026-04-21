@@ -8,15 +8,14 @@ As figuras são o coração da validação deste projeto. Este guia explica o qu
 
 Como a constante de propagação axial (`kz`) de diferentes modos varia com a dimensão do guia.
 
--   **Eixo Horizontal (`b/A₄`):** É a altura do guia (`b`) normalizada por uma escala (`A₄`) que depende do contraste de índice com o substrato. Varrer este eixo é como "engordar" ou "afinar" o guia.
--   **Eixo Vertical (Ordenada Normalizada):** É uma medida de quão bem o modo está confinado.
-    -   `1.0`: Confinamento perfeito (toda a energia no núcleo, `kz = k₁`).
-    -   `0.0`: Limite do corte (o modo está prestes a "vazar", `kz = k₄`).
--   **As Curvas:** Cada curva representa um modo específico (e.g., $E^y_{11}$).
-    -   **Linhas contínuas:** Solver `exact`.
-    -   **Linhas tracejadas:** Solver `closed_form`.
-
--   **O que observar:** A divergência entre as linhas contínuas e tracejadas mostra onde a aproximação de "modo bem guiado" começa a falhar (geralmente perto do corte, na parte de baixo do gráfico).
+- **Eixo Horizontal (`b/A₄`):** É a altura do guia (`b`) normalizada por uma escala (`A₄`) que depende do contraste de índice com o substrato. Varrer este eixo é como "engordar" ou "afinar" o guia.
+- **Eixo Vertical (Ordenada Normalizada):** É uma medida de quão bem o modo está confinado.
+- `1.0`: Confinamento perfeito (toda a energia no núcleo, `kz = k₁`).
+- `0.0`: Limite do corte (o modo está prestes a "vazar", `kz = k₄`).
+- **As Curvas:** Cada curva representa um modo específico (e.g., $E^y_{11}$).
+- **Linhas contínuas:** Solver `exact`.
+- **Linhas tracejadas:** Solver `closed_form`.
+- **O que observar:** A divergência entre as linhas contínuas e tracejadas mostra onde a aproximação de "modo bem guiado" começa a falhar (geralmente perto do corte, na parte de baixo do gráfico).
 
 ### Equações relevantes
 
@@ -64,11 +63,11 @@ Os painéis `6h`, `6i`, `6j` e `6k` já mostram comportamento plausível e compa
 
 Uma ferramenta gráfica para projetar um guia monomodo.
 
--   **Eixos (`X` e `Y`):** São variáveis complexas que combinam geometria e propriedades dos materiais.
--   **As Curvas:**
-    -   **Linhas retas contínuas:** Representam as condições de corte para cada modo superior (e.g., $E^y_{12}$, $E^y_{21}$).
-    -   **Linha pontilhada:** Representa uma família de guias com uma razão de aspecto e materiais específicos.
--   **Como usar:** Para garantir operação monomodo, o ponto de projeto do seu guia (um ponto no plano X-Y) deve estar dentro do triângulo formado pelas linhas dos primeiros modos superiores e os eixos.
+- **Eixos (`X` e `Y`):** São variáveis complexas que combinam geometria e propriedades dos materiais.
+- **As Curvas:**
+- **Linhas retas contínuas:** Representam as condições de corte para cada modo superior (e.g., $E^y_{12}$, $E^y_{21}$).
+- **Linha pontilhada:** Representa uma família de guias com uma razão de aspecto e materiais específicos.
+- **Como usar:** Para garantir operação monomodo, o ponto de projeto do seu guia (um ponto no plano X-Y) deve estar dentro do triângulo formado pelas linhas dos primeiros modos superiores e os eixos.
 
 ### Equações relevantes
 
@@ -109,7 +108,7 @@ O comportamento geométrico do nomograma está consistente e o caso destacado co
 
 As curvas de dispersão para um guia que tem uma de suas faces coberta por metal.
 
--   **O que observar:** A presença do metal quebra a simetria e altera drasticamente quais modos podem se propagar. O artigo sugere que isso pode ser usado para forçar a operação em um único modo e polarização ($E^y_{11}$).
+- **O que observar:** A presença do metal quebra a simetria e altera drasticamente quais modos podem se propagar. O artigo sugere que isso pode ser usado para forçar a operação em um único modo e polarização ($E^y_{11}$).
 
 ### Equações relevantes
 
@@ -151,10 +150,10 @@ As curvas de dispersão para um guia que tem uma de suas faces coberta por metal
 
 Quão forte é o acoplamento entre dois guias paralelos para o modo rotulado como $E^x_{11}$ na Seção IV.
 
--   **Eixo Horizontal (`c/a`):** A separação entre os guias (`c`) normalizada pela largura (`a`).
--   **Eixo Vertical (Acoplamento Normalizado):** Uma medida da força da interação. Um valor maior significa acoplamento mais forte (transferência de potência mais rápida).
--   **As Curvas:** Cada curva representa uma "família" de guias com uma geometria transversal específica (parâmetro `a/A₅`).
--   **O que observar:** O acoplamento cai *exponencialmente* com a separação, pois depende do campo evanescente.
+- **Eixo Horizontal (`c/a`):** A separação entre os guias (`c`) normalizada pela largura (`a`).
+- **Eixo Vertical (Acoplamento Normalizado):** Uma medida da força da interação. Um valor maior significa acoplamento mais forte (transferência de potência mais rápida).
+- **As Curvas:** Cada curva representa uma "família" de guias com uma geometria transversal específica (parâmetro `a/A₅`).
+- **O que observar:** O acoplamento cai *exponencialmente* com a separação, pois depende do campo evanescente.
 
 ### Equações relevantes
 
@@ -198,8 +197,8 @@ Quão forte é o acoplamento entre dois guias paralelos para o modo rotulado com
 
 O mesmo tipo de curva da Fig. 10, agora para o modo rotulado como $E^y_{11}$ na Seção IV.
 
--   **Diferença para a Fig. 10:** o caso-base do repositório segue explicitamente a instrução textual da Seção IV e usa a raiz transversal de Eq. (20) para `kx`.
--   **O que observar:** Para $n_1/n_5$ próximo de 1, os modos $E^x_{11}$ e $E^y_{11}$ se aproximam da degenerescência, e as curvas da Fig. 11 se aproximam das da Fig. 10.
+- **Diferença para a Fig. 10:** o caso-base do repositório segue explicitamente a instrução textual da Seção IV e usa a raiz transversal de Eq. (20) para `kx`.
+- **O que observar:** Para $n_1/n_5$ próximo de 1, os modos $E^x_{11}$ e $E^y_{11}$ se aproximam da degenerescência, e as curvas da Fig. 11 se aproximam das da Fig. 10.
 
 ### Equações relevantes
 
@@ -246,7 +245,7 @@ O caso-base captura bem:
 
 As maiores dimensões que um guia pode ter para suportar *apenas* os modos fundamentais ($E^x_{11}$ e $E^y_{11}$).
 
--   **Como ler:** Para uma dada geometria (`a=b`, `a=2b`, etc.) e contraste de índice (`n₁/n₄`), a tabela fornece um número. Esse número, multiplicado por `λ/n₁`, dá a dimensão física limite.
+- **Como ler:** Para uma dada geometria (`a=b`, `a=2b`, etc.) e contraste de índice (`n₁/n₄`), a tabela fornece um número. Esse número, multiplicado por `λ/n₁`, dá a dimensão física limite.
 
 ### Equações relevantes
 
@@ -300,10 +299,9 @@ Se a priorização for por acabamento editorial, a ordem muda para:
 5. Fig. 8
 6. Tabela I
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](20_auditoria_tecnica_do_modelo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](22_matriz_artigo_para_codigo.md)
+**Navegação:** [Anterior](20_auditoria_tecnica_do_modelo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](22_matriz_artigo_para_codigo.md)
 
 <!-- NAV END -->

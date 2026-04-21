@@ -32,9 +32,9 @@ $$
 \frac{2a}{\lambda}\left(n_1^2-n_5^2\right)^{1/2}\ge 1.
 $$
 
-**Observacao de reproducao do repositorio:** a implementacao atual da Fig. 10 segue exatamente essa referencia textual, isto e, usa Eq. (34) combinada com Eq. (6) no caso exato e Eq. (12) no caso aproximado. O texto e a notacao modal ainda merecem revisao de OCR, porque a figura e descrita como pertencente ao modo $E^{x}_{11}$, enquanto as equacoes citadas nessa frase pertencem a familia tratada na Secao III como $E^y$.
+**Observação de reprodução do repositório:** a implementação atual da Fig. 10 segue exatamente essa referência textual, isto é, usa a Eq. (34) combinada com a Eq. (6) no caso exato e a Eq. (12) no caso aproximado. O texto e a notação modal ainda merecem revisão de OCR, porque a figura é descrita como pertencente ao modo $E^{x}_{11}$, enquanto as equações citadas nessa frase pertencem à família tratada na Seção III como $E^y$.
 
-**Estado atual da API:** `solve_coupler` continua reportando a forma normalizada de Eq. (34) como saida central, mas agora tambem pode reconstruir $A_5$, $a$, $c$, $|K|$ e $L$ quando `wavelength`, `n1` e `n5` sao fornecidos no caso de entrada. Essa dimensionalizacao segue o mesmo modelo reduzido usado nas Figs. 10 e 11.
+**Estado atual da API:** `solve_coupler` continua reportando a forma normalizada da Eq. (34) como saída central, mas agora também pode reconstruir $A_5$, $a$, $c$, $|K|$ e $L$ quando `wavelength`, `n1` e `n5` são fornecidos no caso de entrada. Essa dimensionalização segue o mesmo modelo reduzido usado nas Figs. 10 e 11.
 
 ![Figura 10 — Coeficiente de acoplamento para modos (E^{x}_{1q}).](img/fig_10.png)
 
@@ -44,7 +44,7 @@ As linhas traço-ponto são os acoplamentos obtidos por A. L. Jones para dois ci
 
 A equação de acoplamento normalizado (34) para o modo $E^{y}_{11}$ foi representada na Fig. 11, usando para $\mathbf{k}_x$ a solução exata da equação (20). Para $n_1/n_5$ próximo da unidade, as curvas aproximam-se das curvas contínuas da Fig. 10, à medida que os modos $E^{x}_{11}$ e $E^{y}_{11}$ se aproximam da degenerescência. A influência da altura $b$ dos guias, dos índices de refração $n_2$ e $n_4$, e do valor de $q$ no acoplamento de qualquer um dos modos não é importante, pois esses parâmetros afetam apenas $k_z$.
 
-**Observacao de reproducao do repositorio:** a implementacao atual da Fig. 11 segue exatamente essa frase, isto e, usa Eq. (34) combinada com a raiz exata da Eq. (20). O caso-base mantem as duas familias de legenda do scan, com linhas continuas para $n_1/n_5=1.5$ e linhas traco-ponto para $n_1/n_5=1.1$, e rotula cada curva pelo parametro $a/A_5 = \frac{2a}{\lambda}\left(n_1^2-n_5^2\right)^{1/2}$.
+**Observação de reprodução do repositório:** a implementação atual da Fig. 11 segue exatamente essa frase, isto é, usa a Eq. (34) combinada com a raiz exata da Eq. (20). O caso-base mantém as duas famílias de legenda do scan, com linhas contínuas para $n_1/n_5=1.5$ e linhas traço-ponto para $n_1/n_5=1.1$, e rotula cada curva pelo parâmetro $a/A_5 = \frac{2a}{\lambda}\left(n_1^2-n_5^2\right)^{1/2}$.
 
 ![Figura 11 — Coeficiente de acoplamento para modos E^y_{1q}.](img/fig_11.png)
 
@@ -166,10 +166,9 @@ Do ponto de vista computacional, esta é uma seção excelente para reprodução
 
 A parte final é particularmente interessante para aplicações em modulação e chaveamento óptico, pois mostra que pequenas variações do índice de refração entre os guias podem alterar significativamente a transferência de potência.
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](03.3_exemplos.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](05_Acoplador direcional construído com guias ligeiramente diferentes.md)
+**Navegação:** [Anterior](03.3_exemplos.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](05_Acoplador%20direcional%20constru%C3%ADdo%20com%20guias%20ligeiramente%20diferentes.md)
 
 <!-- NAV END -->

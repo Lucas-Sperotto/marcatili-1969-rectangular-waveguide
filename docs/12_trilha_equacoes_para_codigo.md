@@ -6,8 +6,8 @@ Um dos princípios fundamentais deste repositório é a **rastreabilidade** entr
 
 O problema de um guia dielétrico retangular é complexo. A genialidade de Marcatili foi simplificá-lo com duas aproximações principais:
 
-1.  **Desprezar os campos nos cantos:** A análise considera apenas as regiões 1 a 5 da Fig. 3, ignorando as regiões hachuradas. Isso permite que as equações de Maxwell sejam separáveis nas variáveis `x` e `y`.
-2.  **Contraste de índice fraco:** A suposição de que os índices de refração do núcleo (`n1`) e do revestimento (`n2` a `n5`) são próximos (`(n1/n_v) - 1 << 1`) implica que os modos são bem guiados e quase-TEM.
+1. **Desprezar os campos nos cantos:** A análise considera apenas as regiões 1 a 5 da Fig. 3, ignorando as regiões hachuradas. Isso permite que as equações de Maxwell sejam separáveis nas variáveis `x` e `y`.
+2. **Contraste de índice fraco:** A suposição de que os índices de refração do núcleo (`n1`) e do revestimento (`n2` a `n5`) são próximos (`(n1/n_v) - 1 << 1`) implica que os modos são bem guiados e quase-TEM.
 
 Isso transforma um problema de valor de contorno 2D complexo em dois problemas 1D independentes, um para cada direção transversal (`x` e `y`).
 
@@ -234,10 +234,9 @@ Se você quiser localizar rapidamente uma equação no código:
 - [13_validacao_e_limites_do_modelo.md](13_validacao_e_limites_do_modelo.md)
 - [07_apendice_A.md](07_apendice_A.md)
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](11_closed_form_vs_exact.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](13_validacao_e_limites_do_modelo.md)
+**Navegação:** [Anterior](11_closed_form_vs_exact.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](13_validacao_e_limites_do_modelo.md)
 
 <!-- NAV END -->

@@ -4,6 +4,8 @@
 
 data/output/*.csv
 data/output/*.json
+data/output/fig6/*.csv
+data/output/fig6/*.json
 
 /.codex
 

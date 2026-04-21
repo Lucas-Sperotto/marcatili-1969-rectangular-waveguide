@@ -28,10 +28,9 @@
 
 ---
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](07_apendice_A.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](refs/README.md)
+**Navegação:** [Anterior](07_apendice_A.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](refs/README.md)
 
 <!-- NAV END -->

@@ -56,10 +56,9 @@ A matriz mostra um padrão claro:
 - o acoplador está funcional em sua forma normalizada e já expõe uma camada dimensional do mesmo modelo reduzido;
 - o maior débito restante está no acabamento científico e no fechamento das ambiguidades abertas, não na ausência completa de implementação.
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](21_validacao_figura_por_figura.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](23_riscos_tecnicos_e_pendencias.md)
+**Navegação:** [Anterior](21_validacao_figura_por_figura.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | Próximo
 
 <!-- NAV END -->

@@ -29,10 +29,9 @@ Por fim, determinamos o acoplamento entre hastes guias paralelas de tamanhos e d
   - relação deste resumo com a formulação desenvolvida nas seções seguintes;
   - notas sobre a aproximação empregada por Marcatili.
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** Anterior | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](00.1_figuras.md)
+**Navegação:** Anterior | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](00.1_figuras.md)
 
 <!-- NAV END -->

@@ -18,6 +18,6 @@ Figura 4 — Guia imerso em diferentes dielétricos: (a) seção transversal e (
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](02_symbol_dictionary.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](03.1_modos_Ey.md)
+**Navegação:** [Anterior](02_symbol_dictionary.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](03.1_modos_Ey.md)
 
 <!-- NAV END -->

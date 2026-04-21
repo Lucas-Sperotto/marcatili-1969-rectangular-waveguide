@@ -165,7 +165,7 @@ Se uma reprodução parecer errada, a ordem recomendada de inspeção é:
 
 ## Perguntas Frequentes sobre o Modelo
 
-#### P: O que exatamente significa o solver `exact` neste projeto?
+### P: O que exatamente significa o solver `exact` neste projeto?
 
 **R:** `exact` significa que estamos resolvendo **numericamente as equações transcendentais do modelo simplificado de Marcatili** (e.g., Eq. 6 e 7). Ele é "exato" *dentro desse modelo*. Ele **não** é uma solução rigorosa das equações de Maxwell para a geometria 2D completa, pois ainda se baseia na aproximação de Marcatili de ignorar os campos nos cantos do guia.
 
@@ -173,39 +173,41 @@ Se uma reprodução parecer errada, a ordem recomendada de inspeção é:
 
 ---
 
-#### P: Por que o solver `closed_form` diverge do `exact` perto do corte (cutoff)?
+### P: Por que o solver `closed_form` diverge do `exact` perto do corte (cutoff)?
 
 **R:** O solver `closed_form` (forma fechada) é derivado sob a aproximação de "modo bem guiado". Matematicamente, isso permite usar `tan⁻¹(z) ≈ z`, que só é válido para `z` pequeno. Perto do corte, o modo está fracamente confinado, o campo evanescente se espalha muito, e o argumento `z` da função `tan⁻¹` não é mais pequeno. A aproximação falha, e as fórmulas algébricas perdem a precisão.
 
 ---
 
-#### P: Por que a Fig. 10 usa a Eq. (6) e a Fig. 11 usa a Eq. (20) para o cálculo de `kx`?
+### P: Por que a Fig. 10 usa a Eq. (6) e a Fig. 11 usa a Eq. (20) para o cálculo de `kx`?
 
 **R:** Porque elas se referem a famílias de modos diferentes, que têm polarizações e condições de contorno distintas.
--   A **Fig. 10** analisa o acoplamento para modos da família $E^x_{pq}$ (no texto, embora a implementação siga a referência à Eq. 6, que é da família $E^y_{pq}$ para a direção x - uma ambiguidade histórica do artigo).
--   A **Fig. 11** analisa o acoplamento para modos da família $E^y_{pq}$ (no texto, embora a implementação use a Eq. 20, que é da família $E^x_{pq}$ para a direção x).
+
+- A **Fig. 10** analisa o acoplamento para modos da família $E^x_{pq}$ (no texto, embora a implementação siga a referência à Eq. 6, que é da família $E^y_{pq}$ para a direção x - uma ambiguidade histórica do artigo).
+- A **Fig. 11** analisa o acoplamento para modos da família $E^y_{pq}$ (no texto, embora a implementação use a Eq. 20, que é da família $E^x_{pq}$ para a direção x).
 
 A implementação atual segue a interpretação mais consistente com a estrutura do artigo, onde as equações para `kx` e `ky` trocam de forma dependendo da polarização dominante. A aparente troca de equações nas figuras é uma das ambiguidades documentadas do artigo original.
 
 ---
 
-#### P: A Tabela I está comparando a largura `a` ou a altura `b`?
+### P: A Tabela I está comparando a largura `a` ou a altura `b`?
 
 **R:** Esta é uma excelente pergunta e um ponto de interpretação em aberto. A hipótese de trabalho atual no repositório é que o valor tabelado (multiplicado por `λ/n₁`) corresponde à **largura `a`**. Essa hipótese é baseada em exemplos numéricos e na consistência com outras partes do artigo. No entanto, isso não é uma certeza absoluta e está marcado como um ponto que requer validação final.
 
 ---
 
-#### P: O repositório resolve o problema vetorial completo sem aproximações?
+### P: O repositório resolve o problema vetorial completo sem aproximações?
 
 **R:** **Não.** Todo o repositório se baseia no **modelo aproximado de Marcatili**. A principal simplificação é desprezar a energia que se propaga nas regiões de canto do guia (as áreas hachuradas na Fig. 3 do artigo). Isso permite que o problema seja separado em duas direções (x e y), o que o torna analiticamente tratável. Uma solução "completa" exigiria métodos numéricos mais complexos, como Elementos Finitos (FEM) ou Diferenças Finitas (FDM), que estão fora do escopo deste projeto.
 
 ---
 
-#### P: Por que existem casos para `slab` (lâmina) e `metal`?
+### P: Por que existem casos para `slab` (lâmina) e `metal`?
 
 **R:** Eles representam casos especiais ou limites importantes discutidos no próprio artigo.
--   **`slab`:** Corresponde ao limite de um guia de onda de lâmina (planar), que ocorre quando uma das dimensões transversais (e.g., `a`) se torna muito grande (`a → ∞`). É usado para reproduzir os painéis (d) e (k) da Fig. 6.
--   **`metal`:** Corresponde ao caso da Fig. 8, onde uma das interfaces do guia é substituída por uma parede metálica (ou de baixa impedância). O artigo explora isso como uma forma de remover a degenerescência de polarização e forçar a operação em um único modo.
+
+- **`slab`:** Corresponde ao limite de um guia de onda de lâmina (planar), que ocorre quando uma das dimensões transversais (e.g., `a`) se torna muito grande (`a → ∞`). É usado para reproduzir os painéis (d) e (k) da Fig. 6.
+- **`metal`:** Corresponde ao caso da Fig. 8, onde uma das interfaces do guia é substituída por uma parede metálica (ou de baixa impedância). O artigo explora isso como uma forma de remover a degenerescência de polarização e forçar a operação em um único modo.
 
 ## Mensagem principal
 
@@ -213,10 +215,9 @@ O repositório já está forte o bastante para estudo, reprodução e evolução
 
 Isso é uma qualidade científica do projeto, não uma fraqueza.
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](12_trilha_equacoes_para_codigo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](14_diagramas_de_fluxo_e_sequencia.md)
+**Navegação:** [Anterior](12_trilha_equacoes_para_codigo.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](14_diagramas_de_fluxo_e_sequencia.md)
 
 <!-- NAV END -->

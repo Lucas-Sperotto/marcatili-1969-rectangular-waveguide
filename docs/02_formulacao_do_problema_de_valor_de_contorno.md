@@ -35,6 +35,6 @@ Outro ponto importante é a interpretação modal. Embora os modos sejam rigoros
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](01_introduction.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](02_symbol_dictionary.md)
+**Navegação:** [Anterior](01_introduction.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](02_symbol_dictionary.md)
 
 <!-- NAV END -->

@@ -38,10 +38,9 @@ Este checklist formaliza os passos minimos para reproduzir os artefatos numerico
 - Referencias externas (Goell/Jones) ainda sem digitalizacao completa para comparacao numerica automatica.
 - A cobertura automatica ja inclui smoke tests e regressao quantitativa, mas ainda falta uma camada final de aceitacao editorial/fac-simile.
 
-
 <!-- NAV START -->
 ---
 
-**Navegação:** [Anterior](refs/README.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Riscos](23_riscos_tecnicos_e_pendencias.md) | [Próximo](10_fluxo_geral_do_repositorio.md)
+**Navegação:** [Anterior](refs/README.md) | [Índice](00_resumo.md) | [Checklist](09_checklist_reproducao.md) | [Roteiro](15_roteiro_de_estudo.md) | [Próximo](10_fluxo_geral_do_repositorio.md)
 
 <!-- NAV END -->
