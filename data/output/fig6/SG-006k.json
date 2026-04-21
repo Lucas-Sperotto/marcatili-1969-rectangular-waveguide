@@ -104,7 +104,7 @@
       "p": 1,
       "q": 1,
       "total_points": 160,
-      "valid_points": 142,
+      "valid_points": 160,
       "guided_points": 142
     },
     {
@@ -115,7 +115,7 @@
       "p": 1,
       "q": 1,
       "total_points": 160,
-      "valid_points": 144,
+      "valid_points": 160,
       "guided_points": 144
     },
     {
@@ -126,7 +126,7 @@
       "p": 1,
       "q": 2,
       "total_points": 160,
-      "valid_points": 102,
+      "valid_points": 160,
       "guided_points": 102
     },
     {
@@ -137,7 +137,7 @@
       "p": 1,
       "q": 2,
       "total_points": 160,
-      "valid_points": 104,
+      "valid_points": 160,
       "guided_points": 104
     },
     {
@@ -148,7 +148,7 @@
       "p": 1,
       "q": 3,
       "total_points": 160,
-      "valid_points": 62,
+      "valid_points": 160,
       "guided_points": 62
     },
     {
@@ -159,7 +159,7 @@
       "p": 1,
       "q": 3,
       "total_points": 160,
-      "valid_points": 63,
+      "valid_points": 160,
       "guided_points": 63
     }
   ]

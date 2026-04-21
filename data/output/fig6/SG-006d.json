@@ -147,7 +147,7 @@
       "p": 1,
       "q": 2,
       "total_points": 160,
-      "valid_points": 121,
+      "valid_points": 160,
       "guided_points": 121
     },
     {
@@ -158,7 +158,7 @@
       "p": 1,
       "q": 2,
       "total_points": 160,
-      "valid_points": 121,
+      "valid_points": 160,
       "guided_points": 121
     },
     {
@@ -169,7 +169,7 @@
       "p": 1,
       "q": 3,
       "total_points": 160,
-      "valid_points": 81,
+      "valid_points": 160,
       "guided_points": 81
     },
     {
@@ -180,7 +180,7 @@
       "p": 1,
       "q": 3,
       "total_points": 160,
-      "valid_points": 81,
+      "valid_points": 160,
       "guided_points": 81
     },
     {
@@ -279,7 +279,7 @@
       "p": 1,
       "q": 2,
       "total_points": 160,
-      "valid_points": 121,
+      "valid_points": 160,
       "guided_points": 121
     },
     {
@@ -290,7 +290,7 @@
       "p": 1,
       "q": 2,
       "total_points": 160,
-      "valid_points": 121,
+      "valid_points": 160,
       "guided_points": 121
     },
     {
@@ -301,7 +301,7 @@
       "p": 1,
       "q": 3,
       "total_points": 160,
-      "valid_points": 81,
+      "valid_points": 160,
       "guided_points": 81
     },
     {
@@ -312,7 +312,7 @@
       "p": 1,
       "q": 3,
       "total_points": 160,
-      "valid_points": 81,
+      "valid_points": 160,
       "guided_points": 81
     },
     {
@@ -411,7 +411,7 @@
       "p": 1,
       "q": 2,
       "total_points": 160,
-      "valid_points": 121,
+      "valid_points": 160,
       "guided_points": 121
     },
     {
@@ -422,7 +422,7 @@
       "p": 1,
       "q": 2,
       "total_points": 160,
-      "valid_points": 121,
+      "valid_points": 160,
       "guided_points": 121
     },
     {
@@ -433,7 +433,7 @@
       "p": 1,
       "q": 3,
       "total_points": 160,
-      "valid_points": 81,
+      "valid_points": 160,
       "guided_points": 81
     },
     {
@@ -444,7 +444,7 @@
       "p": 1,
       "q": 3,
       "total_points": 160,
-      "valid_points": 81,
+      "valid_points": 160,
       "guided_points": 81
     }
   ]
