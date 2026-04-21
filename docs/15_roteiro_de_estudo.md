@@ -10,11 +10,9 @@ A documentação deste projeto é organizada em uma trilha principal, com numera
 - **`docs/10-*`:** Documentos de arquitetura e fluxo, explicando *como* o repositório está organizado e *como* o código implementa a física.
 - **`docs/20-*`:** Documentos de auditoria e validação, detalhando o status atual da reprodução, os riscos e as pendências.
 
-## Ordem de Leitura Sugerida para Iniciantes
+## Ordem de Leitura Sugerida
 
-### Guia para Alunos de Ciência da Computação
-
-Se você vem da área de computação, não se assuste com a física! Este projeto é um prato cheio de conceitos de engenharia de software e algoritmos aplicados a um problema real.
+Se você vem da área da computação, não se assuste com a física! Este projeto é um prato cheio de conceitos de engenharia de software e algoritmos aplicados a um problema real.
 
 **Seu foco inicial deve ser:**
 

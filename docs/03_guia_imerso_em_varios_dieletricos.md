@@ -14,7 +14,6 @@ Ele suporta um número discreto de modos guiados, que agrupamos em duas família
 
 Figura 4 — Guia imerso em diferentes dielétricos: (a) seção transversal e (b) distribuição de campo do modo fundamental (E^{y}_{11}).
 
-
 <!-- NAV START -->
 ---
 

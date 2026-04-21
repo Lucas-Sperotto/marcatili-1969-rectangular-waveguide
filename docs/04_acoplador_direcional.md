@@ -23,7 +23,7 @@ O coeficiente de acoplamento normalizado
 ## (34)
 
 $$
-\frac{|K|\,a} {\left[1-\left(\frac{n_5}{n_1}\right)^2\right]^{1/2}k_z} = \frac{\pi a} {2L\left[1-\left(\frac{n_5}{n_1}\right)^2\right]^{1/2}k_z} = 2\left(\frac{k_xA_5}{\pi}\right)^2 \left[ 1-\left(\frac{k_xA_5}{\pi}\right)^2 \right]^{1/2} \exp\left\{ -\pi\frac{c}{A_5} \left[ 1-\left(\frac{k_xA_5}{\pi}\right)^2 \right]^{1/2} \right\}.
+\frac{|K|a} {\left[1-\left(\frac{n_5}{n_1}\right)^2\right]^{1/2}k_z} = \frac{\pi a} {2L\left[1-\left(\frac{n_5}{n_1}\right)^2\right]^{1/2}k_z} = 2\left(\frac{k_xA_5}{\pi}\right)^2 \left[ 1-\left(\frac{k_xA_5}{\pi}\right)^2 \right]^{1/2} \exp\left(-\pi\frac{c}{A_5} \left[ 1-\left(\frac{k_xA_5}{\pi}\right)^2 \right]^{1/2}\right).
 $$
 
 A equação de acoplamento normalizado acima é obtida a partir da equação (33), substituindo-se $\xi_5$ por seu valor dado na equação (8). Ela foi representada na Fig. 10 para o modo $E^{x}_{11}$, assumindo $n_3=n_5$ e $n_1/n_5$ arbitrário. As linhas contínuas e pontilhadas foram obtidas usando, respectivamente, a solução exata da equação (6) e a expressão aproximada (12) para $k_x$. Ambos os conjuntos de curvas são muito próximos entre si, especialmente para
@@ -113,7 +113,7 @@ Para os modos $E^{x}_{11}$ e $E^{y}_{11}$, assumindo modos bem guiados $(k_xA_5/
 ## (36)
 
 $$
-\frac{K_1}{K_2} = \frac{L_2}{L_1} = \exp\left\{ -\pi \left(\frac{n_1^2}{n_5^2}-1\right)^{-1} \frac{c\delta}{A_5} \left[ 1-\left(\frac{2}{\pi}+\frac{a}{A_5}\right)^{-2} \right]^{1/2} \right\}.
+\frac{K_1}{K_2} = \frac{L_2}{L_1} = \exp\left(-\pi \left(\frac{n_1^2}{n_5^2}-1\right)^{-1} \frac{c\delta}{A_5} \left[ 1-\left(\frac{2}{\pi}+\frac{a}{A_5}\right)^{-2} \right]^{1/2} \right).
 $$
 
 Essa razão é igual a $1/2$ se

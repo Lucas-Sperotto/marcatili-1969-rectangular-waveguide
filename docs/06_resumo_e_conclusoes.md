@@ -45,7 +45,7 @@ Os guias dielétricos e os acopladores direcionais descritos mostram grande pote
 - Nesta conclusão, Marcatili retoma os pontos centrais do artigo: modos híbridos, curvas de dispersão, condição monomodo, quase degenerescência dos modos fundamentais e aplicação em acopladores direcionais.
 - O termo **single mode** foi traduzido como **monomodo**.
 
-## Comentário complementar
+## Comentários
 
 Esta conclusão consolida muito bem o valor do artigo. O principal mérito de Marcatili está em mostrar que uma estrutura relativamente simples, uma haste dielétrica retangular cercada por meios de menor índice, pode ser analisada de forma aproximada, mas ainda assim útil para projeto. A teoria não pretende substituir uma solução rigorosa em todos os regimes, mas oferece fórmulas, curvas e critérios de dimensionamento bastante práticos.
 

@@ -21,7 +21,7 @@ Esse raciocínio aplica-se a guias com larguras, alturas e índices de refraçã
 - O termo **stationary** foi traduzido como **estacionário**, no sentido matemático de derivada primeira nula.
 - A ideia central é que pequenas assimetrias entre os guias não alteram o acoplamento na primeira ordem, desde que a diferença entre eles permaneça pequena.
 
-## Comentário complementar
+## Comentários
 
 Esta seção introduz uma observação importante para projeto: pequenas diferenças geométricas entre dois guias acoplados não afetam imediatamente o coeficiente de acoplamento na primeira ordem. Em outras palavras, perto da configuração simétrica, o acoplamento varia de forma suave, e o caso assimétrico pode ser aproximado pelo caso simétrico correspondente à média geométrica das dimensões.
 

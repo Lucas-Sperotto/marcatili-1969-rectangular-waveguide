@@ -30,7 +30,7 @@ As propriedades de guiamento do guia de seção transversal retangular imerso em
   2. a análise do acoplador direcional formado por dois guias próximos.
 - A introdução também deixa claro que a formulação adotada no artigo é **aproximada, porém analítica**, e que os resultados serão comparados com soluções computacionais disponíveis à época.
 
-## Comentário técnico complementar
+## Comentários
 
 A motivação física principal é muito importante: ao escolher um contraste de índices pequeno, o confinamento continua ocorrendo, mas as dimensões transversais do guia podem ser maiores em relação ao comprimento de onda. Isso torna a fabricação menos crítica e ajuda a viabilizar estruturas para óptica integrada. Em outras palavras, Marcatili busca uma geometria simples, mecanicamente estável e com potencial de operação monomodo, sem exigir dimensões excessivamente pequenas.
 
