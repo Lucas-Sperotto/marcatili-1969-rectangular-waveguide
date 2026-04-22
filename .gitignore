@@ -1,7 +1,7 @@
 /build/
 /cmake-build-*/
 /compile_commands.json
-
+/docs/refs/
 /.codex
 
 __pycache__/
