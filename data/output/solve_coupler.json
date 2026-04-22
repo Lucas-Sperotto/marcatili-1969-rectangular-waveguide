@@ -1,0 +1,47 @@
+{
+  "app": "solve_coupler",
+  "status": "ok",
+  "status_class": "solution",
+  "model": "exact",
+  "transverse_equation": "eq6",
+  "equations_used": "(6), (8), (33), (34)",
+  "input_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/input/solve_coupler.json",
+  "output_json_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/solve_coupler.json",
+  "output_csv_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/solve_coupler.csv",
+  "case_id": "CP-POINT-010-BASE",
+  "article_target": "Directional coupler point from Eq. (34), using Eq. (6) for the transverse root in the symmetric n3 = n5 baseline.",
+  "domain_valid": true,
+  "transverse_root_found": true,
+  "dimensional_outputs_available": true,
+  "normalized_inputs": {
+    "p": 1,
+    "a_over_A5": 1.6000000000000001,
+    "c_over_a": 2.5,
+    "index_ratio_squared": 0.44444444444444442
+  },
+  "normalized_outputs": {
+    "a_over_A5": 1.6000000000000001,
+    "c_over_A5": 4,
+    "kx_A5_over_pi": 0.44257936740689396,
+    "sqrt_one_minus_kx_A5_over_pi_squared": 0.89672933683788536,
+    "normalized_coupling": 4.4850623954654968e-06
+  },
+  "dimensional_inputs": {
+    "wavelength": 9.9999999999999995e-07,
+    "n1": 1.8,
+    "n5": 1.5
+  },
+  "dimensional_outputs": {
+    "A5": 5.0251890762960598e-07,
+    "a": 8.0403025220736965e-07,
+    "c": 2.0100756305184243e-06,
+    "k0": 6283185.307179587,
+    "k1": 11309733.552923257,
+    "k5": 9424777.9607693814,
+    "kx": 2766869.2026624158,
+    "kz": 10966061.638230763,
+    "coupling_magnitude": 33813636.092490077,
+    "full_transfer_length": 4.6454522740420882e-08
+  },
+  "note": "This executable always reports the normalized Eq. (34) model. When wavelength, n1 and n5 are also provided, it additionally reconstructs A5, a, c, |K| and L using the same reduced transverse model."
+}

@@ -13,6 +13,7 @@ Os scripts deste diretório executam apenas tarefas externas ao núcleo em C++.
 - `plot_fig8.py`: plota a reprodução atual da Fig. 8 a partir do `CSV` gerado por `reproduce_fig8`;
 - `plot_fig10.py`: plota a reprodução atual da Fig. 10 a partir do `CSV` gerado por `reproduce_fig10`;
 - `plot_fig11.py`: plota a reprodução atual da Fig. 11 a partir do `CSV` gerado por `reproduce_fig11`, com codificação explícita do solver por cor e da razão `n_1/n_5` por estilo de linha.
+- `plot_table1.py`: renderiza a Tabela I calculada como tabela formatada em `PNG` e `Markdown` a partir do `CSV`-resumo gerado por `reproduce_table1`.
 
 ## Fluxo atual
 
@@ -22,6 +23,7 @@ Os scripts deste diretório executam apenas tarefas externas ao núcleo em C++.
 - `./scripts/run.sh fig8`: gera a figura principal correspondente à Fig. 8 no estilo do artigo;
 - `./scripts/run.sh fig10`: gera a figura principal correspondente à Fig. 10 no estilo do artigo;
 - `./scripts/run.sh fig11`: gera a figura principal correspondente à Fig. 11 no estilo do artigo;
+- `./scripts/run.sh table1`: gera a Tabela I calculada como `PNG` e `Markdown` a partir do `summary.csv`;
 - `./scripts/run.sh reproduce`: executa toda a reprodução numérica e gera as imagens finais do fluxo principal;
 - `./scripts/run.sh check`: verifica a presença e a integridade dos artefatos obrigatórios do fluxo atual;
 - `./scripts/run.sh full`: executa limpeza, build, reprodução e verificação.

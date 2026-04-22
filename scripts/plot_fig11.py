@@ -14,6 +14,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
+from mode_colors import SOLVER_LINESTYLE, sweep_color
+
 REQUIRED_COLUMNS = {
     "case_id",
     "ratio_id",
@@ -27,15 +29,8 @@ REQUIRED_COLUMNS = {
     "curve_label",
 }
 
+# Distinct line styles for each n1/n5 index ratio.
 RATIO_LINESTYLES = ["-", "-.", "--", ":"]
-SOLVER_COLORS = {
-    "exact": "black",
-    "closed_form": "#6e6e6e",
-}
-SOLVER_LABELS = {
-    "exact": "exact (black)",
-    "closed_form": "closed_form (gray)",
-}
 
 
 @dataclass(frozen=True)
@@ -130,21 +125,6 @@ def curve_sort_key(rows: list[CurvePoint]) -> tuple[float, float]:
     return (rows[0].n1_over_n5, rows[0].a_over_A5)
 
 
-def label_anchor(rows: list[CurvePoint]) -> CurvePoint:
-    if not rows:
-        raise ValueError("Cannot select label anchor from an empty curve.")
-
-    parameter = rows[0].a_over_A5
-    if parameter <= 0.75:
-        anchor_index = min(len(rows) - 1, max(0, len(rows) * 4 // 5))
-    elif parameter <= 1.5:
-        anchor_index = min(len(rows) - 1, max(0, len(rows) * 2 // 3))
-    else:
-        anchor_index = min(len(rows) - 1, max(0, len(rows) * 2 // 5))
-
-    return rows[anchor_index]
-
-
 def build_ratio_styles(ratio_values: list[str]) -> dict[str, str]:
     return {
         ratio: style
@@ -160,7 +140,8 @@ def build_plot(
     show_default_title: bool,
 ) -> None:
     plt.style.use("seaborn-v0_8-whitegrid")
-    figure, axis = plt.subplots(figsize=(8.6, 7.8))
+    figure, axis = plt.subplots(figsize=(8.2, 8.2))
+    axis.set_box_aspect(1.0)
 
     sorted_groups = sorted(grouped_curves.values(), key=curve_sort_key)
     ratio_values = sorted(
@@ -170,8 +151,9 @@ def build_plot(
     )
     ratio_styles = build_ratio_styles(ratio_values)
 
-    label_rows_by_curve: dict[str, CurvePoint] = {}
-    preferred_ratio = ratio_values[0] if ratio_values else None
+    # Assign a fixed color per unique a/A5 value (same color across all ratio families).
+    unique_labels = sorted({rows[0].curve_label for rows in sorted_groups}, key=float)
+    label_to_color = {label: sweep_color(idx) for idx, label in enumerate(unique_labels)}
 
     for rows in sorted_groups:
         if not rows:
@@ -184,22 +166,9 @@ def build_plot(
         axis.semilogy(
             x_values,
             y_values,
-            color=SOLVER_COLORS.get(first.solver_model, "black"),
+            color=label_to_color[first.curve_label],
             linestyle=ratio_styles.get(first.ratio_label, "-"),
             linewidth=1.8,
-        )
-
-        if first.solver_model == "exact" and first.ratio_label == preferred_ratio:
-            label_rows_by_curve[first.curve_id] = label_anchor(rows)
-        elif first.curve_id not in label_rows_by_curve:
-            label_rows_by_curve[first.curve_id] = label_anchor(rows)
-
-    for point in label_rows_by_curve.values():
-        axis.text(
-            point.c_over_a + 0.03,
-            point.normalized_coupling * 1.05,
-            point.curve_label,
-            fontsize=10,
         )
 
     axis.set_xlim(0.0, 3.0)
@@ -220,8 +189,7 @@ def build_plot(
 
     ratio_handles = [
         Line2D(
-            [0],
-            [0],
+            [0], [0],
             color="black",
             linestyle=ratio_styles.get(ratio, "-"),
             linewidth=1.8,
@@ -230,32 +198,38 @@ def build_plot(
         for ratio in ratio_values
     ]
 
+    color_handles = [
+        Line2D(
+            [0], [0],
+            color=label_to_color[label],
+            linestyle="-",
+            linewidth=1.8,
+            label=f"a/A5 = {label}",
+        )
+        for label in unique_labels
+    ]
+
     solver_models_present = sorted({rows[0].solver_model for rows in sorted_groups})
     solver_handles = [
         Line2D(
-            [0],
-            [0],
-            color=SOLVER_COLORS.get(solver_model, "black"),
-            linestyle="-",
+            [0], [0],
+            color="black",
+            linestyle=SOLVER_LINESTYLE.get(sm, "-"),
             linewidth=1.8,
-            label=SOLVER_LABELS.get(solver_model, solver_model),
+            label=sm,
         )
-        for solver_model in solver_models_present
+        for sm in solver_models_present
     ]
 
-    parameter_handle = Line2D(
-        [0],
-        [0],
-        color="black",
-        linestyle="none",
-        label=r"Labels: $a/A_5 = \frac{2a}{\lambda}\,(n_1^2-n_5^2)^{1/2}$",
-    )
-
     axis.legend(
-        handles=solver_handles + ratio_handles + [parameter_handle],
-        loc="lower left",
+        handles=solver_handles + ratio_handles + color_handles,
+        loc="upper right",
         frameon=True,
-        title="Curves",
+        framealpha=0.95,
+        title="Curvas",
+        fontsize=8.5,
+        title_fontsize=10,
+        labelspacing=0.35,
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

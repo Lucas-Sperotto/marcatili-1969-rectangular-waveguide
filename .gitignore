@@ -2,11 +2,6 @@
 /cmake-build-*/
 /compile_commands.json
 
-data/output/*.csv
-data/output/*.json
-data/output/fig6/*.csv
-data/output/fig6/*.json
-
 /.codex
 
 __pycache__/

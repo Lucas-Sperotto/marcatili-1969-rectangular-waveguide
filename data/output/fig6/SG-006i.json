@@ -17,8 +17,8 @@
     "point_count": 120
   },
   "solver_models": [
-    "closed_form",
-    "exact"
+    "exact",
+    "closed_form"
   ],
   "materials": {
     "n1": 1.5,
@@ -30,138 +30,6 @@
   "material_variants": [
   ],
   "curve_summaries": [
-    {
-      "variant_id": "default",
-      "curve_id": "E_y_1_1",
-      "solver_model": "closed_form",
-      "mode_family": "E_y",
-      "p": 1,
-      "q": 1,
-      "total_points": 120,
-      "valid_points": 101,
-      "guided_points": 97
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_x_1_1",
-      "solver_model": "closed_form",
-      "mode_family": "E_x",
-      "p": 1,
-      "q": 1,
-      "total_points": 120,
-      "valid_points": 102,
-      "guided_points": 98
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_y_2_1",
-      "solver_model": "closed_form",
-      "mode_family": "E_y",
-      "p": 2,
-      "q": 1,
-      "total_points": 120,
-      "valid_points": 100,
-      "guided_points": 88
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_x_2_1",
-      "solver_model": "closed_form",
-      "mode_family": "E_x",
-      "p": 2,
-      "q": 1,
-      "total_points": 120,
-      "valid_points": 100,
-      "guided_points": 89
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_y_1_2",
-      "solver_model": "closed_form",
-      "mode_family": "E_y",
-      "p": 1,
-      "q": 2,
-      "total_points": 120,
-      "valid_points": 71,
-      "guided_points": 69
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_x_1_2",
-      "solver_model": "closed_form",
-      "mode_family": "E_x",
-      "p": 1,
-      "q": 2,
-      "total_points": 120,
-      "valid_points": 72,
-      "guided_points": 70
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_y_2_2",
-      "solver_model": "closed_form",
-      "mode_family": "E_y",
-      "p": 2,
-      "q": 2,
-      "total_points": 120,
-      "valid_points": 71,
-      "guided_points": 64
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_x_2_2",
-      "solver_model": "closed_form",
-      "mode_family": "E_x",
-      "p": 2,
-      "q": 2,
-      "total_points": 120,
-      "valid_points": 72,
-      "guided_points": 65
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_y_3_1",
-      "solver_model": "closed_form",
-      "mode_family": "E_y",
-      "p": 3,
-      "q": 1,
-      "total_points": 120,
-      "valid_points": 85,
-      "guided_points": 76
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_x_3_1",
-      "solver_model": "closed_form",
-      "mode_family": "E_x",
-      "p": 3,
-      "q": 1,
-      "total_points": 120,
-      "valid_points": 85,
-      "guided_points": 77
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_y_1_3",
-      "solver_model": "closed_form",
-      "mode_family": "E_y",
-      "p": 1,
-      "q": 3,
-      "total_points": 120,
-      "valid_points": 41,
-      "guided_points": 40
-    },
-    {
-      "variant_id": "default",
-      "curve_id": "E_x_1_3",
-      "solver_model": "closed_form",
-      "mode_family": "E_x",
-      "p": 1,
-      "q": 3,
-      "total_points": 120,
-      "valid_points": 42,
-      "guided_points": 41
-    },
     {
       "variant_id": "default",
       "curve_id": "E_y_1_1",
@@ -293,6 +161,138 @@
       "total_points": 120,
       "valid_points": 120,
       "guided_points": 45
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 120,
+      "valid_points": 101,
+      "guided_points": 97
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 120,
+      "valid_points": 102,
+      "guided_points": 98
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_2_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 2,
+      "q": 1,
+      "total_points": 120,
+      "valid_points": 100,
+      "guided_points": 88
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_2_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 2,
+      "q": 1,
+      "total_points": 120,
+      "valid_points": 100,
+      "guided_points": 89
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "total_points": 120,
+      "valid_points": 71,
+      "guided_points": 69
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 2,
+      "total_points": 120,
+      "valid_points": 72,
+      "guided_points": 70
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_2_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 2,
+      "q": 2,
+      "total_points": 120,
+      "valid_points": 71,
+      "guided_points": 64
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_2_2",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 2,
+      "q": 2,
+      "total_points": 120,
+      "valid_points": 72,
+      "guided_points": 65
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_3_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 3,
+      "q": 1,
+      "total_points": 120,
+      "valid_points": 85,
+      "guided_points": 76
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_3_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 3,
+      "q": 1,
+      "total_points": 120,
+      "valid_points": 85,
+      "guided_points": 77
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_y_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "total_points": 120,
+      "valid_points": 41,
+      "guided_points": 40
+    },
+    {
+      "variant_id": "default",
+      "curve_id": "E_x_1_3",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 3,
+      "total_points": 120,
+      "valid_points": 42,
+      "guided_points": 41
     }
   ]
 }

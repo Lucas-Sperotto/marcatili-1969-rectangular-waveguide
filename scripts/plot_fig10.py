@@ -14,6 +14,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
+from mode_colors import SOLVER_LINESTYLE, sweep_color
+
 REQUIRED_COLUMNS = {
     "case_id",
     "curve_id",
@@ -111,19 +113,13 @@ def curve_sort_key(rows: list[CurvePoint]) -> float:
     return rows[0].a_over_A5
 
 
-def label_anchor(rows: list[CurvePoint]) -> CurvePoint:
-    if not rows:
-        raise ValueError("Cannot select label anchor from an empty curve.")
+def curve_label_legend_text(curve_labels: list[str]) -> str:
+    if len(curve_labels) <= 4:
+        return "a/A5 = " + ", ".join(curve_labels)
 
-    parameter = rows[0].a_over_A5
-    if parameter <= 0.75:
-        anchor_index = min(len(rows) - 1, max(0, len(rows) * 4 // 5))
-    elif parameter <= 1.5:
-        anchor_index = min(len(rows) - 1, max(0, len(rows) * 2 // 3))
-    else:
-        anchor_index = min(len(rows) - 1, max(0, len(rows) * 2 // 5))
-
-    return rows[anchor_index]
+    head = ", ".join(curve_labels[:4])
+    tail = ", ".join(curve_labels[4:])
+    return "a/A5 = " + head + ",\n" + "       " + tail
 
 
 def build_plot(
@@ -134,10 +130,15 @@ def build_plot(
     show_default_title: bool,
 ) -> None:
     plt.style.use("seaborn-v0_8-whitegrid")
-    figure, axis = plt.subplots(figsize=(8.6, 7.8))
+    figure, axis = plt.subplots(figsize=(8.2, 8.2))
+    axis.set_box_aspect(1.0)
 
     sorted_groups = sorted(grouped_curves.values(), key=curve_sort_key)
-    label_rows_by_curve: dict[str, CurvePoint] = {}
+    curve_labels = sorted({rows[0].curve_label for rows in sorted_groups}, key=float)
+
+    # Assign a fixed color per unique a/A5 value (same color for both solvers).
+    unique_labels = sorted({rows[0].curve_label for rows in sorted_groups}, key=float)
+    label_to_color = {label: sweep_color(idx) for idx, label in enumerate(unique_labels)}
 
     for rows in sorted_groups:
         if not rows:
@@ -150,22 +151,9 @@ def build_plot(
         axis.semilogy(
             x_values,
             y_values,
-            color="black",
-            linestyle="-" if first.solver_model == "exact" else "--",
+            color=label_to_color[first.curve_label],
+            linestyle=SOLVER_LINESTYLE.get(first.solver_model, "-"),
             linewidth=1.8,
-        )
-
-        if first.solver_model == "exact":
-            label_rows_by_curve[first.curve_id] = label_anchor(rows)
-        elif first.curve_id not in label_rows_by_curve:
-            label_rows_by_curve[first.curve_id] = label_anchor(rows)
-
-    for point in label_rows_by_curve.values():
-        axis.text(
-            point.c_over_a + 0.03,
-            point.normalized_coupling * 1.05,
-            point.curve_label,
-            fontsize=10,
         )
 
     axis.set_xlim(0.0, 3.0)
@@ -184,19 +172,39 @@ def build_plot(
     axis.grid(True, which="major", color="#c8c8c8", linewidth=0.8)
     axis.grid(True, which="minor", color="#e6e6e6", linewidth=0.5, alpha=0.6)
 
-    parameter_handle = Line2D(
-        [0],
-        [0],
-        color="black",
-        linestyle="none",
-        label=r"Labels: $a/A_5 = \frac{2a}{\lambda}\,(n_1^2-n_5^2)^{1/2}$",
-    )
+    solver_models_present = sorted({rows[0].solver_model for rows in sorted_groups})
     solver_handles = [
-        Line2D([0], [0], color="black", linestyle="-", linewidth=1.8, label="exact"),
-        Line2D([0], [0], color="black", linestyle="--", linewidth=1.8, label="closed_form"),
-        parameter_handle,
+        Line2D(
+            [0], [0],
+            color="black",
+            linestyle=SOLVER_LINESTYLE.get(sm, "-"),
+            linewidth=1.8,
+            label=sm,
+        )
+        for sm in solver_models_present
     ]
-    axis.legend(handles=solver_handles, loc="lower left", frameon=True, title="Curves")
+
+    color_handles = [
+        Line2D(
+            [0], [0],
+            color=label_to_color[label],
+            linestyle="-",
+            linewidth=1.8,
+            label=f"a/A5 = {label}",
+        )
+        for label in unique_labels
+    ]
+
+    axis.legend(
+        handles=solver_handles + color_handles,
+        loc="upper right",
+        frameon=True,
+        framealpha=0.95,
+        title="Curvas",
+        fontsize=9,
+        title_fontsize=10,
+        labelspacing=0.4,
+    )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     figure.tight_layout()

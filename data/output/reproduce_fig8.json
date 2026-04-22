@@ -1,0 +1,114 @@
+{
+  "app": "reproduce_fig8",
+  "status": "ok",
+  "input_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/input/reproduce_fig8.json",
+  "output_json_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/reproduce_fig8.json",
+  "output_csv_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/reproduce_fig8.csv",
+  "case_id": "SG-008-METAL-001",
+  "article_target": "Figure 8: metalized upper interface, refined with E_y11, E_x11 and E_x21 as the current three-branch interpretation.",
+  "ocr_note": "The scan states n1/1.05 < n4 < n1 and a = 2b. The current case uses the explicit lower-contrast endpoint n4 = n1/1.05 as a reproducible baseline. TODO OCR: the intermediate label is hard to read in the current scan; this case tracks the physically consistent branch set E_y11, E_x11 and E_x21, while the lower label clearly reads E_x21.",
+  "model_note": "Top interface treated as a PEC wall. For E_y, the upper y-boundary is modeled with a fixed pi/2 phase term; for E_x, the tangential electric field is forced to vanish on the metal wall and only the lower dielectric phase term is kept.",
+  "sweep": {
+    "wavelength": 9.9999999999999995e-07,
+    "a_over_b": 2,
+    "a_over_A_min": 0.050000000000000003,
+    "a_over_A_max": 4,
+    "point_count": 121
+  },
+  "materials": {
+    "n1": 1.5,
+    "n4": 1.4285714285714286
+  },
+  "article_single_mode_check": {
+    "a_over_A_upper_bound": 1.3999999999999999,
+    "expected_guided_curve_id": "E_y_1_1",
+    "condition_met": true,
+    "guided_curve_ids": ["E_y_1_1"]
+  },
+  "solver_models": [
+    "exact",
+    "closed_form"
+  ],
+  "curve_summaries": [
+    {
+      "curve_id": "E_y_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 121,
+      "valid_points": 121,
+      "guided_points": 100
+    },
+    {
+      "curve_id": "E_x_1_1",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 121,
+      "valid_points": 121,
+      "guided_points": 77
+    },
+    {
+      "curve_id": "E_y_2_1",
+      "solver_model": "exact",
+      "mode_family": "E_y",
+      "p": 2,
+      "q": 1,
+      "total_points": 121,
+      "valid_points": 121,
+      "guided_points": 77
+    },
+    {
+      "curve_id": "E_x_2_1",
+      "solver_model": "exact",
+      "mode_family": "E_x",
+      "p": 2,
+      "q": 1,
+      "total_points": 121,
+      "valid_points": 121,
+      "guided_points": 57
+    },
+    {
+      "curve_id": "E_y_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "total_points": 121,
+      "valid_points": 109,
+      "guided_points": 97
+    },
+    {
+      "curve_id": "E_x_1_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 1,
+      "q": 1,
+      "total_points": 121,
+      "valid_points": 81,
+      "guided_points": 73
+    },
+    {
+      "curve_id": "E_y_2_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_y",
+      "p": 2,
+      "q": 1,
+      "total_points": 121,
+      "valid_points": 81,
+      "guided_points": 73
+    },
+    {
+      "curve_id": "E_x_2_1",
+      "solver_model": "closed_form",
+      "mode_family": "E_x",
+      "p": 2,
+      "q": 1,
+      "total_points": 121,
+      "valid_points": 79,
+      "guided_points": 55
+    }
+  ]
+}

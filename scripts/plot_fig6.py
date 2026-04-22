@@ -13,13 +13,21 @@ from __future__ import annotations
 import argparse
 import csv
 import math
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-import colorsys
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+
+from mode_colors import (
+    FAMILY_LINEWIDTH,
+    SOLVER_LINESTYLE,
+    family_linewidth,
+    mode_color,
+    solver_linestyle,
+)
 
 X_TICKS = [0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.6, 4.0]
 DEFAULT_Y_MAX = 1.2
@@ -41,6 +49,7 @@ REQUIRED_COLUMNS = {
 DEFAULT_SOLVER_MODEL = "closed_form"
 DEFAULT_VARIANT_ID = "default"
 DEFAULT_GEOMETRY_MODEL = "rectangular"
+VARIANT_MARKERS = ("o", "x", "^", "s", "D", "v")
 
 
 @dataclass(frozen=True)
@@ -102,6 +111,10 @@ def curve_sort_key(point: CurvePoint) -> tuple[int, int, int, int]:
     family_order = 0 if point.mode_family == "E_y" else 1
     solver_order = 0 if point.solver_model == "exact" else 1
     return (point.p, point.q, family_order, solver_order)
+
+
+def unique_in_order(values: list[str]) -> list[str]:
+    return list(dict.fromkeys(values))
 
 
 def parse_required_float(row: dict[str, str], field_name: str) -> float:
@@ -179,34 +192,32 @@ def load_curves(csv_path: Path) -> tuple[str, dict[tuple[str, str, str], list[Cu
     return panel_id, grouped_rows
 
 
-def adjust_color(
-    color: tuple[float, float, float, float],
-    lightness_delta: float,
-) -> tuple[float, float, float, float]:
-    red, green, blue, alpha = color
-    hue, lightness, saturation = colorsys.rgb_to_hls(red, green, blue)
-    shifted_lightness = max(0.0, min(1.0, lightness + lightness_delta))
-    shifted_red, shifted_green, shifted_blue = colorsys.hls_to_rgb(
-        hue,
-        shifted_lightness,
-        saturation,
-    )
-    return (shifted_red, shifted_green, shifted_blue, alpha)
-
-
-def build_variant_lightness(variant_ids: list[str]) -> dict[str, float]:
-    if not variant_ids:
-        return {}
-
-    if len(variant_ids) == 1:
-        return {variant_ids[0]: 0.0}
-
-    center = (len(variant_ids) - 1) / 2.0
-    step = 0.18
+def build_variant_markers(variant_ids: list[str]) -> dict[str, str]:
     return {
-        variant_id: (index - center) * step
+        variant_id: VARIANT_MARKERS[index % len(VARIANT_MARKERS)]
         for index, variant_id in enumerate(variant_ids)
     }
+
+
+def variant_label(variant_id: str) -> str:
+    math_text = re.sub(r"n(\d)", r"n_\1", variant_id)
+    if any(token in math_text for token in ("<", ">", "=")):
+        return f"${math_text}$"
+    return variant_id
+
+
+def marker_kwargs(marker: str, color: str) -> dict[str, object]:
+    kwargs: dict[str, object] = {
+        "marker": marker,
+        "markersize": 5.2,
+        "markeredgecolor": color,
+        "markeredgewidth": 1.1,
+    }
+    if marker == "x":
+        kwargs["markerfacecolor"] = "none"
+    else:
+        kwargs["markerfacecolor"] = "white"
+    return kwargs
 
 
 def build_plot(
@@ -224,15 +235,14 @@ def build_plot(
         key=lambda rows: curve_sort_key(rows[0]),
     )
 
-    base_curve_ids = sorted({rows[0].curve_id for rows in sorted_curves})
-    tab10 = plt.colormaps["tab10"]
-    color_map = {
-        curve_id: tab10(index % 10)
-        for index, curve_id in enumerate(base_curve_ids)
-    }
-
-    variant_ids = sorted({rows[0].variant_id for rows in sorted_curves})
-    variant_lightness = build_variant_lightness(variant_ids)
+    variant_ids = unique_in_order(
+        [
+            rows[0].variant_id
+            for rows in sorted_curves
+            if rows[0].variant_id != DEFAULT_VARIANT_ID
+        ]
+    )
+    variant_markers = build_variant_markers(variant_ids)
 
     solver_models_present = sorted({rows[0].solver_model for rows in sorted_curves})
     mode_legend_handles: list[Line2D] = []
@@ -245,23 +255,24 @@ def build_plot(
             continue
 
         first = rows[0]
-        linestyle = "-" if first.solver_model == "exact" else "--"
-        linewidth = 2.0 if first.p == 1 and first.q == 1 else 1.4
-        line_color = adjust_color(
-            color_map[first.curve_id],
-            variant_lightness.get(first.variant_id, 0.0),
-        )
+        line_color = mode_color(first.p, first.q)
+        linestyle = solver_linestyle(first.solver_model)
+        linewidth = family_linewidth(first.mode_family)
+        marker = variant_markers.get(first.variant_id)
 
         x_values = [point.b_over_A4 for point in rows]
         y_values = [point.kz_normalized_against_n4 for point in rows]
 
-        axis.plot(
-            x_values,
-            y_values,
-            color=line_color,
-            linestyle=linestyle,
-            linewidth=linewidth,
-        )
+        plot_kwargs: dict[str, object] = {
+            "color": line_color,
+            "linestyle": linestyle,
+            "linewidth": linewidth,
+        }
+        if marker is not None:
+            plot_kwargs.update(marker_kwargs(marker, line_color))
+            plot_kwargs["markevery"] = max(1, len(x_values) // 12)
+
+        axis.plot(x_values, y_values, **plot_kwargs)
 
         if first.curve_id not in seen_curve_ids:
             seen_curve_ids.add(first.curve_id)
@@ -269,26 +280,25 @@ def build_plot(
                 Line2D(
                     [0],
                     [0],
-                    color=color_map[first.curve_id],
+                    color=mode_color(first.p, first.q),
                     linestyle="-",
-                    linewidth=2.0,
+                    linewidth=FAMILY_LINEWIDTH.get(first.mode_family, 1.6),
                     label=mode_label(first),
                 )
             )
 
         if first.variant_id not in seen_variant_ids and first.variant_id != DEFAULT_VARIANT_ID:
             seen_variant_ids.add(first.variant_id)
+            marker = variant_markers[first.variant_id]
             variant_legend_handles.append(
                 Line2D(
                     [0],
                     [0],
-                    color=adjust_color(
-                        (0.2, 0.2, 0.2, 1.0),
-                        variant_lightness.get(first.variant_id, 0.0),
-                    ),
+                    color="#2f2f2f",
                     linestyle="-",
                     linewidth=2.0,
-                    label=first.variant_id,
+                    label=variant_label(first.variant_id),
+                    **marker_kwargs(marker, "#2f2f2f"),
                 )
             )
 
@@ -311,7 +321,7 @@ def build_plot(
             loc="upper left",
             ncol=2,
             frameon=True,
-            title="Modes",
+            title="Modos",
         )
         axis.add_artist(mode_legend)
 
@@ -320,14 +330,14 @@ def build_plot(
             handles=variant_legend_handles,
             loc="upper right",
             frameon=True,
-            title="Materials",
+            title="Materiais",
         )
         axis.add_artist(variant_legend)
 
     if len(solver_models_present) > 1:
         solver_handles = [
-            Line2D([0], [0], color="black", linestyle="-", linewidth=2.0, label="exact"),
-            Line2D([0], [0], color="black", linestyle="--", linewidth=2.0, label="closed_form"),
+            Line2D([0], [0], color="black", linestyle=SOLVER_LINESTYLE["exact"], linewidth=2.0, label="exact"),
+            Line2D([0], [0], color="black", linestyle=SOLVER_LINESTYLE["closed_form"], linewidth=2.0, label="closed_form"),
         ]
         axis.legend(
             handles=solver_handles,

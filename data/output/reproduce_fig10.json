@@ -1,0 +1,148 @@
+{
+  "app": "reproduce_fig10",
+  "status": "ok",
+  "input_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/input/reproduce_fig10.json",
+  "output_json_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/reproduce_fig10.json",
+  "output_csv_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/reproduce_fig10.csv",
+  "case_id": "CP-010-FIG10-001",
+  "article_target": "Figure 10: normalized directional-coupler curves for the mode labeled E_x11 in Section IV, following Eq. (34) with k_x from Eq. (6) exact and Eq. (12) closed form in the symmetric n3 = n5 limit.",
+  "ocr_note": "TODO OCR: the scan clearly shows the families 0.5, 0.75, 1.5, 2, 3 and 4, but one mid-slope label remains hard to read and may be 1.0 or 1.6. The current baseline uses the monotone family set 0.5, 0.75, 1.0, 1.5, 2.0, 3.0 and 4.0 for a/A5 = 2a/lambda * sqrt(n1^2-n5^2). The dash-dot Jones cylinder reference is still pending.",
+  "model_note": "Current Fig. 10 reproduction follows Section IV literally: Eq. (34) for the normalized coupling and Eq. (6) / Eq. (12) for k_x in the symmetric n3 = n5 limit. TODO: the scan still leaves a label ambiguity near the mid-slope family, and the dash-dot Jones cylinder reference is not digitized yet.",
+  "sweep": {
+    "c_over_a_min": 0,
+    "c_over_a_max": 3,
+    "point_count": 151
+  },
+  "solver_models": [
+    "exact",
+    "closed_form"
+  ],
+  "curve_summaries": [
+    {
+      "curve_id": "a_over_A5=0.5",
+      "curve_label": "0.5",
+      "a_over_A5": 0.5,
+      "solver_model": "exact",
+      "kx_A5_over_pi": 0.80616259520668487,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=0.75",
+      "curve_label": "0.75",
+      "a_over_A5": 0.75,
+      "solver_model": "exact",
+      "kx_A5_over_pi": 0.68860075994697145,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=1",
+      "curve_label": "1",
+      "a_over_A5": 1,
+      "solver_model": "exact",
+      "kx_A5_over_pi": 0.59461164405665112,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=1.5",
+      "curve_label": "1.5",
+      "a_over_A5": 1.5,
+      "solver_model": "exact",
+      "kx_A5_over_pi": 0.46256990158834232,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=2",
+      "curve_label": "2",
+      "a_over_A5": 2,
+      "solver_model": "exact",
+      "kx_A5_over_pi": 0.37696700939320238,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=3",
+      "curve_label": "3",
+      "a_over_A5": 3,
+      "solver_model": "exact",
+      "kx_A5_over_pi": 0.27435672924729826,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=4",
+      "curve_label": "4",
+      "a_over_A5": 4,
+      "solver_model": "exact",
+      "kx_A5_over_pi": 0.21544061525276059,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=0.5",
+      "curve_label": "0.5",
+      "a_over_A5": 0.5,
+      "solver_model": "closed_form",
+      "kx_A5_over_pi": 0.87980169297688515,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=0.75",
+      "curve_label": "0.75",
+      "a_over_A5": 0.75,
+      "solver_model": "closed_form",
+      "kx_A5_over_pi": 0.72117823496238753,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=1",
+      "curve_label": "1",
+      "a_over_A5": 1,
+      "solver_model": "closed_form",
+      "kx_A5_over_pi": 0.61101547035165726,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=1.5",
+      "curve_label": "1.5",
+      "a_over_A5": 1.5,
+      "solver_model": "closed_form",
+      "kx_A5_over_pi": 0.46802899277296456,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=2",
+      "curve_label": "2",
+      "a_over_A5": 2,
+      "solver_model": "closed_form",
+      "kx_A5_over_pi": 0.37927349649738806,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=3",
+      "curve_label": "3",
+      "a_over_A5": 3,
+      "solver_model": "closed_form",
+      "kx_A5_over_pi": 0.27498063107899812,
+      "total_points": 151,
+      "valid_points": 151
+    },
+    {
+      "curve_id": "a_over_A5=4",
+      "curve_label": "4",
+      "a_over_A5": 4,
+      "solver_model": "closed_form",
+      "kx_A5_over_pi": 0.21567435957539677,
+      "total_points": 151,
+      "valid_points": 151
+    }
+  ]
+}

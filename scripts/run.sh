@@ -18,7 +18,6 @@ readonly RUN_PIPELINE="${RUN_PIPELINE:-0}"
 readonly -a NON_FIGURE_APPS=(
     solve_single_guide
     solve_coupler
-    reproduce_table1
 )
 
 log() {
@@ -340,9 +339,28 @@ render_figure11() {
         -o "$output_png"
 }
 
+render_table1() {
+    local output_json="$OUTPUT_DIR/reproduce_table1.json"
+    local output_summary_csv="$OUTPUT_DIR/reproduce_table1.summary.csv"
+    local output_png="$OUTPUT_DIR/reproduce_table1.png"
+    local output_md="$OUTPUT_DIR/reproduce_table1.md"
+
+    run_app "reproduce_table1" "$ROOT_DIR/data/input/reproduce_table1.json" "$output_json"
+    require_file "$output_summary_csv"
+
+    run_plot_script \
+        "Rendering Table 1" \
+        "$ROOT_DIR/scripts/plot_table1.py" \
+        "$output_summary_csv" \
+        --no-title \
+        --markdown-output "$output_md" \
+        -o "$output_png"
+}
+
 reproduce_outputs() {
     prepare_output_dir
     run_non_figure_apps
+    render_table1
     render_fig6_panels
     render_figure7
     render_figure8
@@ -378,6 +396,8 @@ check_reproduction() {
         "$OUTPUT_DIR/reproduce_table1.json"
         "$OUTPUT_DIR/reproduce_table1.summary.csv"
         "$OUTPUT_DIR/reproduce_table1.details.csv"
+        "$OUTPUT_DIR/reproduce_table1.png"
+        "$OUTPUT_DIR/reproduce_table1.md"
     )
 
     require_dir "$FIG6_INPUT_DIR"
@@ -431,6 +451,7 @@ Commands:
   fig8        Build (unless SKIP_BUILD=1) and render Figure 8
   fig10       Build (unless SKIP_BUILD=1) and render Figure 10
   fig11       Build (unless SKIP_BUILD=1) and render Figure 11
+  table1      Build (unless SKIP_BUILD=1) and render the calculated Table 1 summary
   reproduce   Build (unless SKIP_BUILD=1) and reproduce all configured outputs
   check       Verify the required reproduction artifacts
   full        Clean, build, reproduce, and verify everything
@@ -491,6 +512,11 @@ main() {
             build_if_needed
             prepare_output_dir
             render_figure11
+            ;;
+        table1)
+            build_if_needed
+            prepare_output_dir
+            render_table1
             ;;
         reproduce)
             build_if_needed

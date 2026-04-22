@@ -3,10 +3,10 @@
   "article_target": "Figure 6a, finite panel sweep with current repository assumptions for the weak-contrast fully embedded single-dielectric guide",
   "panel_id": "SG-006a",
   "solver_models": [
-    "closed_form",
-    "exact"
+    "exact",
+    "closed_form"
   ],
-  "wavelength": 1.0e-6,
+  "wavelength": 1e-06,
   "a_over_b": 1.0,
   "n1": 1.5,
   "n2": 1.4851485148514851,
@@ -26,7 +26,14 @@
     "E_y:2:2",
     "E_x:2:2",
     "E_y:3:1",
-    "E_x:3:1"
+    "E_x:3:1",
+    "E_y:1:3",
+    "E_x:1:3",
+    "E_y:2:3",
+    "E_x:2:3",
+    "E_y:3:2",
+    "E_x:3:2",
+    "E_y:3:3",
+    "E_x:3:3"
   ]
 }
-

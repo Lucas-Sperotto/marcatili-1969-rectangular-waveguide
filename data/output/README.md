@@ -13,7 +13,7 @@ Esta pasta concentra os artefatos gerados pelos executáveis e pelos scripts de 
 | `reproduce_fig8` | `reproduce_fig8.json`, `reproduce_fig8.csv`, `reproduce_fig8.png` |
 | `reproduce_fig10` | `reproduce_fig10.json`, `reproduce_fig10.csv`, `reproduce_fig10.png` |
 | `reproduce_fig11` | `reproduce_fig11.json`, `reproduce_fig11.csv`, `reproduce_fig11.png` |
-| `reproduce_table1` | `reproduce_table1.json`, `reproduce_table1.summary.csv`, `reproduce_table1.details.csv` |
+| `reproduce_table1` | `reproduce_table1.json`, `reproduce_table1.summary.csv`, `reproduce_table1.details.csv`, `reproduce_table1.png`, `reproduce_table1.md` |
 
 ## Notas
 

@@ -14,6 +14,13 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
+from mode_colors import (
+    SOLVER_LINESTYLE,
+    family_linewidth,
+    mode_color,
+    solver_linestyle,
+)
+
 X_TICKS = [0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.6, 4.0]
 Y_TICKS = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 
@@ -142,8 +149,6 @@ def build_plot(
 
     sorted_groups = sorted(grouped_curves.values(), key=curve_sort_key)
     base_curve_ids = sorted({rows[0].curve_id for rows in sorted_groups})
-
-    color_map = {curve_id: "black" for curve_id in base_curve_ids}
     label_rows_by_curve: dict[str, CurvePoint] = {}
 
     for rows in sorted_groups:
@@ -157,9 +162,9 @@ def build_plot(
         axis.plot(
             x_values,
             y_values,
-            color=color_map[first.curve_id],
-            linestyle="-" if first.solver_model == "exact" else "--",
-            linewidth=2.0 if first.p == 1 else 1.7,
+            color=mode_color(first.p, first.q),
+            linestyle=solver_linestyle(first.solver_model),
+            linewidth=family_linewidth(first.mode_family),
         )
 
         if first.solver_model == "exact":
@@ -174,7 +179,13 @@ def build_plot(
 
         x_value = min(3.82, point.a_over_A + 0.08)
         y_value = point.kz_normalized_against_n4 + 0.02
-        axis.text(x_value, y_value, mode_label(point), fontsize=11)
+        axis.text(
+            x_value,
+            y_value,
+            mode_label(point),
+            fontsize=11,
+            color=mode_color(point.p, point.q),
+        )
 
     axis.set_xlim(0.0, 4.0)
     axis.set_ylim(0.0, 1.0)
@@ -191,8 +202,8 @@ def build_plot(
     axis.grid(True, which="major", color="#d0d0d0", linewidth=0.8)
 
     solver_handles = [
-        Line2D([0], [0], color="black", linestyle="-", linewidth=2.0, label="exact"),
-        Line2D([0], [0], color="black", linestyle="--", linewidth=2.0, label="closed_form"),
+        Line2D([0], [0], color="black", linestyle=SOLVER_LINESTYLE["exact"], linewidth=2.0, label="exact"),
+        Line2D([0], [0], color="black", linestyle=SOLVER_LINESTYLE["closed_form"], linewidth=2.0, label="closed_form"),
     ]
     axis.legend(handles=solver_handles, loc="lower right", frameon=True, title="Solvers")
 

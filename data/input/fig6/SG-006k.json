@@ -4,10 +4,10 @@
   "panel_id": "SG-006k",
   "geometry_model": "slab",
   "solver_models": [
-    "closed_form",
-    "exact"
+    "exact",
+    "closed_form"
   ],
-  "wavelength": 1.0e-6,
+  "wavelength": 1e-06,
   "n1": 1.5,
   "n2": 1.0,
   "n3": 1.4851485148514851,

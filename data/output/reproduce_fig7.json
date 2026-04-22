@@ -1,0 +1,115 @@
+{
+  "app": "reproduce_fig7",
+  "status": "ok",
+  "input_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/input/reproduce_fig7.json",
+  "output_json_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/reproduce_fig7.json",
+  "output_lines_csv_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/reproduce_fig7.lines.csv",
+  "output_intersections_csv_file": "/home/sperotto/marcatili-1969-rectangular-waveguide/data/output/reproduce_fig7.intersections.csv",
+  "case_id": "SG-007-NOMOGRAM-001",
+  "article_target": "Figure 7 nomogram plus the design example with a/b = 5 and the C = 25 guide line highlighted",
+  "geometry": {
+    "wavelength": 9.9999999999999995e-07,
+    "a": 2.5000000000000001e-05,
+    "b": 5.0000000000000004e-06
+  },
+  "materials": {
+    "n1": 1.5,
+    "n2": 1.425,
+    "n3": 1.4970000000000001,
+    "n4": 1.425,
+    "n5": 1.4970000000000001
+  },
+  "nomogram": {
+    "line_point_count": 240,
+    "x_numerator": 12273838745.579399,
+    "y_numerator": 313225063897.20721,
+    "derived_c": 25.519731062950438,
+    "reference_c_value": 25,
+    "reference_c_absolute_error": 0.51973106295043792,
+    "reference_c_relative_error": 0.020789242518017517
+  },
+  "design_example": {
+    "a_over_b": 5,
+    "symmetric_material_pairs": true,
+    "delta_from_n35": 0.0019999999999998908,
+    "delta_prime_from_n24": 0.049999999999999933,
+    "sqrt_delta_prime_over_delta": 5.0000000000001332
+  },
+  "article_reference_check": {
+    "mode_line_id": "E_y_2_1",
+    "reference_c_value": 25,
+    "exact_x": 0.034482758620689655,
+    "exact_y": 0.86206896551724133,
+    "article_y_readoff": 0.88,
+    "article_y_absolute_error": 0.017931034482758679,
+    "article_y_relative_error": 0.020376175548589406,
+    "note": "TODO OCR: the scan labels the plotted p=2, q=1 line as E_y21, while the transcribed sentence mentions E_x21. This case tracks the plotted nomogram line."
+  },
+  "reference_intersections": [
+    {
+      "mode_line_id": "E_y_3_1",
+      "c_line_id": "C=25",
+      "mode_family": "E_y",
+      "p": 3,
+      "q": 1,
+      "x": 0.029411764705882353,
+      "y": 0.73529411764705876,
+      "domain_valid": true,
+      "guided": false,
+      "kz": 9402612.8864510078,
+      "kz_normalized_against_n4": 0.95181493382989379
+    },
+    {
+      "mode_line_id": "E_y_2_1",
+      "c_line_id": "C=25",
+      "mode_family": "E_y",
+      "p": 2,
+      "q": 1,
+      "x": 0.034482758620689655,
+      "y": 0.86206896551724133,
+      "domain_valid": true,
+      "guided": false,
+      "kz": 9405875.7320189215,
+      "kz_normalized_against_n4": 0.9589009729725575
+    },
+    {
+      "mode_line_id": "E_y_1_1",
+      "c_line_id": "C=25",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 1,
+      "x": 0.038461538461538464,
+      "y": 0.96153846153846156,
+      "domain_valid": true,
+      "guided": true,
+      "kz": 9407832.8961785454,
+      "kz_normalized_against_n4": 0.96315259645815465
+    },
+    {
+      "mode_line_id": "E_y_1_2",
+      "c_line_id": "C=25",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 2,
+      "x": 0.0099009900990099011,
+      "y": 0.24752475247524752,
+      "domain_valid": true,
+      "guided": false,
+      "kz": 9358781.0048371553,
+      "kz_normalized_against_n4": 0.85686200931821555
+    },
+    {
+      "mode_line_id": "E_y_1_3",
+      "c_line_id": "C=25",
+      "mode_family": "E_y",
+      "p": 1,
+      "q": 3,
+      "x": 0.0044247787610619468,
+      "y": 0.11061946902654868,
+      "domain_valid": true,
+      "guided": false,
+      "kz": 9276451.4795962423,
+      "kz_normalized_against_n4": 0.6797110307516504
+    }
+  ]
+}
