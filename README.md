@@ -1,5 +1,7 @@
 # marcatili-1969-rectangular-waveguide
 
+[![DOI](https://zenodo.org/badge/1212433330.svg)](https://doi.org/10.5281/zenodo.19699346)
+
 Reprodução didática e reprodutível do artigo clássico de fotônica integrada:
 
 > **"Dielectric Rectangular Waveguide and Directional Coupler for Integrated Optics"**
