@@ -11,7 +11,7 @@ authors:
   - family-names: "Sperotto"
     given-names: "Lucas Kriesel"
     email: "sperotto@unemat.br"
-    orcid: "0000-0002-1234-5678"
+    orcid: "https://orcid.org/0000-0002-4941-7398"
 keywords:
   - "rectangular waveguide"
   - "dielectric waveguide"
@@ -19,3 +19,7 @@ keywords:
   - "integrated optics"
   - "Marcatili"
   - "C++17"
+  - "electromagnetics"
+  - "computational electromagnetics"
+  - "integrated photonics"
+  - "reproducible research"
