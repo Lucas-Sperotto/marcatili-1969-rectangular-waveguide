@@ -5,7 +5,7 @@
 Reprodução didática e reprodutível do artigo clássico de fotônica integrada:
 
 > **"Dielectric Rectangular Waveguide and Directional Coupler for Integrated Optics"**
-> E. A. J. Marcatili — *Bell System Technical Journal*, vol. 48, pp. 2071–2102, [![DOI]](https://doi.org/10.1002/j.1538-7305.1969.tb01166.x)
+> E. A. J. Marcatili — *Bell System Technical Journal*, vol. 48, pp. 2071–2102, [![DOI]]([https://doi.org/10.1002/j.1538-7305.1969.tb01166.x](https://doi.org/10.1002/j.1538-7305.1969.tb01166.x))
 
 Implementado em **C++17**. O foco é conectar três camadas de forma explícita e rastreável:
 
