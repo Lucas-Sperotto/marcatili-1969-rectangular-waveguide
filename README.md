@@ -41,6 +41,8 @@ sudo apt install cmake build-essential
 sudo apt install -y python3-matplotlib
 ```
 
+Para compilar e rodar:
+
 ```bash
 # 1. Compilar
 ./scripts/run.sh build
