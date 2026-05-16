@@ -31,6 +31,16 @@ artigo original  ←→  documentação técnica  ←→  implementação numér
 
 ## Quick start
 
+
+Para instalar dependências:
+
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install cmake build-essential
+sudo apt install -y python3-matplotlib
+```
+
 ```bash
 # 1. Compilar
 ./scripts/run.sh build
