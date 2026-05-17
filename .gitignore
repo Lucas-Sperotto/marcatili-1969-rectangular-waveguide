@@ -6,6 +6,7 @@
 
 __pycache__/
 *.py[cod]
+*.bak
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

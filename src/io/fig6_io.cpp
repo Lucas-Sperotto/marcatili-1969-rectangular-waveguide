@@ -78,6 +78,123 @@ std::string TrimWhitespaceCopy(const std::string& text) {
     return text.substr(begin, end - begin);
 }
 
+std::string ExtractFirstFigure6Object(const std::string& json_text) {
+    const std::string trimmed = TrimWhitespaceCopy(json_text);
+    if (trimmed.empty()) {
+        throw std::runtime_error("Figure 6 input JSON is empty.");
+    }
+
+    if (trimmed.front() == '{') {
+        return trimmed;
+    }
+
+    if (trimmed.front() != '[') {
+        throw std::runtime_error(
+            "Figure 6 input JSON must be a root object or an array of objects."
+        );
+    }
+
+    bool in_string = false;
+    bool escaped = false;
+    int array_depth = 0;
+    std::size_t array_end = std::string::npos;
+
+    for (std::size_t index = 0; index < trimmed.size(); ++index) {
+        const char ch = trimmed[index];
+
+        if (in_string) {
+            if (escaped) {
+                escaped = false;
+            } else if (ch == '\\') {
+                escaped = true;
+            } else if (ch == '"') {
+                in_string = false;
+            }
+            continue;
+        }
+
+        if (ch == '"') {
+            in_string = true;
+            continue;
+        }
+
+        if (ch == '[') {
+            ++array_depth;
+        } else if (ch == ']') {
+            --array_depth;
+            if (array_depth == 0) {
+                array_end = index;
+                break;
+            }
+            if (array_depth < 0) {
+                break;
+            }
+        }
+    }
+
+    if (array_end == std::string::npos) {
+        throw std::runtime_error("Figure 6 input JSON has an unterminated root array.");
+    }
+
+    std::string inner = TrimWhitespaceCopy(trimmed.substr(1, array_end - 1));
+    if (inner.empty()) {
+        throw std::runtime_error("Figure 6 input root array is empty.");
+    }
+
+    const std::size_t object_begin = inner.find_first_not_of(" \t\r\n");
+    if (object_begin == std::string::npos || inner[object_begin] != '{') {
+        throw std::runtime_error(
+            "Figure 6 input root array must contain an object as its first element."
+        );
+    }
+
+    in_string = false;
+    escaped = false;
+    int object_depth = 0;
+    std::size_t object_end = std::string::npos;
+
+    for (std::size_t index = object_begin; index < inner.size(); ++index) {
+        const char ch = inner[index];
+
+        if (in_string) {
+            if (escaped) {
+                escaped = false;
+            } else if (ch == '\\') {
+                escaped = true;
+            } else if (ch == '"') {
+                in_string = false;
+            }
+            continue;
+        }
+
+        if (ch == '"') {
+            in_string = true;
+            continue;
+        }
+
+        if (ch == '{') {
+            ++object_depth;
+        } else if (ch == '}') {
+            --object_depth;
+            if (object_depth == 0) {
+                object_end = index;
+                break;
+            }
+            if (object_depth < 0) {
+                break;
+            }
+        }
+    }
+
+    if (object_end == std::string::npos) {
+        throw std::runtime_error(
+            "Figure 6 input root array has an unterminated first object."
+        );
+    }
+
+    return inner.substr(object_begin, object_end - object_begin + 1);
+}
+
 std::optional<double> FindDoubleWithFallback(
     const std::string& json_text,
     const std::string& dotted_key,
@@ -251,41 +368,42 @@ marcatili::Figure6Config ParseFigure6Config(
     const std::string& cli_output_json
 ) {
     marcatili::Figure6Config config;
+    const std::string config_json = ExtractFirstFigure6Object(json_text);
 
-    config.case_id = RequireStringValue(json_text, "case_id");
-    config.article_target = FindStringValue(json_text, "article_target").value_or("");
-    config.panel_id = RequireStringValue(json_text, "panel_id");
+    config.case_id = RequireStringValue(config_json, "case_id");
+    config.article_target = FindStringValue(config_json, "article_target").value_or("");
+    config.panel_id = RequireStringValue(config_json, "panel_id");
 
     config.csv_output_path =
-        FindStringValue(json_text, "csv_file")
+        FindStringValue(config_json, "csv_file")
             .value_or(BuildDefaultCsvPath(cli_output_json));
 
     config.geometry_model = marcatili::ParseFigure6GeometryModel(
-        FindStringValue(json_text, "geometry_model").value_or("rectangular")
+        FindStringValue(config_json, "geometry_model").value_or("rectangular")
     );
 
     config.wavelength =
-        RequireDoubleWithFallback(json_text, "geometry.wavelength", "wavelength");
+        RequireDoubleWithFallback(config_json, "geometry.wavelength", "wavelength");
 
     config.a_over_b =
         (config.geometry_model == marcatili::Figure6GeometryModel::kRectangular)
-            ? RequireDoubleWithFallback(json_text, "geometry.a_over_b", "a_over_b")
-            : FindDoubleWithFallback(json_text, "geometry.a_over_b", "a_over_b").value_or(0.0);
+            ? RequireDoubleWithFallback(config_json, "geometry.a_over_b", "a_over_b")
+            : FindDoubleWithFallback(config_json, "geometry.a_over_b", "a_over_b").value_or(0.0);
 
-    config.n1 = RequireDoubleWithFallback(json_text, "materials.n1", "n1");
-    config.n2 = RequireDoubleWithFallback(json_text, "materials.n2", "n2");
-    config.n3 = RequireDoubleWithFallback(json_text, "materials.n3", "n3");
-    config.n4 = RequireDoubleWithFallback(json_text, "materials.n4", "n4");
-    config.n5 = RequireDoubleWithFallback(json_text, "materials.n5", "n5");
+    config.n1 = RequireDoubleWithFallback(config_json, "materials.n1", "n1");
+    config.n2 = RequireDoubleWithFallback(config_json, "materials.n2", "n2");
+    config.n3 = RequireDoubleWithFallback(config_json, "materials.n3", "n3");
+    config.n4 = RequireDoubleWithFallback(config_json, "materials.n4", "n4");
+    config.n5 = RequireDoubleWithFallback(config_json, "materials.n5", "n5");
 
     config.b_over_A4_min =
-        RequireDoubleWithFallback(json_text, "sweep.b_over_A4_min", "b_over_A4_min");
+        RequireDoubleWithFallback(config_json, "sweep.b_over_A4_min", "b_over_A4_min");
     config.b_over_A4_max =
-        RequireDoubleWithFallback(json_text, "sweep.b_over_A4_max", "b_over_A4_max");
+        RequireDoubleWithFallback(config_json, "sweep.b_over_A4_max", "b_over_A4_max");
     config.point_count =
-        RequireIntWithFallback(json_text, "sweep.point_count", "point_count");
+        RequireIntWithFallback(config_json, "sweep.point_count", "point_count");
 
-    const auto solver_model_texts = FindStringArrayValues(json_text, "solver_models");
+    const auto solver_model_texts = FindStringArrayValues(config_json, "solver_models");
     if (solver_model_texts.empty()) {
         config.solver_models.push_back(marcatili::SingleGuideSolverModel::kClosedForm);
     } else {
@@ -296,11 +414,11 @@ marcatili::Figure6Config ParseFigure6Config(
         }
     }
 
-    for (const auto& mode_text : RequireStringArrayValues(json_text, "modes")) {
+    for (const auto& mode_text : RequireStringArrayValues(config_json, "modes")) {
         config.modes.push_back(marcatili::ParseFigure6ModeSpec(mode_text));
     }
 
-    config.material_variants = ParseMaterialVariants(json_text);
+    config.material_variants = ParseMaterialVariants(config_json);
 
     return config;
 }
