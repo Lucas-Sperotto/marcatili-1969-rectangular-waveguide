@@ -1,0 +1,29 @@
+{
+  "case_id": "SG-SWEEP-INDEX-001",
+  "article_target": "Index sweep of n4 for selected E_y modes using the exact single-guide equations",
+  "solver_model": "exact",
+  "base_case": {
+    "a": 25.0e-6,
+    "b": 50.0e-6,
+    "wavelength": 1.0e-6,
+    "n1": 1.5,
+    "n2": 1.49,
+    "n3": 1.49,
+    "n4": 1.49,
+    "n5": 1.49
+  },
+  "sweep": {
+    "parameter": "n4",
+    "values": [
+      1.49,
+      1.492,
+      1.495,
+      1.498,
+      1.4999
+    ]
+  },
+  "modes": [
+    "E_y:1:1",
+    "E_y:1:2"
+  ]
+}

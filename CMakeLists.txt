@@ -38,6 +38,9 @@ set(MARCATILI_CORE_SOURCES
     src/io/fig8_io.cpp
     src/io/table1_io.cpp
     src/io/fig7_io.cpp
+    src/io/sweep_aspect_io.cpp
+    src/io/sweep_index_io.cpp
+    src/io/sweep_wavelength_io.cpp
     src/io/fig6_io.cpp
     src/io/schema_json.cpp
     src/io/single_guide_io.cpp
@@ -82,9 +85,13 @@ endfunction()
 
 set(MARCATILI_APPS
     solve_single_guide
+    solve_slab_guide
     solve_coupler
     reproduce_fig6
     reproduce_fig7
+    reproduce_sweep_aspect
+    reproduce_sweep_index
+    reproduce_sweep_wavelength
     reproduce_fig8
     reproduce_fig10
     reproduce_fig11
@@ -142,6 +149,13 @@ if(BUILD_TESTING)
     )
 
     marcatili_add_smoke_test(
+        solve_slab_guide_smoke
+        solve_slab_guide
+        "${PROJECT_SOURCE_DIR}/data/input/solve_single_guide.json"
+        "${MARCATILI_TEST_OUTPUT_DIR}/solve_slab_guide.json"
+    )
+
+    marcatili_add_smoke_test(
         solve_coupler_smoke
         solve_coupler
         "${PROJECT_SOURCE_DIR}/data/input/solve_coupler.json"
@@ -167,6 +181,24 @@ if(BUILD_TESTING)
         reproduce_fig7
         "${PROJECT_SOURCE_DIR}/data/input/reproduce_fig7.json"
         "${MARCATILI_TEST_OUTPUT_DIR}/reproduce_fig7.json"
+    )
+
+    add_test(
+        NAME reproduce_sweep_aspect_smoke
+        COMMAND reproduce_sweep_aspect
+                "${PROJECT_SOURCE_DIR}/data/input/sweep_aspect.json"
+    )
+
+    add_test(
+        NAME reproduce_sweep_index_smoke
+        COMMAND reproduce_sweep_index
+                "${PROJECT_SOURCE_DIR}/data/input/sweep_index.json"
+    )
+
+    add_test(
+        NAME reproduce_sweep_wavelength_smoke
+        COMMAND reproduce_sweep_wavelength
+                "${PROJECT_SOURCE_DIR}/data/input/sweep_wavelength.json"
     )
 
     marcatili_add_smoke_test(

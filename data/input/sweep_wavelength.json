@@ -1,0 +1,24 @@
+{
+  "case_id": "SG-SWEEP-WAVELENGTH-001",
+  "article_target": "Wavelength sweep for chromatic-dispersion inspection using dimensional kz from the exact single-guide equations",
+  "solver_model": "exact",
+  "geometry": {
+    "a": 25.0e-6,
+    "b": 5.0e-6
+  },
+  "materials": {
+    "n1": 1.5,
+    "n2": 1.4851485148514851,
+    "n3": 1.4851485148514851,
+    "n4": 1.4851485148514851,
+    "n5": 1.4851485148514851
+  },
+  "sweep": {
+    "min_wavelength": 0.8e-6,
+    "max_wavelength": 1.6e-6,
+    "point_count": 41
+  },
+  "modes": [
+    "E_y:1:1"
+  ]
+}

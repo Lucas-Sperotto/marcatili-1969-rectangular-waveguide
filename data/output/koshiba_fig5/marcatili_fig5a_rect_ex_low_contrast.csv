@@ -1,0 +1,17 @@
+case_id,curve_id,x,y,x_quantity,y_quantity,mode_label,field_kind,status,source,solver_model,p,q,v_number,wavelength,a,b,a_over_b,n_core,n_cladding,kz,source_status,guided
+fig5a_rect_ex_low_contrast,Ex11_marcatili_exact,0.3,-0.797854679968,v_number,b_number,Ex11,E,below_cutoff,marcatili_1969_single_guide,exact,1,1,0.3,2.13437474581,1,0.5,2,1.05,1,2.82086656948,below_cutoff,0
+fig5a_rect_ex_low_contrast,Ex11_marcatili_exact,0.7,-0.313827296523,v_number,b_number,Ex11,E,below_cutoff,marcatili_1969_single_guide,exact,1,1,0.7,0.914732033919,1,0.5,2,1.05,1,6.75750111784,below_cutoff,0
+fig5a_rect_ex_low_contrast,Ex11_marcatili_exact,1.1,0.0556735398816,v_number,b_number,Ex11,E,propagating,marcatili_1969_single_guide,exact,1,1,1.1,0.582102203403,1,0.5,2,1.05,1,10.8247097919,ok,1
+fig5a_rect_ex_low_contrast,Ex11_marcatili_exact,1.5,0.301224254203,v_number,b_number,Ex11,E,propagating,marcatili_1969_single_guide,exact,1,1,1.5,0.426874949162,1,0.5,2,1.05,1,14.9445315153,ok,1
+fig5a_rect_ex_low_contrast,Ex11_marcatili_closed_form,0.3,nan,v_number,b_number,Ex11,E,outside_closed_form_domain,marcatili_1969_single_guide,closed_form,1,1,0.3,2.13437474581,1,0.5,2,1.05,1,nan,outside_closed_form_domain,0
+fig5a_rect_ex_low_contrast,Ex11_marcatili_closed_form,0.7,nan,v_number,b_number,Ex11,E,outside_closed_form_domain,marcatili_1969_single_guide,closed_form,1,1,0.7,0.914732033919,1,0.5,2,1.05,1,nan,outside_closed_form_domain,0
+fig5a_rect_ex_low_contrast,Ex11_marcatili_closed_form,1.1,-0.065587406787,v_number,b_number,Ex11,E,below_cutoff,marcatili_1969_single_guide,closed_form,1,1,1.1,0.582102203403,1,0.5,2,1.05,1,10.7576120499,below_cutoff,0
+fig5a_rect_ex_low_contrast,Ex11_marcatili_closed_form,1.5,0.248191306589,v_number,b_number,Ex11,E,propagating,marcatili_1969_single_guide,closed_form,1,1,1.5,0.426874949162,1,0.5,2,1.05,1,14.9050776661,ok,1
+fig5a_rect_ex_low_contrast,Ex21_marcatili_exact,0.3,nan,v_number,b_number,Ex21,E,below_cutoff,marcatili_1969_single_guide,exact,2,1,0.3,2.13437474581,1,0.5,2,1.05,1,nan,below_cutoff,0
+fig5a_rect_ex_low_contrast,Ex21_marcatili_exact,0.7,nan,v_number,b_number,Ex21,E,below_cutoff,marcatili_1969_single_guide,exact,2,1,0.7,0.914732033919,1,0.5,2,1.05,1,nan,below_cutoff,0
+fig5a_rect_ex_low_contrast,Ex21_marcatili_exact,1.1,-0.593152921695,v_number,b_number,Ex21,E,below_cutoff,marcatili_1969_single_guide,exact,2,1,1.1,0.582102203403,1,0.5,2,1.05,1,10.4606841494,below_cutoff,0
+fig5a_rect_ex_low_contrast,Ex21_marcatili_exact,1.5,-0.261667471248,v_number,b_number,Ex21,E,below_cutoff,marcatili_1969_single_guide,exact,2,1,1.5,0.426874949162,1,0.5,2,1.05,1,14.5202997644,below_cutoff,0
+fig5a_rect_ex_low_contrast,Ex21_marcatili_closed_form,0.3,nan,v_number,b_number,Ex21,E,outside_closed_form_domain,marcatili_1969_single_guide,closed_form,2,1,0.3,2.13437474581,1,0.5,2,1.05,1,nan,outside_closed_form_domain,0
+fig5a_rect_ex_low_contrast,Ex21_marcatili_closed_form,0.7,nan,v_number,b_number,Ex21,E,outside_closed_form_domain,marcatili_1969_single_guide,closed_form,2,1,0.7,0.914732033919,1,0.5,2,1.05,1,nan,outside_closed_form_domain,0
+fig5a_rect_ex_low_contrast,Ex21_marcatili_closed_form,1.1,nan,v_number,b_number,Ex21,E,outside_closed_form_domain,marcatili_1969_single_guide,closed_form,2,1,1.1,0.582102203403,1,0.5,2,1.05,1,nan,outside_closed_form_domain,0
+fig5a_rect_ex_low_contrast,Ex21_marcatili_closed_form,1.5,-0.446940633893,v_number,b_number,Ex21,E,below_cutoff,marcatili_1969_single_guide,closed_form,2,1,1.5,0.426874949162,1,0.5,2,1.05,1,14.3779280983,below_cutoff,0

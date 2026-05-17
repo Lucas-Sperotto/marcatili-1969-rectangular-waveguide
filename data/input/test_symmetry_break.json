@@ -1,0 +1,23 @@
+{
+  "case_id": "SG-SYMMETRY-BREAK-A6",
+  "article_target": "A6 symmetry-breaking test: square guide with n2 != n4, comparing E_y:1:2 and E_x:2:1",
+  "solver_model": "exact",
+  "wavelength": 1.0e-6,
+  "a_over_b": 1.0,
+  "n1": 1.5,
+  "n2": 1.452,
+  "n3": 1.45,
+  "n4": 1.45,
+  "n5": 1.45,
+  "b_over_A4_list": [
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    12.0
+  ],
+  "modes": [
+    "E_y:1:2",
+    "E_x:2:1"
+  ]
+}
