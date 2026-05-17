@@ -1,0 +1,23 @@
+{
+  "case_id": "SG-ROOT-SECANT-FIG7",
+  "article_target": "Root-method iteration test derived from the first reproduce_fig7 case, using the plotted E_y:2:1 reference mode.",
+  "solver_model": "exact",
+  "solver_algorithm": "secant",
+  "mode_family": "E_y",
+  "mode_indices": {
+    "p": 2,
+    "q": 1
+  },
+  "geometry": {
+    "wavelength": 1.0e-6,
+    "a": 25.0e-6,
+    "b": 5.0e-6
+  },
+  "materials": {
+    "n1": 1.5,
+    "n2": 1.425,
+    "n3": 1.497,
+    "n4": 1.425,
+    "n5": 1.497
+  }
+}

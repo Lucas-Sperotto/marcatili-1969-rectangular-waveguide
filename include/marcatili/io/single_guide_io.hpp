@@ -22,6 +22,10 @@ namespace marcatili::io {
  *
  * Se `csv_file` não for informado no JSON, um caminho padrão é derivado a partir
  * do arquivo JSON de saída informado em `cli_output_json`.
+ *
+ * Para `solver_model = "exact"`, o campo opcional `solver_algorithm` seleciona
+ * o método de raiz transversal: `"bisection"` (padrão), `"secant"`,
+ * `"newton"` ou `"false_position"`.
  */
 marcatili::SingleGuideConfig ParseSingleGuideConfig(
     const std::string& json_text,
@@ -34,7 +38,8 @@ marcatili::SingleGuideConfig ParseSingleGuideConfig(
 std::string BuildSingleGuideJsonReport(
     const marcatili::SingleGuideResult& result,
     const std::string& input_file,
-    const std::string& output_json_file
+    const std::string& output_json_file,
+    const std::string& app_name = "solve_single_guide"
 );
 
 /**

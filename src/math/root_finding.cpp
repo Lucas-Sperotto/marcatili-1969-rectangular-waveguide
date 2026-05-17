@@ -158,4 +158,302 @@ double SolveRootByBisection(
     return 0.5 * (left + right);
 }
 
+double secant(
+    std::function<double(double)> f,
+    double x0,
+    double x1,
+    double tol,
+    int max_iter,
+    int* iter_count
+) {
+    if (iter_count != nullptr) {
+        *iter_count = 0;
+    }
+
+    if (max_iter <= 0) {
+        throw std::invalid_argument("secant: max_iter must be positive.");
+    }
+
+    if (tol <= 0.0) {
+        throw std::invalid_argument("secant: tol must be positive.");
+    }
+
+    if (!std::isfinite(x0) || !std::isfinite(x1)) {
+        throw std::invalid_argument("secant: initial guesses must be finite.");
+    }
+
+    if (x0 == x1) {
+        throw std::invalid_argument("secant: initial guesses must be distinct.");
+    }
+
+    double f0 = f(x0);
+    double f1 = f(x1);
+
+    if (!std::isfinite(f0) || !std::isfinite(f1)) {
+        throw std::runtime_error(
+            "secant: function returned a non-finite value at an initial guess."
+        );
+    }
+
+    if (f0 == 0.0) {
+        return x0;
+    }
+
+    if (f1 == 0.0) {
+        return x1;
+    }
+
+    for (int iteration = 0; iteration < max_iter; ++iteration) {
+        const double denominator = f1 - f0;
+        if (!std::isfinite(denominator) || denominator == 0.0) {
+            throw std::runtime_error(
+                "secant: degenerate update because consecutive function values are equal."
+            );
+        }
+
+        const double x2 = x1 - f1 * (x1 - x0) / denominator;
+        if (!std::isfinite(x2)) {
+            throw std::runtime_error(
+                "secant: computed a non-finite root estimate."
+            );
+        }
+
+        const double f2 = f(x2);
+        if (!std::isfinite(f2)) {
+            throw std::runtime_error(
+                "secant: function returned a non-finite value during iteration."
+            );
+        }
+
+        if (iter_count != nullptr) {
+            *iter_count = iteration + 1;
+        }
+
+        if (std::abs(f2) < tol || std::abs(x2 - x1) < tol) {
+            return x2;
+        }
+
+        x0 = x1;
+        f0 = f1;
+        x1 = x2;
+        f1 = f2;
+    }
+
+    return x1;
+}
+
+double newton_fd(
+    std::function<double(double)> f,
+    double x0,
+    double tol,
+    int max_iter,
+    double h,
+    int* iter_count
+) {
+    if (iter_count != nullptr) {
+        *iter_count = 0;
+    }
+
+    if (max_iter <= 0) {
+        throw std::invalid_argument("newton_fd: max_iter must be positive.");
+    }
+
+    if (tol <= 0.0) {
+        throw std::invalid_argument("newton_fd: tol must be positive.");
+    }
+
+    if (!std::isfinite(h) || h <= 0.0) {
+        throw std::invalid_argument("newton_fd: h must be finite and positive.");
+    }
+
+    if (!std::isfinite(x0)) {
+        throw std::invalid_argument("newton_fd: initial guess must be finite.");
+    }
+
+    for (int iteration = 0; iteration < max_iter; ++iteration) {
+        const double f0 = f(x0);
+        const double f_plus = f(x0 + h);
+        const double f_minus = f(x0 - h);
+
+        if (!std::isfinite(f0) ||
+            !std::isfinite(f_plus) ||
+            !std::isfinite(f_minus)) {
+            throw std::runtime_error(
+                "newton_fd: function returned a non-finite value."
+            );
+        }
+
+        const double derivative = (f_plus - f_minus) / (2.0 * h);
+        if (!std::isfinite(derivative) || std::abs(derivative) < 1e-15) {
+            throw std::runtime_error(
+                "newton_fd: degenerate numerical derivative."
+            );
+        }
+
+        const double p = x0 - f0 / derivative;
+        if (!std::isfinite(p)) {
+            throw std::runtime_error(
+                "newton_fd: computed a non-finite root estimate."
+            );
+        }
+
+        if (iter_count != nullptr) {
+            *iter_count = iteration + 1;
+        }
+
+        if (std::abs(p - x0) < tol) {
+            return p;
+        }
+
+        x0 = p;
+    }
+
+    return x0;
+}
+
+double false_position(
+    std::function<double(double)> f,
+    double a,
+    double b,
+    double tol,
+    int max_iter,
+    int* iter_count
+) {
+    if (iter_count != nullptr) {
+        *iter_count = 0;
+    }
+
+    if (max_iter <= 0) {
+        throw std::invalid_argument("false_position: max_iter must be positive.");
+    }
+
+    if (tol <= 0.0) {
+        throw std::invalid_argument("false_position: tol must be positive.");
+    }
+
+    if (!std::isfinite(a) || !std::isfinite(b)) {
+        throw std::invalid_argument("false_position: interval endpoints must be finite.");
+    }
+
+    if (a > b) {
+        throw std::invalid_argument("false_position: a must not exceed b.");
+    }
+
+    double f_a = f(a);
+    double f_b = f(b);
+
+    if (!std::isfinite(f_a) || !std::isfinite(f_b)) {
+        throw std::runtime_error(
+            "false_position: function returned a non-finite value at an interval endpoint."
+        );
+    }
+
+    if (f_a == 0.0) {
+        return a;
+    }
+
+    if (f_b == 0.0) {
+        return b;
+    }
+
+    if (f_a * f_b > 0.0) {
+        throw std::runtime_error(
+            "false_position: interval does not bracket a root."
+        );
+    }
+
+    bool has_previous_p = false;
+    double previous_p = a;
+
+    for (int iteration = 0; iteration < max_iter; ++iteration) {
+        const double denominator = f_b - f_a;
+        if (!std::isfinite(denominator) || denominator == 0.0) {
+            throw std::runtime_error(
+                "false_position: degenerate update because endpoint function values are equal."
+            );
+        }
+
+        const double p = b - f_b * (b - a) / denominator;
+        if (!std::isfinite(p)) {
+            throw std::runtime_error(
+                "false_position: computed a non-finite root estimate."
+            );
+        }
+
+        const double f_p = f(p);
+        if (!std::isfinite(f_p)) {
+            throw std::runtime_error(
+                "false_position: function returned a non-finite value during iteration."
+            );
+        }
+
+        if (iter_count != nullptr) {
+            *iter_count = iteration + 1;
+        }
+
+        if (f_p == 0.0 ||
+            (has_previous_p && std::abs(p - previous_p) < tol)) {
+            return p;
+        }
+
+        if (f_a * f_p < 0.0) {
+            b = p;
+            f_b = f_p;
+        } else {
+            a = p;
+            f_a = f_p;
+        }
+
+        previous_p = p;
+        has_previous_p = true;
+    }
+
+    return previous_p;
+}
+
+double fixed_point(
+    std::function<double(double)> g,
+    double x0,
+    double tol,
+    int max_iter,
+    int* iter_count
+) {
+    if (iter_count != nullptr) {
+        *iter_count = 0;
+    }
+
+    if (max_iter <= 0) {
+        throw std::invalid_argument("fixed_point: max_iter must be positive.");
+    }
+
+    if (tol <= 0.0) {
+        throw std::invalid_argument("fixed_point: tol must be positive.");
+    }
+
+    if (!std::isfinite(x0)) {
+        throw std::invalid_argument("fixed_point: initial guess must be finite.");
+    }
+
+    for (int iteration = 0; iteration < max_iter; ++iteration) {
+        const double p = g(x0);
+        if (!std::isfinite(p)) {
+            throw std::runtime_error(
+                "fixed_point: function returned a non-finite value."
+            );
+        }
+
+        if (iter_count != nullptr) {
+            *iter_count = iteration + 1;
+        }
+
+        if (std::abs(p - x0) < tol) {
+            return p;
+        }
+
+        x0 = p;
+    }
+
+    return x0;
+}
+
 }  // namespace marcatili::math

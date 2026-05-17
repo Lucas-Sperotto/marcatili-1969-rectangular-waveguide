@@ -90,6 +90,7 @@ struct SingleGuideConfig {
 
     // Seleção do algoritmo
     SingleGuideSolverModel solver_model = SingleGuideSolverModel::kClosedForm;
+    std::string solver_algorithm = "bisection";  // exact root solver algorithm
     SingleGuideFamily      family       = SingleGuideFamily::kEy;
 
     // Índices modais: p em x, q em y  (inteiros ≥ 1)
@@ -156,6 +157,11 @@ struct SingleGuideResult {
     std::string status;          // "ok", "below_cutoff", "outside_*_domain"
     std::string status_class;    // "solution", "physical_limit", "domain_limit"
     std::string equations_used;  // lista das equações aplicadas (ex.: "(6), (7)")
+
+    // Iterações usadas pelo solver exact em cada direção transversal.
+    // Para closed_form ou resultados sem raiz encontrada, permanecem em zero.
+    int iter_count_kx = 0;
+    int iter_count_ky = 0;
 
     // ── Números de onda (rad/m) ──────────────────────────────────────────
     // k₀ = 2π/λ         (vácuo)

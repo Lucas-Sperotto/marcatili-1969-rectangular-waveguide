@@ -1,5 +1,6 @@
 #include "marcatili/io/single_guide_io.hpp"
 
+#include <cctype>
 #include <cmath>
 #include <iomanip>
 #include <sstream>
@@ -46,6 +47,44 @@ std::string BuildDefaultCsvPath(const std::string& cli_output_json) {
     }
 
     return ReplaceExtension(cli_output_json, ".csv");
+}
+
+std::string NormalizeToken(const std::string& text) {
+    std::string normalized;
+    normalized.reserve(text.size());
+
+    for (unsigned char ch : text) {
+        if (std::isalnum(ch)) {
+            normalized.push_back(static_cast<char>(std::tolower(ch)));
+        }
+    }
+
+    return normalized;
+}
+
+std::string ParseSolverAlgorithmValue(const std::string& solver_algorithm_text) {
+    const std::string normalized = NormalizeToken(solver_algorithm_text);
+
+    if (normalized == "bisection") {
+        return "bisection";
+    }
+
+    if (normalized == "secant") {
+        return "secant";
+    }
+
+    if (normalized == "newton") {
+        return "newton";
+    }
+
+    if (normalized == "falseposition") {
+        return "false_position";
+    }
+
+    throw std::runtime_error(
+        "solver_algorithm must be \"bisection\", \"secant\", "
+        "\"newton\" or \"false_position\"."
+    );
 }
 
 int RequireIntWithFallback(
@@ -109,6 +148,9 @@ marcatili::SingleGuideConfig ParseSingleGuideConfig(
     config.solver_model = ParseSingleGuideSolverModel(
         FindStringValue(json_text, "solver_model").value_or("closed_form")
     );
+    config.solver_algorithm = ParseSolverAlgorithmValue(
+        FindStringValue(json_text, "solver_algorithm").value_or("bisection")
+    );
 
     config.family =
         marcatili::ParseSingleGuideFamily(RequireStringValue(json_text, "mode_family"));
@@ -140,12 +182,13 @@ marcatili::SingleGuideConfig ParseSingleGuideConfig(
 std::string BuildSingleGuideJsonReport(
     const marcatili::SingleGuideResult& result,
     const std::string& input_file,
-    const std::string& output_json_file
+    const std::string& output_json_file,
+    const std::string& app_name
 ) {
     std::ostringstream json;
     json << "{\n";
 
-    AppendJsonField(json, "app", "\"solve_single_guide\"");
+    AppendJsonField(json, "app", "\"" + EscapeJson(app_name) + "\"");
     AppendJsonField(json, "status", "\"" + EscapeJson(result.status) + "\"");
     AppendJsonField(json, "status_class", "\"" + EscapeJson(result.status_class) + "\"");
     AppendJsonField(
@@ -165,6 +208,11 @@ std::string BuildSingleGuideJsonReport(
     );
     AppendJsonField(
         json,
+        "solver_algorithm",
+        "\"" + EscapeJson(result.config.solver_algorithm) + "\""
+    );
+    AppendJsonField(
+        json,
         "mode_family",
         "\"" + EscapeJson(ToString(result.config.family)) + "\""
     );
@@ -176,6 +224,8 @@ std::string BuildSingleGuideJsonReport(
 
     AppendJsonField(json, "guided", result.guided ? "true" : "false");
     AppendJsonField(json, "domain_valid", result.domain_valid ? "true" : "false");
+    AppendJsonField(json, "iter_count_kx", std::to_string(result.iter_count_kx));
+    AppendJsonField(json, "iter_count_ky", std::to_string(result.iter_count_ky));
     AppendJsonField(
         json,
         "equations_used",
@@ -276,8 +326,8 @@ std::string BuildSingleGuideJsonReport(
 std::string BuildSingleGuideCsvReport(const marcatili::SingleGuideResult& result) {
     std::ostringstream csv;
 
-    csv << "case_id,solver_model,mode_family,p,q,wavelength,a,b,n1,n2,n3,n4,n5,"
-           "status,status_class,guided,domain_valid,k0,k1,k2,k3,k4,k5,"
+    csv << "case_id,solver_model,solver_algorithm,mode_family,p,q,wavelength,a,b,n1,n2,n3,n4,n5,"
+           "status,status_class,guided,domain_valid,iter_count_kx,iter_count_ky,k0,k1,k2,k3,k4,k5,"
            "A2,A3,A4,A5,kx,ky,kz,xi3,xi5,eta2,eta4,"
            "b_over_A4,kz_normalized_against_n4,critical_external_index,critical_external_wave_number,"
            "kx_A3_over_pi_squared,kx_A5_over_pi_squared,"
@@ -285,6 +335,7 @@ std::string BuildSingleGuideCsvReport(const marcatili::SingleGuideResult& result
 
     csv << EscapeCsv(result.config.case_id) << ","
         << EscapeCsv(ToString(result.config.solver_model)) << ","
+        << EscapeCsv(result.config.solver_algorithm) << ","
         << EscapeCsv(ToString(result.config.family)) << ","
         << result.config.p << ","
         << result.config.q << ","
@@ -300,6 +351,8 @@ std::string BuildSingleGuideCsvReport(const marcatili::SingleGuideResult& result
         << EscapeCsv(result.status_class) << ","
         << (result.guided ? "1" : "0") << ","
         << (result.domain_valid ? "1" : "0") << ","
+        << result.iter_count_kx << ","
+        << result.iter_count_ky << ","
         << CsvNumber(result.k0) << ","
         << CsvNumber(result.k1) << ","
         << CsvNumber(result.k2) << ","

@@ -85,6 +85,8 @@ using math::Square;
 // singular (atan(k_t·ξ) com ξ → ∞ quando k_t → 0). Um valor de 10⁻¹² é
 // suficientemente próximo de zero para capturar qualquer raiz física real.
 constexpr double kRootLowerBound = 1e-12;
+constexpr int kRootMaxIterations = 200;
+constexpr double kRootTolerance = 1e-12;
 
 double NaN() {
     return std::numeric_limits<double>::quiet_NaN();
@@ -190,6 +192,16 @@ void ValidateConfig(const SingleGuideConfig& config) {
     if (!(config.n1 > external_max)) {
         throw std::invalid_argument(
             "SolveSingleGuide: requires n1 > n2, n3, n4 and n5."
+        );
+    }
+
+    if (config.solver_algorithm != "bisection" &&
+        config.solver_algorithm != "secant" &&
+        config.solver_algorithm != "newton" &&
+        config.solver_algorithm != "false_position") {
+        throw std::invalid_argument(
+            "SolveSingleGuide: solver_algorithm must be bisection, secant, "
+            "newton or false_position."
         );
     }
 }
@@ -308,7 +320,9 @@ bool BracketsRoot(
 
 double SolveExactRoot(
     const std::function<double(double)>& function,
-    double upper_bound
+    double upper_bound,
+    const std::string& solver_algorithm,
+    int* iter_count
 ) {
     if (!BracketsRoot(function, kRootLowerBound, upper_bound)) {
         throw std::runtime_error(
@@ -316,7 +330,66 @@ double SolveExactRoot(
         );
     }
 
-    return math::SolveRootByBisection(function, kRootLowerBound, upper_bound);
+    if (iter_count != nullptr) {
+        *iter_count = 0;
+    }
+
+    const double lower_bound = kRootLowerBound;
+    const double midpoint = 0.5 * (lower_bound + upper_bound);
+
+    if (solver_algorithm == "secant") {
+        return math::secant(
+            function,
+            lower_bound,
+            upper_bound,
+            kRootTolerance,
+            kRootMaxIterations,
+            iter_count
+        );
+    }
+
+    if (solver_algorithm == "newton") {
+        return math::newton_fd(
+            function,
+            midpoint,
+            kRootTolerance,
+            kRootMaxIterations,
+            1e-7,
+            iter_count
+        );
+    }
+
+    if (solver_algorithm == "false_position") {
+        return math::false_position(
+            function,
+            lower_bound,
+            upper_bound,
+            kRootTolerance,
+            kRootMaxIterations,
+            iter_count
+        );
+    }
+
+    int function_call_count = 0;
+    const auto counted_function = [&](double value) {
+        ++function_call_count;
+        return function(value);
+    };
+
+    const double root = math::SolveRootByBisection(
+        counted_function,
+        lower_bound,
+        upper_bound,
+        kRootMaxIterations,
+        kRootTolerance
+    );
+
+    if (iter_count != nullptr) {
+        // SolveRootByBisection evaluates both endpoints before entering the loop.
+        *iter_count = std::max(0, function_call_count - 2);
+    }
+
+    return root;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -339,11 +412,13 @@ enum class RootSearchStatus {
 struct RootSearchResult {
     RootSearchStatus status = RootSearchStatus::kOutsideDomain;
     double root = NaN();
+    int iter_count = 0;
 };
 
 RootSearchResult SolveExactRootWithStatus(
     const std::function<double(double)>& function,
-    double upper_bound
+    double upper_bound,
+    const std::string& solver_algorithm
 ) {
     const double f_lower = function(kRootLowerBound);
     const double f_upper = function(upper_bound);
@@ -362,9 +437,18 @@ RootSearchResult SolveExactRootWithStatus(
         return {RootSearchStatus::kOutsideDomain, NaN()};
     }
 
+    int iter_count = 0;
+    const double root = SolveExactRoot(
+        function,
+        upper_bound,
+        solver_algorithm,
+        &iter_count
+    );
+
     return {
         RootSearchStatus::kFound,
-        SolveExactRoot(function, upper_bound)
+        root,
+        iter_count
     };
 }
 
@@ -725,13 +809,15 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
         // Limite superior: cutoff transversal em x (menor dos dois meios laterais)
         root_x = SolveExactRootWithStatus(
             fx,
-            SafeUpperBound(kPi / result.A3, kPi / result.A5)
+            SafeUpperBound(kPi / result.A3, kPi / result.A5),
+            config.solver_algorithm
         );
 
         // Intervalo de busca para k_y: (ε,  min(π/A₂, π/A₄)·(1−ε))
         root_y = SolveExactRootWithStatus(
             fy,
-            SafeUpperBound(kPi / result.A2, kPi / result.A4)
+            SafeUpperBound(kPi / result.A2, kPi / result.A4),
+            config.solver_algorithm
         );
 
         result.equations_used = "(6), (7), (8), (9), (10)";
@@ -788,11 +874,13 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
 
         root_x = SolveExactRootWithStatus(
             fx,
-            SafeUpperBound(kPi / result.A3, kPi / result.A5)
+            SafeUpperBound(kPi / result.A3, kPi / result.A5),
+            config.solver_algorithm
         );
         root_y = SolveExactRootWithStatus(
             fy,
-            SafeUpperBound(kPi / result.A2, kPi / result.A4)
+            SafeUpperBound(kPi / result.A2, kPi / result.A4),
+            config.solver_algorithm
         );
 
         result.equations_used = "(20), (21), (18), (19), (10)";
@@ -801,6 +889,8 @@ SingleGuideResult SolveSingleGuideExact(const SingleGuideConfig& config) {
     // ─────────────────────────────────────────────────────────────────────────
     // Diagnóstico do resultado da busca de raiz
     // ─────────────────────────────────────────────────────────────────────────
+    result.iter_count_kx = root_x.iter_count;
+    result.iter_count_ky = root_y.iter_count;
 
     // kOutsideDomain: f(ε) ≥ 0 ou NaN — configuração não pertence ao modelo
     if (root_x.status == RootSearchStatus::kOutsideDomain ||
