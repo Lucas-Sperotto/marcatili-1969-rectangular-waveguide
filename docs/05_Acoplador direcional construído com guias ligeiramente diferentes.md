@@ -16,6 +16,37 @@ Esse raciocínio aplica-se a guias com larguras, alturas e índices de refraçã
 
 ---
 
+## Teoria de Modos Acoplados para Guias Assimétricos
+
+A análise qualitativa de Marcatili pode ser formalizada pela teoria de modos acoplados.
+Sejam $\beta_1$ e $\beta_2$ as constantes de propagação dos modos fundamentais de cada
+guia isolado. O parâmetro de descasamento de fase (*phase mismatch*) é:
+
+$$
+\delta = \frac{\beta_1 - \beta_2}{2}
+$$
+
+Seja $\kappa$ o coeficiente de acoplamento (aproximado pelo coeficiente do guia simétrico
+médio para pequenas assimetrias). A fração máxima de potência transferida é:
+
+$$
+F = \frac{\kappa^2}{\kappa^2 + \delta^2}
+$$
+
+A transferência completa ($F = 1$) só ocorre no caso síncrono, quando $\delta = 0$.
+O comprimento de acoplamento do caso perturbado é:
+
+$$
+L_c = \frac{\pi}{2\sqrt{\kappa^2 + \delta^2}}
+$$
+
+Para $\delta \ll \kappa$, $L_c \approx \pi/(2\kappa)$, recuperando o caso simétrico.
+Esta formulação justifica a implementação em `src/physics/coupler.cpp` e os campos
+`beta_1`, `beta_2`, `delta` e `effective_coupling_magnitude` no JSON de saída do
+acoplador perturbado (`data/input/solve_coupler_perturbed.json`).
+
+---
+
 ## Observações
 
 - O termo **stationary** foi traduzido como **estacionário**, no sentido matemático de derivada primeira nula.

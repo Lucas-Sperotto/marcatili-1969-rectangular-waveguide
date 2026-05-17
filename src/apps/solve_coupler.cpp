@@ -15,9 +15,11 @@
 
 #include <exception>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
 #include "marcatili/io/coupler_io.hpp"
+#include "marcatili/io/schema_json.hpp"
 #include "marcatili/io/text_io.hpp"
 #include "marcatili/physics/coupler.hpp"
 
@@ -48,9 +50,18 @@ int main(int argc, char** argv) {
         // - parsing do schema fica em io/
         // - a física do acoplador fica em physics/
         const std::string input_text = marcatili::io::ReadTextFile(input_file);
+        const bool uses_perturbed_guides =
+            marcatili::io::FindRawJsonValue(input_text, "guide_1").has_value() ||
+            marcatili::io::FindRawJsonValue(input_text, "guide_2").has_value();
 
         const marcatili::CouplerPointConfig config =
             marcatili::io::ParseCouplerPointConfig(input_text, output_json_file);
+
+        if (uses_perturbed_guides != config.perturbed_guides_enabled) {
+            throw std::runtime_error(
+                "solve_coupler: perturbed guide input was not parsed consistently."
+            );
+        }
 
         const marcatili::CouplerPointResult result =
             marcatili::SolveCouplerPoint(config);

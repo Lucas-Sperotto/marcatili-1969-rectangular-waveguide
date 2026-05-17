@@ -26,12 +26,17 @@ struct Figure10CurveSpec {
 struct Figure10Config {
     std::string case_id;
     std::string article_target;
+    std::string article_note;
     std::string ocr_note;
     std::string csv_output_path;
 
     double c_over_a_min = 0.0;
     double c_over_a_max = 0.0;
     int point_count = 0;
+
+    CouplerTransverseEquation transverse_equation = CouplerTransverseEquation::kEq6;
+    double n1_over_n5 = 0.0;
+    double index_ratio_squared = 0.0;
 
     std::vector<SingleGuideSolverModel> solver_models;
     std::vector<Figure10CurveSpec> curves;

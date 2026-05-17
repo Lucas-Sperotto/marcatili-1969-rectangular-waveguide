@@ -1,0 +1,22 @@
+{
+  "case_id": "CP-010-FIG10-TEST16",
+  "article_target": "Figure 10: normalized directional-coupler curves for the mode labeled E_x11 in Section IV, following Eq. (34) with k_x from Eq. (6) exact and Eq. (12) closed form in the symmetric n3 = n5 limit.",
+  "article_note": "alternative intermediate case, 1.6 hypothesis from OCR May 2026",
+  "ocr_note": "TODO OCR: this alternative test replaces the ambiguous mid-slope family used in the baseline input, changing a/A5 = 1.0 to a/A5 = 1.6 while leaving the other Figure 10 families unchanged.",
+  "c_over_a_min": 0.0,
+  "c_over_a_max": 3.0,
+  "point_count": 151,
+  "solver_models": [
+    "exact",
+    "closed_form"
+  ],
+  "curves": [
+    {"a_over_A5": 0.5, "curve_id": "a_over_A5=0.5", "label": "0.5"},
+    {"a_over_A5": 0.75, "curve_id": "a_over_A5=0.75", "label": "0.75"},
+    {"a_over_A5": 1.6, "curve_id": "a_over_A5=1.6", "label": "1.6"},
+    {"a_over_A5": 1.5, "curve_id": "a_over_A5=1.5", "label": "1.5"},
+    {"a_over_A5": 2.0, "curve_id": "a_over_A5=2", "label": "2"},
+    {"a_over_A5": 3.0, "curve_id": "a_over_A5=3", "label": "3"},
+    {"a_over_A5": 4.0, "curve_id": "a_over_A5=4", "label": "4"}
+  ]
+}

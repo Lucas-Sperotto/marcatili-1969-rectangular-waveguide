@@ -177,9 +177,15 @@ Quão forte é o acoplamento entre dois guias paralelos para o modo rotulado com
 
 ### Divergências científicas
 
-- **Ambiguidade Principal:** A identificação da família de curvas intermediária (`1.0` vs. `1.6`) no scan original ainda não foi encerrada por fonte melhor. O repositório mantém a família `1.0` como baseline de trabalho, porque ela preserva o conjunto monotônico documentado nos casos-base.
-- O texto da Seção IV cita Eq. (6) e Eq. (12) (da família $E^y_{pq}$), embora o título da figura mencione modos $E^x_{pq}$. A implementação segue o texto.
-- a referência de Jones ainda não foi incorporada.
+- **Parâmetro intermediário (atualizado maio/2026):** A análise OCR de maio/2026 concluiu que
+  o parâmetro da curva intermediária no scan é **1.6**, não 1.0. O repositório ainda usa 1.0
+  como baseline de trabalho (preserva monotonicidade), e o caso N6 em
+  `data/input/reproduce_fig10_test16.json` registra a hipótese 1.6 para comparação direta.
+- **Rótulo E^x vs Eq. (6)/(12) (confirmado maio/2026):** O rótulo da figura ("$E^x_{pq}$") é
+  **incoerente** com o texto da Seção IV, que instrui o uso das Eq. (6) e (12) — equações da
+  família $E^y_{pq}$. A implementação segue o texto (Eq. 6/12), e o caso N7 em
+  `data/input/reproduce_fig10_eq20.json` quantifica a alternativa Eq. (20).
+- a referência de Jones ainda não foi incorporada (item B5 do backlog).
 
 ### Divergências editoriais
 

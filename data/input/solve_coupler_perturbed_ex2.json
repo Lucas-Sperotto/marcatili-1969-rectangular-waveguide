@@ -1,0 +1,35 @@
+{
+  "case_id": "CP-POINT-SECV-EX2",
+  "article_target": "Section V example 2: index asymmetry delta_n1 = 0.005. Both guides have identical geometry; guide 2 has n1 = 1.805 instead of 1.800. Illustrates phase-mismatch delta arising from refractive-index difference.",
+  "article_reference": "Marcatili 1969 Section V",
+  "solver_model": "exact",
+  "transverse_equation": "eq6",
+  "mode_indices": {
+    "p": 1,
+    "q": 1
+  },
+  "normalized_geometry": {
+    "c_over_a": 2.5
+  },
+  "geometry": {
+    "wavelength": 1.0e-6
+  },
+  "guide_1": {
+    "a": 8.04020151261037e-7,
+    "b": 8.04020151261037e-7,
+    "n1": 1.800,
+    "n2": 1.5,
+    "n3": 1.5,
+    "n4": 1.5,
+    "n5": 1.5
+  },
+  "guide_2": {
+    "a": 8.04020151261037e-7,
+    "b": 8.04020151261037e-7,
+    "n1": 1.805,
+    "n2": 1.5,
+    "n3": 1.5,
+    "n4": 1.5,
+    "n5": 1.5
+  }
+}

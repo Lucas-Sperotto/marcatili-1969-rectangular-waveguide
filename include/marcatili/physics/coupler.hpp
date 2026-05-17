@@ -74,6 +74,17 @@ enum class CouplerTransverseEquation {
     kEq20    // família E^x, Eq. (20) normalizada → Fig. 11
 };
 
+struct CouplerGuideConfig {
+    double a = 0.0;
+    double b = 0.0;
+
+    double n1 = 0.0;
+    double n2 = 0.0;
+    double n3 = 0.0;
+    double n4 = 0.0;
+    double n5 = 0.0;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CouplerPointConfig
 //
@@ -109,6 +120,11 @@ struct CouplerPointConfig {
     // O modo fundamental do guia é p = 1 (meia-onda em x).
     int p = 1;
 
+    // Índice modal vertical q ≥ 1.
+    // O caminho histórico do acoplador é efetivamente 1D e usa q = 1.
+    // O caso perturbado usa q ao resolver beta_1 e beta_2 com SolveSingleGuideExact.
+    int q = 1;
+
     // ── Parâmetros geométricos normalizados ──────────────────────────────
     // a/A₅ = (2a/λ)√(n₁²−n₅²): largura elétrica normalizada do guia
     // Parâmetro de família das curvas nas Figs. 10 e 11.
@@ -130,6 +146,15 @@ struct CouplerPointConfig {
     double wavelength = 0.0;   // λ (metros)
     double n1         = 0.0;   // índice do núcleo
     double n5         = 0.0;   // índice do meio entre os guias
+
+    // ── Extensão da Seção V: guias ligeiramente diferentes ───────────────
+    // Quando guide_1 e guide_2 aparecem no JSON, beta_1 e beta_2 são
+    // calculados independentemente com o solver exato do guia único. O
+    // comprimento de acoplamento passa a usar
+    // L_c = pi / (2 sqrt(kappa^2 + delta^2)), delta = (beta_1 - beta_2)/2.
+    bool perturbed_guides_enabled = false;
+    CouplerGuideConfig guide_1;
+    CouplerGuideConfig guide_2;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -191,6 +216,13 @@ struct CouplerPointResult {
     // L = π/(2|K|): comprimento de transferência total
     // Distância ao longo de z para transferência completa de potência entre guias
     double full_transfer_length  = 0.0;
+
+    // ── Extensão da Seção V: guias ligeiramente diferentes ───────────────
+    bool perturbed_outputs_available = false;
+    double beta_1 = 0.0;
+    double beta_2 = 0.0;
+    double delta = 0.0;
+    double effective_coupling_magnitude = 0.0;
 };
 
 // ── Conversão enumeração ↔ string ────────────────────────────────────────────

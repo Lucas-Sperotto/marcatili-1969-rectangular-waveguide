@@ -1,0 +1,24 @@
+{
+  "case_id": "CP-010-FIG10-EQ20",
+  "article_target": "Figure 10 alternative test: normalized directional-coupler curves using the E_x-family transverse root from Eq. (20), matching the caption rather than the Section IV Eq. (6)/(12) text.",
+  "article_note": "alternative Eq.(20) test — caption says E^x but text uses Eq.6/12",
+  "ocr_note": "Gemini analysis from May 2026 confirmed the Fig. 10 caption/text incoherence. This test keeps the baseline a/A5 families but changes the transverse equation from Eq. (6) to Eq. (20) for all curves, using n1/n5 = 1.5.",
+  "transverse_equation": "eq20",
+  "n1_over_n5": 1.5,
+  "c_over_a_min": 0.0,
+  "c_over_a_max": 3.0,
+  "point_count": 151,
+  "solver_models": [
+    "exact",
+    "closed_form"
+  ],
+  "curves": [
+    {"a_over_A5": 0.5, "curve_id": "a_over_A5=0.5", "label": "0.5"},
+    {"a_over_A5": 0.75, "curve_id": "a_over_A5=0.75", "label": "0.75"},
+    {"a_over_A5": 1.0, "curve_id": "a_over_A5=1", "label": "1"},
+    {"a_over_A5": 1.5, "curve_id": "a_over_A5=1.5", "label": "1.5"},
+    {"a_over_A5": 2.0, "curve_id": "a_over_A5=2", "label": "2"},
+    {"a_over_A5": 3.0, "curve_id": "a_over_A5=3", "label": "3"},
+    {"a_over_A5": 4.0, "curve_id": "a_over_A5=4", "label": "4"}
+  ]
+}

@@ -95,6 +95,7 @@ bool IsFiniteNumber(double value) {
 std::string ClassifyStatus(const std::string& status) {
     if (status == "ok")                      return "solution";
     if (status == "below_transverse_cutoff") return "physical_limit";
+    if (status == "perturbed_guide_not_guided") return "physical_limit";
     return "domain_limit";
 }
 
@@ -131,6 +132,10 @@ std::string NormalizeEquationText(const std::string& text) {
 void ValidateConfig(const CouplerPointConfig& config) {
     if (config.p <= 0) {
         throw std::invalid_argument("SolveCouplerPoint: p must be a positive integer.");
+    }
+
+    if (config.q <= 0) {
+        throw std::invalid_argument("SolveCouplerPoint: q must be a positive integer.");
     }
 
     if (!IsFiniteNumber(config.a_over_A5) || config.a_over_A5 <= 0.0) {
@@ -186,6 +191,47 @@ void ValidateConfig(const CouplerPointConfig& config) {
                 "SolveCouplerPoint: index_ratio_squared is inconsistent with dimensional n1/n5."
             );
         }
+    }
+
+    const auto validate_guide = [](const CouplerGuideConfig& guide, const char* guide_name) {
+        if (!IsFiniteNumber(guide.a) || guide.a <= 0.0 ||
+            !IsFiniteNumber(guide.b) || guide.b <= 0.0) {
+            throw std::invalid_argument(
+                std::string("SolveCouplerPoint: ") + guide_name +
+                " requires positive finite a and b."
+            );
+        }
+
+        if (!IsFiniteNumber(guide.n1) || guide.n1 <= 0.0 ||
+            !IsFiniteNumber(guide.n2) || guide.n2 <= 0.0 ||
+            !IsFiniteNumber(guide.n3) || guide.n3 <= 0.0 ||
+            !IsFiniteNumber(guide.n4) || guide.n4 <= 0.0 ||
+            !IsFiniteNumber(guide.n5) || guide.n5 <= 0.0) {
+            throw std::invalid_argument(
+                std::string("SolveCouplerPoint: ") + guide_name +
+                " requires positive finite refractive indices."
+            );
+        }
+
+        const double external_max =
+            std::max(std::max(guide.n2, guide.n3), std::max(guide.n4, guide.n5));
+        if (!(guide.n1 > external_max)) {
+            throw std::invalid_argument(
+                std::string("SolveCouplerPoint: ") + guide_name +
+                " requires n1 greater than n2..n5."
+            );
+        }
+    };
+
+    if (config.perturbed_guides_enabled) {
+        if (!HasDimensionalInputs(config)) {
+            throw std::invalid_argument(
+                "SolveCouplerPoint: perturbed guides require wavelength, n1 and n5."
+            );
+        }
+
+        validate_guide(config.guide_1, "guide_1");
+        validate_guide(config.guide_2, "guide_2");
     }
 }
 
@@ -342,6 +388,91 @@ void ResetDependentOutputs(CouplerPointResult& result) {
     result.coupling_magnitude                     = NaN();
     result.full_transfer_length                   = NaN();
     result.dimensional_outputs_available          = false;
+    result.perturbed_outputs_available            = false;
+    result.beta_1                                 = NaN();
+    result.beta_2                                 = NaN();
+    result.delta                                  = NaN();
+    result.effective_coupling_magnitude           = NaN();
+}
+
+SingleGuideFamily FamilyForTransverseEquation(CouplerTransverseEquation equation) {
+    return (equation == CouplerTransverseEquation::kEq6)
+               ? SingleGuideFamily::kEy
+               : SingleGuideFamily::kEx;
+}
+
+SingleGuideConfig BuildPerturbedGuidePointConfig(
+    const CouplerPointConfig& config,
+    const CouplerGuideConfig& guide,
+    const std::string& suffix
+) {
+    SingleGuideConfig guide_config;
+    guide_config.case_id = config.case_id + "_" + suffix;
+    guide_config.article_target = config.article_target;
+    guide_config.csv_output_path = "";
+    guide_config.solver_model = SingleGuideSolverModel::kExact;
+    guide_config.family = FamilyForTransverseEquation(config.transverse_equation);
+    guide_config.p = config.p;
+    guide_config.q = config.q;
+    guide_config.wavelength = config.wavelength;
+    guide_config.a = guide.a;
+    guide_config.b = guide.b;
+    guide_config.n1 = guide.n1;
+    guide_config.n2 = guide.n2;
+    guide_config.n3 = guide.n3;
+    guide_config.n4 = guide.n4;
+    guide_config.n5 = guide.n5;
+    return guide_config;
+}
+
+void PopulatePerturbedOutputs(CouplerPointResult& result) {
+    if (!result.config.perturbed_guides_enabled) {
+        return;
+    }
+
+    if (!result.dimensional_outputs_available ||
+        !IsFiniteNumber(result.coupling_magnitude) ||
+        result.coupling_magnitude < 0.0) {
+        return;
+    }
+
+    const SingleGuideResult guide_1_result =
+        SolveSingleGuideExact(
+            BuildPerturbedGuidePointConfig(result.config, result.config.guide_1, "guide_1")
+        );
+    const SingleGuideResult guide_2_result =
+        SolveSingleGuideExact(
+            BuildPerturbedGuidePointConfig(result.config, result.config.guide_2, "guide_2")
+        );
+
+    result.beta_1 = guide_1_result.kz;
+    result.beta_2 = guide_2_result.kz;
+
+    if (!IsFiniteNumber(result.beta_1) || !IsFiniteNumber(result.beta_2)) {
+        result.status = "perturbed_guide_not_guided";
+        result.status_class = ClassifyStatus(result.status);
+        result.full_transfer_length = NaN();
+        result.effective_coupling_magnitude = NaN();
+        result.perturbed_outputs_available = false;
+        return;
+    }
+
+    result.delta = 0.5 * (result.beta_1 - result.beta_2);
+    result.effective_coupling_magnitude =
+        std::sqrt(Square(result.coupling_magnitude) + Square(result.delta));
+
+    if (IsFiniteNumber(result.effective_coupling_magnitude) &&
+        result.effective_coupling_magnitude > 0.0) {
+        result.full_transfer_length =
+            kPi / (2.0 * result.effective_coupling_magnitude);
+    } else if (result.effective_coupling_magnitude == 0.0) {
+        result.full_transfer_length = std::numeric_limits<double>::infinity();
+    } else {
+        result.full_transfer_length = NaN();
+        return;
+    }
+
+    result.perturbed_outputs_available = true;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -466,15 +597,20 @@ double SolveClosedFormKxRatio(const CouplerPointConfig& config) {
 }
 
 std::string BuildEquationsUsed(const CouplerPointConfig& config) {
+    const std::string perturbation_suffix =
+        config.perturbed_guides_enabled
+            ? ", Sec. V perturbed delta beta formula"
+            : "";
+
     if (config.solver_model == SingleGuideSolverModel::kExact) {
-        return (config.transverse_equation == CouplerTransverseEquation::kEq6)
+        return ((config.transverse_equation == CouplerTransverseEquation::kEq6)
                    ? "(6), (8), (33), (34)"
-                   : "(20), (18), (33), (34)";
+                   : "(20), (18), (33), (34)") + perturbation_suffix;
     }
 
-    return (config.transverse_equation == CouplerTransverseEquation::kEq6)
+    return ((config.transverse_equation == CouplerTransverseEquation::kEq6)
                ? "(12), (34)"
-               : "(22), (34)";
+               : "(22), (34)") + perturbation_suffix;
 }
 
 }  // namespace
@@ -557,6 +693,7 @@ CouplerPointResult SolveCouplerPoint(const CouplerPointConfig& config) {
             result.status_class = ClassifyStatus(result.status);
             result.domain_valid = false;
             PopulateDimensionalOutputs(result);
+            PopulatePerturbedOutputs(result);
             return result;
         }
 
@@ -565,6 +702,7 @@ CouplerPointResult SolveCouplerPoint(const CouplerPointConfig& config) {
             result.status_class = ClassifyStatus(result.status);
             result.domain_valid = true;
             PopulateDimensionalOutputs(result);
+            PopulatePerturbedOutputs(result);
             return result;
         }
 
@@ -587,6 +725,7 @@ CouplerPointResult SolveCouplerPoint(const CouplerPointConfig& config) {
         result.domain_valid = false;
         ResetDependentOutputs(result);
         PopulateDimensionalOutputs(result);
+        PopulatePerturbedOutputs(result);
         return result;
     }
 
@@ -599,6 +738,7 @@ CouplerPointResult SolveCouplerPoint(const CouplerPointConfig& config) {
         result.domain_valid = false;
         ResetDependentOutputs(result);
         PopulateDimensionalOutputs(result);
+        PopulatePerturbedOutputs(result);
         return result;
     }
 
@@ -640,11 +780,13 @@ CouplerPointResult SolveCouplerPoint(const CouplerPointConfig& config) {
         result.status_class     = ClassifyStatus(result.status);
         result.normalized_coupling = NaN();
         PopulateDimensionalOutputs(result);
+        PopulatePerturbedOutputs(result);
         return result;
     }
 
     // Calcula saídas dimensionais (opcional, se wavelength/n1/n5 presentes)
     PopulateDimensionalOutputs(result);
+    PopulatePerturbedOutputs(result);
     return result;
 }
 

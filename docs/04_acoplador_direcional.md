@@ -40,7 +40,7 @@ $$
 
 Figura 10  — Coeficiente de acoplamento para modos $E^{x}_{1q}$. — acoplamento calculado a partir das equações transcendentais; — — aproximações em forma fechada; — · — · — acoplamento entre duas hastes cilíndricas (A. L. Jones).
 
-As linhas traço-ponto são os acoplamentos obtidos por A. L. Jones para dois cilindros paralelos de índice de refração $n_1=1.8$, imersos em um meio com $n_5=1.5$. Como esperado, se os diâmetros dos guias circulares forem iguais às larguras dos guias retangulares, e se as separações forem as mesmas, o acoplamento entre os guias circulares deve ser ligeiramente menor do que aquele entre os guias retangulares.
+As linhas traço-ponto são os acoplamentos obtidos por A. L. Jones [5] para dois cilindros paralelos de índice de refração $n_1=1.8$, imersos em um meio com $n_5=1.5$. Como esperado, se os diâmetros dos guias circulares forem iguais às larguras dos guias retangulares, e se as separações forem as mesmas, o acoplamento entre os guias circulares deve ser ligeiramente menor do que aquele entre os guias retangulares.
 
 A equação de acoplamento normalizado (34) para o modo $E^{y}_{11}$ foi representada na Fig. 11, usando para $\mathbf{k}_x$ a solução exata da equação (20). Para $n_1/n_5$ próximo da unidade, as curvas aproximam-se das curvas contínuas da Fig. 10, à medida que os modos $E^{x}_{11}$ e $E^{y}_{11}$ se aproximam da degenerescência. A influência da altura $b$ dos guias, dos índices de refração $n_2$ e $n_4$, e do valor de $q$ no acoplamento de qualquer um dos modos não é importante, pois esses parâmetros afetam apenas $k_z$.
 

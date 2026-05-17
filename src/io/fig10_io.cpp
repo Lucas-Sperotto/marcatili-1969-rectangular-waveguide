@@ -35,6 +35,14 @@ std::string JsonNumberOrNull(double value) {
     return JsonNumber(value);
 }
 
+std::string JsonPositiveNumberOrNull(double value) {
+    if (!std::isfinite(value) || value <= 0.0) {
+        return "null";
+    }
+
+    return JsonNumber(value);
+}
+
 std::string CsvNumber(double value) {
     if (!std::isfinite(value)) {
         return "nan";
@@ -181,11 +189,27 @@ marcatili::Figure10Config ParseFigure10Config(
 
     config.case_id = RequireStringValue(json_text, "case_id");
     config.article_target = FindStringValue(json_text, "article_target").value_or("");
+    config.article_note = FindStringValue(json_text, "article_note").value_or("");
     config.ocr_note = FindStringValue(json_text, "ocr_note").value_or("");
 
     config.csv_output_path =
         FindStringValue(json_text, "csv_file")
             .value_or(BuildDefaultCsvPath(cli_output_json));
+
+    config.transverse_equation = marcatili::ParseCouplerTransverseEquation(
+        FindStringValue(json_text, "transverse_equation").value_or("eq6")
+    );
+
+    config.n1_over_n5 =
+        FindDoubleWithFallback(json_text, "materials.n1_over_n5", "n1_over_n5").value_or(0.0);
+
+    const auto index_ratio_squared =
+        FindDoubleWithFallback(json_text, "materials.index_ratio_squared", "index_ratio_squared");
+    if (index_ratio_squared.has_value()) {
+        config.index_ratio_squared = *index_ratio_squared;
+    } else if (config.n1_over_n5 > 0.0) {
+        config.index_ratio_squared = 1.0 / (config.n1_over_n5 * config.n1_over_n5);
+    }
 
     config.c_over_a_min =
         RequireDoubleWithFallback(json_text, "sweep.c_over_a_min", "c_over_a_min");
@@ -225,15 +249,31 @@ std::string BuildFigure10JsonReport(
     AppendJsonField(json, "output_csv_file", JsonStringOrNull(result.config.csv_output_path));
     AppendJsonField(json, "case_id", "\"" + EscapeJson(result.config.case_id) + "\"");
     AppendJsonField(json, "article_target", JsonStringOrNull(result.config.article_target));
+    AppendJsonField(json, "article_note", JsonStringOrNull(result.config.article_note));
     AppendJsonField(json, "ocr_note", JsonStringOrNull(result.config.ocr_note));
+    AppendJsonField(
+        json,
+        "transverse_equation",
+        "\"" + EscapeJson(ToString(result.config.transverse_equation)) + "\""
+    );
+    AppendJsonField(json, "n1_over_n5", JsonPositiveNumberOrNull(result.config.n1_over_n5));
+    AppendJsonField(
+        json,
+        "index_ratio_squared",
+        JsonPositiveNumberOrNull(result.config.index_ratio_squared)
+    );
     AppendJsonField(
         json,
         "model_note",
         JsonStringOrNull(
-            "Current Fig. 10 reproduction follows Section IV literally: Eq. (34) for the "
-            "normalized coupling and Eq. (6) / Eq. (12) for k_x in the symmetric n3 = n5 "
-            "limit. TODO: the scan still leaves a label ambiguity near the mid-slope family, "
-            "and the dash-dot Jones cylinder reference is not digitized yet."
+            result.config.transverse_equation == marcatili::CouplerTransverseEquation::kEq6
+                ? "Current Fig. 10 reproduction follows Section IV literally: Eq. (34) for the "
+                  "normalized coupling and Eq. (6) / Eq. (12) for k_x in the symmetric n3 = n5 "
+                  "limit. TODO: the scan still leaves a label ambiguity near the mid-slope family, "
+                  "and the dash-dot Jones cylinder reference is not digitized yet."
+                : "Alternative Fig. 10 reproduction follows the caption hypothesis by using Eq. "
+                  "(20) for k_x. This is a diagnostic test for the E^x/E^y caption-text "
+                  "incoherence, not a replacement for the Eq. (6)/(12) baseline."
         )
     );
 

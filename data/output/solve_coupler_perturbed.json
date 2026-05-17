@@ -1,0 +1,55 @@
+{
+  "app": "solve_coupler",
+  "status": "ok",
+  "status_class": "solution",
+  "model": "exact",
+  "transverse_equation": "eq6",
+  "equations_used": "(6), (8), (33), (34), Sec. V perturbed delta beta formula",
+  "input_file": "data/input/solve_coupler_perturbed.json",
+  "output_json_file": "data/output/solve_coupler_perturbed.json",
+  "output_csv_file": "data/output/solve_coupler_perturbed.csv",
+  "case_id": "CP-POINT-010-PERTURBED",
+  "article_target": "Directional coupler point with slightly different guides using Section V delta-beta correction after Eq. (11).",
+  "domain_valid": true,
+  "transverse_root_found": true,
+  "dimensional_outputs_available": true,
+  "normalized_inputs": {
+    "p": 1,
+    "q": 1,
+    "a_over_A5": 1.5999798993705925,
+    "c_over_a": 2.5,
+    "index_ratio_squared": 0.69444444444444442
+  },
+  "normalized_outputs": {
+    "a_over_A5": 1.5999798993705925,
+    "c_over_A5": 3.9999497484264812,
+    "kx_A5_over_pi": 0.44258321868267214,
+    "sqrt_one_minus_kx_A5_over_pi_squared": 0.89672743603643912,
+    "normalized_coupling": 4.4858730832235621e-06
+  },
+  "dimensional_inputs": {
+    "wavelength": 9.9999999999999995e-07,
+    "n1": 1.8,
+    "n5": 1.5
+  },
+  "dimensional_outputs": {
+    "A5": 5.0251890762960598e-07,
+    "a": 8.0402015126103701e-07,
+    "c": 2.0100503781525924e-06,
+    "k0": 6283185.307179587,
+    "k1": 11309733.552923257,
+    "k5": 9424777.9607693814,
+    "kx": 2766893.2796464018,
+    "kz": 10966055.563290097,
+    "coupling_magnitude": 33820154.146832354,
+    "full_transfer_length": 4.6445564758084229e-08
+  },
+  "perturbed_outputs": {
+    "available": true,
+    "beta_1": 10546798.996994672,
+    "beta_2": 10578011.636523409,
+    "delta": -15606.319764368236,
+    "effective_coupling_magnitude": 33820157.747602515
+  },
+  "note": "This executable always reports the normalized Eq. (34) model. When wavelength, n1 and n5 are also provided, it additionally reconstructs A5, a, c, |K| and L using the same reduced transverse model."
+}
