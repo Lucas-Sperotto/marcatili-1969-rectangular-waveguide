@@ -1,9 +1,12 @@
 # marcatili-1969-rectangular-waveguide
 
+[![DOI](https://zenodo.org/badge/1212433330.svg)](https://doi.org/10.5281/zenodo.19699346)
+
 Reprodução didática e reprodutível do artigo clássico de fotônica integrada:
 
 > **"Dielectric Rectangular Waveguide and Directional Coupler for Integrated Optics"**
-> E. A. J. Marcatili — *Bell System Technical Journal*, vol. 48, pp. 2071–2102, 1969.
+> E. A. J. Marcatili — *Bell System Technical Journal*, vol. 48, pp. 2071–2102, [https://doi.org/10.1002/j.1538-7305.1969.tb01166.x](https://doi.org/10.1002/j.1538-7305.1969.tb01166.x)
+> [PDF](https://onlinelibrary.wiley.com/doi/abs/10.1002/j.1538-7305.1969.tb01166.x)
 
 Implementado em **C++17**. O foco é conectar três camadas de forma explícita e rastreável:
 
@@ -27,6 +30,18 @@ artigo original  ←→  documentação técnica  ←→  implementação numér
 ---
 
 ## Quick start
+
+
+Para instalar dependências:
+
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install cmake build-essential
+sudo apt install -y python3-matplotlib
+```
+
+Para compilar e rodar:
 
 ```bash
 # 1. Compilar
